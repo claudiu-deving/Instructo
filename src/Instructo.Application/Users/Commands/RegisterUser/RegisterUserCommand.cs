@@ -1,7 +1,7 @@
 ﻿using Instructo.Application.Abstractions.Messaging;
 using Instructo.Domain.Shared;
 
-namespace Instructo.Application.Users.CreateUser;
+namespace Instructo.Application.Users.Commands.RegisterUser;
 
 public record RegisterUserCommand(
     string FirstName,

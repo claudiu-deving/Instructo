@@ -2,7 +2,7 @@
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 
-namespace Instructo.Application.Users.CreateUser;
+namespace Instructo.Application.Users.Commands.RegisterUser;
 
 public class RegisterUserCommandHandler(IIdentityService identityService) : ICommandHandler<RegisterUserCommand, Result<string>>
 {

@@ -17,7 +17,6 @@ using Instructo.Api.Middleware;
 using Scalar.AspNetCore;
 using Instructo.Api.Endpoints;
 using Instructo.Domain.Entities;
-using Instructo.Application.Users.CreateUser;
 using MediatR;
 using Instructo.Application.Behaviors;
 using FluentValidation;
@@ -34,6 +33,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Instructo.Application.Users.Query;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.Json;
+using Instructo.Application.Users.Commands.RegisterUser;
 
 var builder = WebApplication.CreateBuilder(args);
 

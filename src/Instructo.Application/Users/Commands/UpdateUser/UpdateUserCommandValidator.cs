@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Instructo.Application.Users.UpdateUser;
+namespace Instructo.Application.Users.Commands.UpdateUser;
 
 public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 {

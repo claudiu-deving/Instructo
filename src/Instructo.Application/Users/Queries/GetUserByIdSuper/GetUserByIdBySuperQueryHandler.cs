@@ -4,7 +4,7 @@ using Instructo.Domain.Shared;
 
 using MediatR;
 
-namespace Instructo.Application.Users.Query;
+namespace Instructo.Application.Users.Queries.GetUserByIdSuper;
 
 public class GetUserByIdBySuperQueryHandler : IRequestHandler<GetUserByIdBySuperQuery, Result<UserReadSuperDto>>
 {
@@ -19,9 +19,7 @@ public class GetUserByIdBySuperQueryHandler : IRequestHandler<GetUserByIdBySuper
     {
         var user = await _userQueries.GetUsersByIdBySuperAsync(request.UserId);
         if(user==null)
-        {
             return Result<UserReadSuperDto>.Failure([new Error("Not found", "User not found")]);
-        }
         else
         {
             return Result<UserReadSuperDto>.Success(user);

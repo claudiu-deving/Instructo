@@ -1,5 +1,4 @@
-﻿
-using Instructo.Application.Users.CreateUser;
+﻿using Instructo.Application.Users.Commands.RegisterUser;
 using Instructo.Domain.Dtos;
 using Instructo.Domain.Interfaces;
 using Instructo.Infrastructure.Migrations;

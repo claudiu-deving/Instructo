@@ -1,6 +1,6 @@
-﻿using Instructo.Application.Users.CreateUser;
+﻿using Instructo.Application.Users.Commands.RegisterUser;
 using Instructo.Application.Users.Delete;
-using Instructo.Application.Users.Query;
+using Instructo.Application.Users.Queries.GetUsersBySuper;
 using Instructo.Application.Users.UpdateUser;
 using Instructo.Domain.Dtos;
 
@@ -149,7 +149,7 @@ public static class UserEndpoint
     }
     private static async Task<IResult> DeleteUserByEmail([FromServices] ISender sender, string email)
     {
-        var userRetrievalRequest = await sender.Send(new GetUserByEmailCommand(email));
+        var userRetrievalRequest = await sender.Send(new GetUserByEmailQuery(email));
         return await userRetrievalRequest.Match<Task<IResult>>(async ok =>
         {
             var userDto = await sender.Send(new DeleteUserByIdCommand(ok.Id));

@@ -4,7 +4,7 @@ using Instructo.Domain.Shared;
 
 using MediatR;
 
-namespace Instructo.Application.Users.Query;
+namespace Instructo.Application.Users.Queries.GetUsersBySuper;
 
 public class GetUsersBySuperQueryHandler : IRequestHandler<GetUsersBySuperQuery, Result<IEnumerable<UserReadSuperDto>>>
 {

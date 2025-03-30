@@ -2,7 +2,7 @@
 
 using Instructo.Domain.Interfaces;
 
-namespace Instructo.Application.Users.CreateUser;
+namespace Instructo.Application.Users.Commands.RegisterUser;
 
 public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
