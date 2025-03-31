@@ -2,7 +2,7 @@
 
 namespace Instructo.Domain.Shared;
 
-public class Result<TValue>
+public class Result<TValue> : IResult<TValue>
 {
     protected Result(TValue value)
     {
@@ -31,7 +31,7 @@ public class Result<TValue>
 
     public override string ToString() => Match(
             success: value => value?.ToString()??string.Empty,
-            failure: error => string.Join(", ", error.ToList())??string.Empty);
+            failure: error => string.Join(Environment.NewLine, error.ToList())??string.Empty);
 
     public static Result<TValue> Success(TValue value) => new(value);
     public static Result<TValue> Failure(Error[] errors) => new(errors);

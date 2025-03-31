@@ -1,4 +1,6 @@
 ﻿
+using System.Reflection;
+
 using FluentValidation;
 
 using Instructo.Domain.Shared;
@@ -49,6 +51,23 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
 
     public static TResult CreateValidationResult<TResult>(Error[] errors) where TResult : class
     {
-        return (ValidationResult.WithErrors(errors) as TResult)!;
+        // Check if TResult is or derives from Result<T>
+        if(typeof(IResult).IsAssignableFrom(typeof(TResult)))
+        {
+            // Create an instance of TResult using its constructor that takes errors
+            // You would need to ensure TResult has such a constructor
+            // Or use a factory method approach
+
+            // For simplicity, assuming all derived classes implement a static WithErrors method:
+            var method = typeof(TResult).GetMethod("WithErrors",
+                BindingFlags.Public|BindingFlags.Static);
+
+            if(method!=null)
+            {
+                return (TResult)method.Invoke(null, new object[] { errors });
+            }
+        }
+
+        throw new InvalidOperationException($"Type {typeof(TResult).Name} does not support validation errors");
     }
 }

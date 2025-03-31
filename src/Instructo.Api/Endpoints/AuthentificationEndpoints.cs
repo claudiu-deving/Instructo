@@ -1,7 +1,8 @@
-﻿using Instructo.Application.Users.Commands.RegisterUser;
+﻿using Instructo.Application.Users.Commands.ChangePassword;
+using Instructo.Application.Users.Commands.ForgotPassoword;
+using Instructo.Application.Users.Commands.LoginUser;
+using Instructo.Application.Users.Commands.RegisterUser;
 using Instructo.Domain.Dtos;
-using Instructo.Domain.Interfaces;
-using Instructo.Infrastructure.Migrations;
 
 using MediatR;
 
@@ -14,51 +15,107 @@ public static class AuthentificationEndpoints
     public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("api/auth").WithTags("Authentification");
-        group.MapPost("/login", Login).RequireRateLimiting("Auth-RateLimiting");
+        group.MapPost("/login", Login);
         group.MapPost("/register", Register);
         group.MapPost("/forgot-password", ForgotPassword);
         group.MapPost("/change-password", ChangePassword);
         return app;
     }
 
-    private static async Task<IResult> ChangePassword([FromServices] IIdentityService identityService, ChangePasswordDto changePasswordDto)
+    private static async Task<IResult> ChangePassword([FromServices] ISender sender, [FromServices] ILogger logger, ChangePasswordDto changePasswordDto)
     {
-        var result = await identityService.ChangePassword(changePasswordDto);
-        return !result.IsError ? TypedResults.Ok(result) : TypedResults.BadRequest(result);
+        try
+        {
+            var changePasswordCommand = new ChangePasswordCommand(changePasswordDto.Email, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            var changePasswordRequest = await sender.Send(changePasswordCommand);
+            return changePasswordRequest.Match<IResult>(ok =>
+            {
+                return TypedResults.Ok();
+            }, nok =>
+            {
+                return TypedResults.BadRequest(new { errors = nok.ToList() });
+            });
+        }
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "Error changing password: {Email}", changePasswordDto.Email);
+            return TypedResults.InternalServerError();
+        }
     }
 
-    private static async Task<IResult> Login([FromServices] IIdentityService identityService, LoginDto loginDto)
+    private static async Task<IResult> Login([FromServices] ISender sender, [FromServices] ILogger<Program> logger, LoginDto loginDto)
     {
-        var result = await identityService.LoginAsync(loginDto.Email, loginDto.Password);
-        return result.Match<IResult>(ok =>
+        try
         {
-            return TypedResults.Ok(ok);
-        },
-        nok =>
+            var request = new LoginUserCommand(loginDto.Email, loginDto.Password);
+            var loginRequest = await sender.Send(request);
+            return loginRequest.Match<IResult>(returnedToken =>
+             {
+                 return TypedResults.Ok(returnedToken);
+             }, errors =>
+             {
+                 return TypedResults.Unauthorized();
+             });
+
+        }
+        catch(Exception ex)
         {
-            return TypedResults.Unauthorized();
-        });
+            logger.LogError(ex, "Error logging in for user: {Email}", loginDto.Email);
+            return TypedResults.InternalServerError();
+        }
     }
     private static async Task<IResult> Register([FromServices] ISender sender, [FromServices] ILogger<Program> logger, RegisterUserDto registerDto)
     {
-        logger.LogInformation("Registering for user: {Username}", registerDto.Email);
-        RegisterUserCommand registerUserCommand = new RegisterUserCommand(
-            registerDto.FirstName,
-            registerDto.LastName,
-            registerDto.Email,
-            registerDto.Password,
-            registerDto.PhoneNumber);
-        var result = await sender.Send(registerUserCommand);
-        if(result.IsError)
+        try
         {
-            logger.LogInformation("Validation failed for user: {Username},with errors: {Errors}", registerDto.Email, result);
+            var createUserCommand = new RegisterUserCommand(
+                registerDto.Email,
+                registerDto.FirstName,
+                registerDto.LastName,
+                registerDto.PhoneNumber,
+                registerDto.Password,
+                registerDto.Role);
+
+            logger.LogInformation("Registering by admin for user: {Username}", createUserCommand.Email);
+            var response = await sender.Send(createUserCommand);
+
+            var result = response.Match<IResult>(
+                     ok =>
+                     {
+                         return TypedResults.Created($"/api/users/{ok}");
+                     },
+                     nok =>
+                     {
+                         return TypedResults.BadRequest(new { errors = nok.ToList() });
+                     });
+
+            return result;
         }
-        return !result.IsError ? TypedResults.Created("api/auth/register", result) : TypedResults.BadRequest(result);
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "Error registering user");
+            return TypedResults.InternalServerError();
+        }
     }
 
-    private static async Task<IResult> ForgotPassword([FromServices] IIdentityService identityService, ForgotPasswordDto forgotPasswordDto)
+    private static async Task<IResult> ForgotPassword([FromServices] ISender sender, [FromServices] ILogger logger, ForgotPasswordDto forgotPasswordDto)
     {
-        var result = await identityService.ForgotPasswordAsync(forgotPasswordDto);
-        return !result.IsError ? TypedResults.Ok(result) : TypedResults.BadRequest(result);
+        try
+        {
+            var forgotPasswordCommand = new ForgotPasswordCommand(forgotPasswordDto.Email);
+            var result = await sender.Send(forgotPasswordCommand);
+            return result.Match<IResult>(ok =>
+            {
+                return TypedResults.Ok();
+            }, nok =>
+            {
+                return TypedResults.BadRequest(new { errors = nok.ToList() });
+            });
+        }
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "Error forgot password for user: {Email}", forgotPasswordDto.Email);
+            return TypedResults.InternalServerError();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Instructo.Domain.Dtos;
+using Instructo.Domain.Entities;
 using Instructo.Domain.Shared;
 
 using Microsoft.AspNetCore.Identity;
@@ -6,10 +7,14 @@ using Microsoft.AspNetCore.Identity;
 namespace Instructo.Domain.Interfaces;
 public interface IIdentityService
 {
-    Task<Result<string>> ChangePassword(ChangePasswordDto changePasswordDto);
-    Task<Result<string>> ExternalLoginAsync(ExternalLoginInfo info);
+    Task<Result<string>> AddToRoleAsync(ApplicationUser user, string role);
+    Task<Result<string>> ChangePasswordAsync(ApplicationUser user, string currentPassword, string newPassword);
+    Task<Result<string>> CheckPasswordSignInAsync(ApplicationUser user, string password);
+    Task<Result<string>> CreateAsync(ApplicationUser user, string password);
+    Task<Result<string>> DeleteAsync(ApplicationUser user);
+    Task<ApplicationUser?> GetUserByIdAsync(string id);
     Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
-    Task<Result<string>> LoginAsync(string email, string password);
-    Task<Result<string>> RegisterAsync(RegisterUserDto registerDto);
-    Task<Result<string>> UpdateUserAsync(string id, UserUpdateDto userUpdateDto);
+    Task<string> GenerateJwtTokenAsync(ApplicationUser user);
+    Task<ApplicationUser?> GetUserByEmailAsync(string email);
+    Task<Result<string>> UpdateAsync(ApplicationUser user);
 }

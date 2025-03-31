@@ -8,4 +8,5 @@ public record RegisterUserCommand(
     string LastName,
     string Email,
     string Password,
-    string PhoneNumber) : ICommand<Result<string>>;
+    string PhoneNumber,
+    string Role) : ICommand<Result<string>>;

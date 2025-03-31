@@ -13,4 +13,5 @@ public readonly record struct RegisterUserDto
     public string LastName { get; init; }
     public string Password { get; init; }
     public string PhoneNumber { get; init; }
+    public string Role { get; init; }
 }

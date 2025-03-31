@@ -1,39 +1,39 @@
-using System;
+using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
-using AutoMapper;
+using AspNetCoreRateLimit;
 
+using FluentValidation;
+
+using Instructo.Api.Endpoints;
+using Instructo.Api.Middleware;
+using Instructo.Application.Behaviors;
+using Instructo.Application.Users.Commands.RegisterUser;
+using Instructo.Domain.Entities;
 using Instructo.Domain.Interfaces;
+using Instructo.Domain.Shared;
 using Instructo.Infrastructure.Data;
 using Instructo.Infrastructure.Data.Configurations;
 using Instructo.Infrastructure.Data.Repositories;
 using Instructo.Infrastructure.Identity;
 
+using MediatR;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Instructo.Api.Middleware;
-using Scalar.AspNetCore;
-using Instructo.Api.Endpoints;
-using Instructo.Domain.Entities;
-using MediatR;
-using Instructo.Application.Behaviors;
-using FluentValidation;
-using Instructo.Domain.Shared;
-using Instructo.Infrastructure.Migrations;
-using Serilog;
+
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+
+using Scalar.AspNetCore;
+
+using Serilog;
 using Serilog.Extensions.Hosting;
-using System.Security.Claims;
-using AspNetCoreRateLimit;
-using Microsoft.Extensions.DependencyInjection;
-using Instructo.Application.Users.Query;
-using System.Text.Json;
-using Microsoft.AspNetCore.Http.Json;
-using Instructo.Application.Users.Commands.RegisterUser;
 
 var builder = WebApplication.CreateBuilder(args);
 

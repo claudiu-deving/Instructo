@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Instructo.Shared", "Instruc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.Shared", "src\Instructo.Shared\Instructo.Shared.csproj", "{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.Tests.Common", "Instructo.Tests.Common\Instructo.Tests.Common.csproj", "{6BC2A083-2DD2-4B17-8092-81425340843D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BC2A083-2DD2-4B17-8092-81425340843D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BC2A083-2DD2-4B17-8092-81425340843D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BC2A083-2DD2-4B17-8092-81425340843D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BC2A083-2DD2-4B17-8092-81425340843D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +87,7 @@ Global
 		{AC11F731-8D7B-2C40-6B13-C87CBA3AE4D7} = {F84B6034-04A9-4E0B-B9E4-5F1AD9997C7B}
 		{4460966B-847D-44CC-AC74-C64D26F93335} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3} = {4460966B-847D-44CC-AC74-C64D26F93335}
+		{6BC2A083-2DD2-4B17-8092-81425340843D} = {F84B6034-04A9-4E0B-B9E4-5F1AD9997C7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {23954A8C-9A62-41AD-BDBB-8AED6C8D5905}

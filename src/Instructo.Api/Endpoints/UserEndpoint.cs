@@ -1,7 +1,9 @@
-﻿using Instructo.Application.Users.Commands.RegisterUser;
-using Instructo.Application.Users.Delete;
+﻿using Instructo.Application.Users.Commands.DeleteUser;
+using Instructo.Application.Users.Commands.RegisterUser;
+using Instructo.Application.Users.Commands.UpdateUser;
+using Instructo.Application.Users.Queries.GetUserByEmail;
+using Instructo.Application.Users.Queries.GetUserByIdSuper;
 using Instructo.Application.Users.Queries.GetUsersBySuper;
-using Instructo.Application.Users.UpdateUser;
 using Instructo.Domain.Dtos;
 
 using MediatR;
@@ -75,7 +77,7 @@ public static class UserEndpoint
                    });
     }
 
-    private static async Task<IResult> CreateUser([FromServices] ISender sender, ILogger<Program> logger, RegisterUserCommand createUserCommand)
+    private static async Task<IResult> CreateUser([FromServices] ISender sender, [FromServices] ILogger<Program> logger, RegisterUserCommand createUserCommand)
     {
         logger.LogInformation("Registering by admin for user: {Username}", createUserCommand.Email);
         var response = await sender.Send(createUserCommand);
@@ -93,7 +95,7 @@ public static class UserEndpoint
         return result;
     }
 
-    private static async Task<IResult> UpdateUser([FromServices] ISender sender, ILogger<Program> logger, string id, [FromBody] UserUpdateDto userUpdateDto)
+    private static async Task<IResult> UpdateUser([FromServices] ISender sender, [FromServices] ILogger<Program> logger, string id, [FromBody] UserUpdateDto userUpdateDto)
     {
         logger.LogInformation("Registering by admin for user: {user}", userUpdateDto);
         var userRetrievalRequest = await sender.Send(new GetUserByIdBySuperQuery(id));

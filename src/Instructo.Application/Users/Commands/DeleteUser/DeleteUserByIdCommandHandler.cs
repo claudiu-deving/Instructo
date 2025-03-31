@@ -1,24 +1,21 @@
 ﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Entities;
+using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace Instructo.Application.Users.Commands.DeleteUser;
 
-public class DeleteUserByIdCommandHandler(UserManager<ApplicationUser> userManager) : ICommandHandler<DeleteUserByIdCommand, Result<string>>
+public class DeleteUserByIdCommandHandler(IIdentityService identityService, ILogger<DeleteUserByIdCommandHandler> logger) : ICommandHandler<DeleteUserByIdCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(DeleteUserByIdCommand request, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.Id);
+        var user = await identityService.GetUserByIdAsync(request.Id);
         if(user==null)
-            return Result<string>.Failure([new Error("Delete-User", "User doesn't exist")]);
-        var result = await userManager.DeleteAsync(user);
-        if(result.Succeeded)
-            return Result<string>.Success("User deleted");
-        else
         {
-            return Result<string>.Failure([.. result.Errors.Select(e => new Error(e.Code, e.Description))]);
+            logger.LogError("Delete user request for non-existing user: {Id}", request.Id);
+            return Result<string>.Failure([new Error("Delete-User", "User doesn't exist")]);
         }
+        return await identityService.DeleteAsync(user);
     }
 }
