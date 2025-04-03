@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Instructo.Domain.Entities;
+namespace Instructo.Domain.Common;
 
 public abstract class ValueObject
 {

@@ -8,6 +8,8 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
+using ILogger = Serilog.ILogger;
+
 namespace Instructo.Api.Endpoints;
 
 public static class AuthentificationEndpoints
@@ -38,12 +40,12 @@ public static class AuthentificationEndpoints
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "Error changing password: {Email}", changePasswordDto.Email);
+            logger.Error(ex, "Error changing password: {Email}", changePasswordDto.Email);
             return TypedResults.InternalServerError();
         }
     }
 
-    private static async Task<IResult> Login([FromServices] ISender sender, [FromServices] ILogger<Program> logger, LoginDto loginDto)
+    private static async Task<IResult> Login([FromServices] ISender sender, [FromServices] ILogger logger, LoginDto loginDto)
     {
         try
         {
@@ -60,23 +62,23 @@ public static class AuthentificationEndpoints
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "Error logging in for user: {Email}", loginDto.Email);
+            logger.Error(ex, "Error logging in for user: {Email}", loginDto.Email);
             return TypedResults.InternalServerError();
         }
     }
-    private static async Task<IResult> Register([FromServices] ISender sender, [FromServices] ILogger<Program> logger, RegisterUserDto registerDto)
+    private static async Task<IResult> Register([FromServices] ISender sender, [FromServices] ILogger logger, RegisterUserDto registerDto)
     {
         try
         {
             var createUserCommand = new RegisterUserCommand(
-                registerDto.Email,
                 registerDto.FirstName,
                 registerDto.LastName,
-                registerDto.PhoneNumber,
+                registerDto.Email,
                 registerDto.Password,
+                registerDto.PhoneNumber,
                 registerDto.Role);
 
-            logger.LogInformation("Registering by admin for user: {Username}", createUserCommand.Email);
+            logger.Information("Registering by admin for user: {Username}", createUserCommand.Email);
             var response = await sender.Send(createUserCommand);
 
             var result = response.Match<IResult>(
@@ -93,7 +95,7 @@ public static class AuthentificationEndpoints
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "Error registering user");
+            logger.Error(ex, "Error registering user");
             return TypedResults.InternalServerError();
         }
     }
@@ -114,7 +116,7 @@ public static class AuthentificationEndpoints
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "Error forgot password for user: {Email}", forgotPasswordDto.Email);
+            logger.Error(ex, "Error forgot password for user: {Email}", forgotPasswordDto.Email);
             return TypedResults.InternalServerError();
         }
     }

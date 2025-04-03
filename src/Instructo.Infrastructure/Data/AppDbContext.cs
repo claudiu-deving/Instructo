@@ -20,7 +20,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     }
 
     // DbSets for your entity models
-    public DbSet<SchoolEntity> Schools { get; set; }
+    public DbSet<School> Schools { get; set; }
+    public DbSet<WebsiteLink> WebsiteLinks { get; set; }
+    public DbSet<Image> Images { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +30,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         Console.WriteLine("Creating");
         // Apply entity configurations
         modelBuilder.ApplyConfiguration(new SchoolsConfiguration());
+        modelBuilder.ApplyConfiguration(new WebsiteLinksConfiguration());
+        modelBuilder.ApplyConfiguration(new ImagesConfiguration());
 
         modelBuilder.Entity<ApplicationUser>().ToTable("Users").HasIndex(u => u.Email).IsUnique();
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");

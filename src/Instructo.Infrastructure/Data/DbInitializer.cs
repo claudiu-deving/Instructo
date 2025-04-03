@@ -23,8 +23,26 @@ public static class DbInitializer
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         // Create roles
-        string[] roleNames = { "Admin", "SchoolOwner", "Instructor", "Student" };
+        string[] roleNames = ["Admin", "Owner", "Instructor", "Student"];
 
+
+        //await roleManager.CreateAsync(new ApplicationRole() { Name="IronMan", Description="I am Ironman" });
+        //await roleManager.CreateAsync(new ApplicationRole() { Name="Admin", Description="Can manage a school, cannot delete it" });
+        //await roleManager.CreateAsync(new ApplicationRole() { Name="Owner", Description="Can manage a school, can delete it" });
+        //await roleManager.CreateAsync(new ApplicationRole() { Name="Instructor", Description="Can manage session" });
+        //await roleManager.CreateAsync(new ApplicationRole() { Name="Student", Description="Can view session" });
+
+        //Create the IronMan user
+        //var ironMan = new ApplicationUser()
+        //{
+        //    Email="claudiu.c.strugar@gmail.com",
+        //    LastName="Strugar",
+        //    FirstName="Claudiu",
+        //    PhoneNumber="1234567890",
+        //    UserName="claudiu.c.strugar@gmail.com"
+        //};
+        //await userManager.CreateAsync(ironMan, "Password123!");
+        //await userManager.AddToRoleAsync(ironMan, "IronMan");
 
         int count = 2000;
         // Generate fake users with Bogus
@@ -37,6 +55,7 @@ public static class DbInitializer
             .RuleFor(u => u.Created, f => f.Date.Past(2))
             .RuleFor(u => u.LastLogin, f => f.Random.Bool(0.7f) ? f.Date.Recent(30) : null)  // 70% have logged in recently
             .RuleFor(u => u.IsActive, f => f.Random.Bool(0.85f));  // 85% are active
+
 
         // Generate users
         var users = faker.Generate(count);

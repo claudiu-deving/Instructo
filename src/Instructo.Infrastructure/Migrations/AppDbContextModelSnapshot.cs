@@ -142,15 +142,12 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Instructo.Domain.Entities.SchoolEntity", b =>
+            modelBuilder.Entity("Instructo.Domain.Entities.Image", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Contact")
+                    b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -161,10 +158,9 @@ namespace Instructo.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -174,12 +170,37 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Location")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Logo")
+                    b.HasKey("Id");
+
+                    b.ToTable("Images", (string)null);
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CompanyName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IconId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -189,19 +210,56 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("OwnerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Phone")
+                    b.HasKey("Id");
+
+                    b.HasIndex("IconId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Schools", (string)null);
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.WebsiteLink", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IconId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Website")
+                    b.Property<int?>("SchoolId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("IconId");
 
-                    b.ToTable("Schools", (string)null);
+                    b.HasIndex("SchoolId");
+
+                    b.ToTable("WebsiteLinks", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -310,13 +368,32 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Instructo.Domain.Entities.SchoolEntity", b =>
+            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
                 {
+                    b.HasOne("Instructo.Domain.Entities.Image", "Icon")
+                        .WithMany()
+                        .HasForeignKey("IconId");
+
                     b.HasOne("Instructo.Domain.Entities.ApplicationUser", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId");
 
+                    b.Navigation("Icon");
+
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.WebsiteLink", b =>
+                {
+                    b.HasOne("Instructo.Domain.Entities.Image", "Icon")
+                        .WithMany()
+                        .HasForeignKey("IconId");
+
+                    b.HasOne("Instructo.Domain.Entities.School", null)
+                        .WithMany("WebsiteLinks")
+                        .HasForeignKey("SchoolId");
+
+                    b.Navigation("Icon");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -368,6 +445,11 @@ namespace Instructo.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
+                {
+                    b.Navigation("WebsiteLinks");
                 });
 #pragma warning restore 612, 618
         }

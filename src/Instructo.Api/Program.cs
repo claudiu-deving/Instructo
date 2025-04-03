@@ -1,39 +1,5 @@
-using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
-
-using AspNetCoreRateLimit;
-
-using FluentValidation;
-
-using Instructo.Api.Endpoints;
-using Instructo.Api.Middleware;
-using Instructo.Application.Behaviors;
-using Instructo.Application.Users.Commands.RegisterUser;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
-using Instructo.Infrastructure.Data;
-using Instructo.Infrastructure.Data.Configurations;
-using Instructo.Infrastructure.Data.Repositories;
-using Instructo.Infrastructure.Identity;
-
-using MediatR;
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-using Scalar.AspNetCore;
-
-using Serilog;
-using Serilog.Extensions.Hosting;
+using Instructo.Domain.ValueObjects;
+using Instructo.Infrastructure.Data.Repositories.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -193,15 +159,14 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 // Add authorization policies
 builder.Services.AddAuthorizationBuilder()
     // Add authorization policies
-    .AddPolicy("IronMan", policy => policy.RequireRole("IronMan").RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "13073b69-393f-4c5b-b96c-26b5d544d69e"))
+    .AddPolicy("IronMan", policy => policy.RequireRole("IronMan").RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "4651c07c-e1f7-48dc-bc83-f07bda50b96e"))
     // Add authorization policies
     .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
     // Add authorization policies
     .AddPolicy("SchoolOwners", policy => policy.RequireRole("Admin", "SchoolOwner"));
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
 var app = builder.Build();
 
 

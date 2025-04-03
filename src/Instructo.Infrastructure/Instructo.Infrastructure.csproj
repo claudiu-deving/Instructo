@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Enums\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

@@ -12,13 +12,13 @@ using Instructo.Domain.Shared;
 
 using Microsoft.Data.SqlClient;
 
-namespace Instructo.Infrastructure.Data.Repositories;
+namespace Instructo.Infrastructure.Data.Repositories.Queries;
 
-public class UserQueries : IUserQueries
+public class UserQueryRepository : IUserQueries
 {
     private readonly string _connectionString;
 
-    public UserQueries(string connectionString)
+    public UserQueryRepository(string connectionString)
     {
         _connectionString=connectionString;
     }
@@ -37,7 +37,7 @@ public class UserQueries : IUserQueries
             JOIN UserRoles ur ON ur.UserId = u.Id
             JOIN Roles r ON r.Id = ur.RoleId
             WHERE u.Email = @email";
-        return await connection.QueryFirstAsync<UserReadDto>(sql, new { email = email });
+        return await connection.QueryFirstAsync<UserReadDto>(sql, new { email });
     }
 
     public async Task<IEnumerable<UserReadDto>> GetUsers()

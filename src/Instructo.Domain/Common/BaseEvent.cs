@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Instructo.Domain.Entities.Events;
+namespace Instructo.Domain.Common;
 
 public abstract class BaseEvent : INotification
 {

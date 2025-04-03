@@ -1,8 +1,6 @@
-﻿using Instructo.Tests.Common;
+﻿using Microsoft.Extensions.Logging;
 
-using Microsoft.Extensions.Logging;
-
-namespace Instructo.UnitTests.Application.Users.Common;
+namespace Instructo.Tests.Common;
 
 public abstract class BaseTest
 {
@@ -37,8 +35,8 @@ public class TestLogger<T> : ILogger<T>
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
     {
         // You can add the type name as a prefix to distinguish between different loggers
-        string typeName = typeof(T).Name;
-        string message = formatter(state, exception);
+        var typeName = typeof(T).Name;
+        var message = formatter(state, exception);
 
         _baseLogger.Log(logLevel, eventId, state, exception, (s, e) => $"[{typeName}] {message}");
     }

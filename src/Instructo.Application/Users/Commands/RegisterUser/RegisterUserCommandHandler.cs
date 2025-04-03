@@ -22,7 +22,8 @@ public class RegisterUserCommandHandler(IIdentityService identityService, ILogge
             Email=request.Email,
             FirstName=request.FirstName,
             LastName=request.LastName,
-            PhoneNumber=request.PhoneNumber
+            PhoneNumber=request.PhoneNumber,
+            UserName = request.Email
         }, request.Password);
 
 

@@ -1,12 +1,9 @@
 ﻿using Instructo.Application.Users.Commands.DeleteUser;
-using Instructo.Application.Users.Commands.RegisterUser;
 using Instructo.Application.Users.Commands.UpdateUser;
 using Instructo.Application.Users.Queries.GetUserByEmail;
 using Instructo.Application.Users.Queries.GetUserByIdSuper;
 using Instructo.Application.Users.Queries.GetUsersBySuper;
 using Instructo.Domain.Dtos;
-
-using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 

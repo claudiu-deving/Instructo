@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Instructo.Domain.ValueObjects;
 
-namespace Instructo.Domain.ValueObjects;
-
-public abstract class ValueObject
+public abstract class ValueObject : IComparable
 {
     protected static bool EqualOperator(ValueObject left, ValueObject right)
     {
@@ -43,6 +37,23 @@ public abstract class ValueObject
 
         return hash.ToHashCode();
     }
+
+    public int CompareTo(object? obj)
+    {
+        if(obj==null)
+            return 1;
+        var other = (ValueObject)obj;
+        using var thisComponents = GetEqualityComponents().GetEnumerator();
+        using var otherComponents = other.GetEqualityComponents().GetEnumerator();
+        while(thisComponents.MoveNext()&&otherComponents.MoveNext())
+        {
+            var comparison = Comparer<object>.Default.Compare(thisComponents.Current, otherComponents.Current);
+            if(comparison!=0)
+                return comparison;
+        }
+        return 0;
+    }
+
     public static bool operator ==(ValueObject one, ValueObject two)
     {
         return EqualOperator(one, two);

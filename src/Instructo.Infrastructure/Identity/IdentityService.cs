@@ -82,13 +82,14 @@ public class IdentityService(
     }
     public async Task<Result<string>> CreateAsync(ApplicationUser user, string password)
     {
-        if((await userManager.CreateAsync(user, password)).Succeeded)
+        var registrationRequest = await userManager.CreateAsync(user, password);
+        if(registrationRequest.Succeeded)
         {
             return Result<string>.Success("User created");
         }
         else
         {
-            return Result<string>.Failure([new Error("Create-User", "User creation failed")]);
+            return Result<string>.Failure(registrationRequest.Errors.Select(x => new Error(x.Code, x.Description)).ToArray());
         }
     }
     public async Task<Result<string>> AddToRoleAsync(ApplicationUser user, string role)

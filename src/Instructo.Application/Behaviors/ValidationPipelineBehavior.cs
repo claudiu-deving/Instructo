@@ -52,7 +52,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
     public static TResult CreateValidationResult<TResult>(Error[] errors) where TResult : class
     {
         // Check if TResult is or derives from Result<T>
-        if(typeof(IResult).IsAssignableFrom(typeof(TResult)))
+        if(typeof(IAppResult).IsAssignableFrom(typeof(TResult)))
         {
             // Create an instance of TResult using its constructor that takes errors
             // You would need to ensure TResult has such a constructor

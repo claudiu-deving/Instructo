@@ -1,14 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-using Instructo.Domain.Entities.Events;
+namespace Instructo.Domain.Common;
 
-namespace Instructo.Domain.Entities;
-
-public abstract class BaseEntity
+public abstract class BaseEntity<T> : IEntity<T> where T : class, IComparable
 {
-    // This can easily be modified to be BaseEntity<T> and public T Id to support different key types.
-    // Using non-generic integer types for simplicity
-    public int Id { get; protected set; }
+    public T Id { get; } = default!;
 
     private readonly List<BaseEvent> _domainEvents = [];
 

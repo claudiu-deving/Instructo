@@ -3,7 +3,7 @@ using Instructo.Domain.Entities;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 using Instructo.Infrastructure.Identity;
-using Instructo.UnitTests.Application.Users.Common;
+using Instructo.Tests.Common;
 
 using MediatR;
 

@@ -23,26 +23,12 @@ public class IronmanAccessLoggingMiddleware
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier); 
             var userName = user.FindFirstValue(ClaimTypes.Name);  
             var ipAddress = context.Connection.RemoteIpAddress?.ToString();
-            var userAgent = context.Request.Headers.UserAgent.ToString();
 
-            if(!user.Identity?.IsAuthenticated??true)
-            {
-                _logger.LogWarning(
-                    "Unauthenticated access attempt to SuperUser endpoint {Path}. IP: {IpAddress}, UserAgent: {UserAgent}",
-                    context.Request.Path, ipAddress, userAgent);
-            }
-            else if(!user.HasClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "13073b69-393f-4c5b-b96c-26b5d544d69e"))
-            {
-                _logger.LogWarning(
-                    "Unauthorized access attempt to SuperUser endpoint {Path} by user {UserId} ({UserName}). IP: {IpAddress}",
-                    context.Request.Path, userId, userName, ipAddress);
-            }
-            else
-            {
+         
                 _logger.LogInformation(
                     "SuperUser {UserId} ({UserName}) accessed {Method} {Path}. IP: {IpAddress}",
                     userId, userName, context.Request.Method, context.Request.Path, ipAddress);
-            }
+            
         }
 
         await _next(context);

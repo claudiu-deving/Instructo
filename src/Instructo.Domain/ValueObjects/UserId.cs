@@ -12,7 +12,7 @@ public sealed class UserId : ValueObject
         return [Id];
     }
 
-    public static implicit operator string(UserId studentId) => studentId.Id;
+    public static implicit operator string(UserId userId) => userId.Id;
 
     public static UserId Create(string id) => new(id);
 }

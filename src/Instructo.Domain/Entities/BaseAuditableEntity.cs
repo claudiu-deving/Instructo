@@ -1,6 +1,8 @@
-﻿namespace Instructo.Domain.Entities;
+﻿using Instructo.Domain.Common;
 
-public abstract class BaseAuditableEntity : BaseEntity
+namespace Instructo.Domain.Entities;
+
+public abstract class BaseAuditableEntity<T> : BaseEntity<T> where T : class, IComparable
 {
     public DateTimeOffset Created { get; set; }
 
