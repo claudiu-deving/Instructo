@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instructo.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250402182019_Initial")]
-    partial class Initial
+    [Migration("20250403191813_SchoolWebsiteLinks")]
+    partial class SchoolWebsiteLinks
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -147,8 +147,8 @@ namespace Instructo.Infrastructure.Migrations
 
             modelBuilder.Entity("Instructo.Domain.Entities.Image", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
@@ -184,8 +184,9 @@ namespace Instructo.Infrastructure.Migrations
 
             modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
@@ -197,8 +198,11 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("IconId")
-                        .HasColumnType("int");
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("IconId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
@@ -213,6 +217,9 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("OwnerId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IconId");
@@ -224,8 +231,8 @@ namespace Instructo.Infrastructure.Migrations
 
             modelBuilder.Entity("Instructo.Domain.Entities.WebsiteLink", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("datetimeoffset");
@@ -236,8 +243,8 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("IconId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("IconId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
@@ -249,9 +256,6 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SchoolId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -259,8 +263,6 @@ namespace Instructo.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IconId");
-
-                    b.HasIndex("SchoolId");
 
                     b.ToTable("WebsiteLinks", (string)null);
                 });
@@ -371,6 +373,21 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SchoolWebsiteLink", b =>
+                {
+                    b.Property<Guid>("SchoolsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WebsiteLinksId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("SchoolsId", "WebsiteLinksId");
+
+                    b.HasIndex("WebsiteLinksId");
+
+                    b.ToTable("SchoolWebsiteLinks", (string)null);
+                });
+
             modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.Image", "Icon")
@@ -391,10 +408,6 @@ namespace Instructo.Infrastructure.Migrations
                     b.HasOne("Instructo.Domain.Entities.Image", "Icon")
                         .WithMany()
                         .HasForeignKey("IconId");
-
-                    b.HasOne("Instructo.Domain.Entities.School", null)
-                        .WithMany("WebsiteLinks")
-                        .HasForeignKey("SchoolId");
 
                     b.Navigation("Icon");
                 });
@@ -450,9 +463,19 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
+            modelBuilder.Entity("SchoolWebsiteLink", b =>
                 {
-                    b.Navigation("WebsiteLinks");
+                    b.HasOne("Instructo.Domain.Entities.School", null)
+                        .WithMany()
+                        .HasForeignKey("SchoolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Instructo.Domain.Entities.WebsiteLink", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteLinksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

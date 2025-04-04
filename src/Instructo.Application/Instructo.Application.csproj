@@ -16,4 +16,9 @@
     <ProjectReference Include="..\Instructo.Domain\Instructo.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Schools\Commands\DeleteSchool\" />
+    <Folder Include="Schools\Commands\UpdateSchool\" />
+  </ItemGroup>
+
 </Project>

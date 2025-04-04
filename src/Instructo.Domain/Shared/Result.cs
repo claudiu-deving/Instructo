@@ -1,5 +1,7 @@
 ﻿using MediatR;
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace Instructo.Domain.Shared;
 
 public class Result<TValue> : IResult<TValue>
@@ -8,17 +10,17 @@ public class Result<TValue> : IResult<TValue>
     {
         IsError=false;
         _value=value;
-        _errors= [Error.None];
+        Errors= [Error.None];
     }
     protected Result(Error[] errors)
     {
         IsError=true;
-        _errors=errors;
+        Errors=errors;
         _value=default;
     }
 
     public bool IsError { get; protected set; }
-    private readonly Error[] _errors;
+    public readonly Error[] Errors;
     private readonly TValue? _value;
 
     public static implicit operator Result<TValue>(TValue value) => new Result<TValue>(value);
@@ -27,7 +29,7 @@ public class Result<TValue> : IResult<TValue>
     public TResult Match<TResult>(
         Func<TValue, TResult> success,
         Func<Error[], TResult> failure) =>
-        !IsError ? success(_value!) : failure(_errors!);
+        !IsError ? success(_value!) : failure(Errors!);
 
     public override string ToString() => Match(
             success: value => value?.ToString()??string.Empty,
@@ -37,5 +39,11 @@ public class Result<TValue> : IResult<TValue>
     public static Result<TValue> Failure(Error[] errors) => new(errors);
     public static Result<TValue> WithErrors(Error[] errors) => new(errors);
 
+    public Result<TOut> Map<TOut>(Func<TValue?, TOut> mapper)
+    {
+        if(IsError)
+            return Result<TOut>.Failure(Errors);
 
+        return Result<TOut>.Success(mapper(_value));
+    }
 }

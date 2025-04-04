@@ -1,16 +1,8 @@
 ﻿namespace Instructo.Domain.ValueObjects;
 
-public sealed class ImageId : ValueObject
+public readonly record struct ImageId(Guid Id)
 {
-    private ImageId(int id)
-    {
-        Id=id;
-    }
-    public int Id { get; }
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        return [Id];
-    }
-    public static implicit operator int(ImageId studentId) => studentId.Id;
-    public static ImageId Create(int id) => new(id);
+    public ImageId() : this(Guid.NewGuid()) { }
+    public static implicit operator Guid(ImageId imageId) => imageId.Id;
+    public static ImageId CreateNew() => new();
 }

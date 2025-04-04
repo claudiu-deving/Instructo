@@ -1,18 +1,8 @@
 ﻿namespace Instructo.Domain.ValueObjects;
 
-public sealed class WebsiteLinkId : ValueObject
+public readonly record struct WebsiteLinkId(Guid Id)
 {
-    private WebsiteLinkId(int id)
-    {
-        Id=id;
-    }
-    public int Id { get; }
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        return [Id];
-    }
-
-    public static implicit operator int(WebsiteLinkId studentId) => studentId.Id;
-
-    public static WebsiteLinkId Create(int id) => new(id);
+    public WebsiteLinkId() : this(Guid.NewGuid()) { }
+    public static implicit operator Guid(WebsiteLinkId imageId) => imageId.Id;
+    public static WebsiteLinkId CreateNew() => new();
 }

@@ -1,5 +1,4 @@
 ﻿using Instructo.Domain.Dtos;
-using Instructo.Domain.Shared;
 
 namespace Instructo.Domain.Interfaces;
 
@@ -10,4 +9,5 @@ public interface IUserQueries
     Task<UserReadSuperDto> GetUsersByIdBySuperAsync(string userId);
     Task<IEnumerable<UserReadSuperDto>> GetUsersBySuper();
     Task<UserReadDto> GetUserByEmailAsync(string email);
+    Task<bool> IsEmailUnique(string email);
 }

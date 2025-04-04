@@ -2,7 +2,7 @@
 
 namespace Instructo.Domain.Entities;
 
-public abstract class BaseAuditableEntity<T> : BaseEntity<T> where T : class, IComparable
+public abstract class BaseAuditableEntity<T> : BaseEntity<T> where T : struct
 {
     public DateTimeOffset Created { get; set; }
 

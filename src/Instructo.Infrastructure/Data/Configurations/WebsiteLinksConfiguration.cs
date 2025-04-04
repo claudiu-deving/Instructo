@@ -1,4 +1,5 @@
 ﻿using Instructo.Domain.Entities;
+using Instructo.Infrastructure.Data.Converters;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

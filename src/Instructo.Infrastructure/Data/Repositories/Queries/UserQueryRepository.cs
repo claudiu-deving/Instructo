@@ -119,4 +119,13 @@ public class UserQueryRepository : IUserQueries
             JOIN Roles r ON r.Id = ur.RoleId";
         return await connection.QueryAsync<UserReadSuperDto>(sql);
     }
+
+    public async Task<bool> IsEmailUnique(string email)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+        var sql = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+        var count = await connection.ExecuteScalarAsync<int>(sql, new { email });
+        return count==0;
+    }
 }

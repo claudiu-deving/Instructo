@@ -9,8 +9,9 @@ namespace Instructo.Domain.Entities;
 ///</remarks>
 public class School : BaseAuditableEntity<SchoolId>
 {
-    internal School(ApplicationUser owner, SchoolName name, CompanyName companyName, Image? icon) : base()
+    public School(ApplicationUser owner, SchoolName name, CompanyName companyName, Image? icon) : base()
     {
+        Id=SchoolId.CreateNew();
         Owner=owner;
         Name=name;
         CompanyName=companyName;
@@ -22,6 +23,11 @@ public class School : BaseAuditableEntity<SchoolId>
     public virtual ApplicationUser? Owner { get; private set; }
     public SchoolName Name { get; private set; }
     public CompanyName CompanyName { get; private set; }
+
+    public string? Email { get; private set; }
+
+    public string? PhoneNumber { get; private set; }
+
     public virtual Image? Icon { get; private set; }
 
     private readonly List<WebsiteLink> _websiteLinks = [];
@@ -32,40 +38,4 @@ public class School : BaseAuditableEntity<SchoolId>
 
     public bool RemoveLink(WebsiteLink link) =>
         _websiteLinks.Remove(link);
-}
-
-
-
-public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
-{
-    public WebsiteLink(string url, string name, string description, Image icon)
-    {
-        Url=url;
-        Name=name;
-        Description=description;
-        Icon=icon;
-    }
-
-    private WebsiteLink() { }
-    public Url Url { get; private set; }
-    public WebsiteLinkName Name { get; private set; }
-    public string? Description { get; private set; }
-    public virtual Image? Icon { get; private set; }
-}
-
-public sealed class Image : BaseAuditableEntity<ImageId>
-{
-    private Image() { }
-    public FileName FileName { get; private set; }
-    public ContentType ContentType { get; private set; }
-    public Url Url { get; private set; }
-    public string? Description { get; private set; }
-
-    public Image(string fileName, string contentType, string url, string? description)
-    {
-        FileName=fileName;
-        ContentType=contentType;
-        Url=url;
-        Description=description;
-    }
 }

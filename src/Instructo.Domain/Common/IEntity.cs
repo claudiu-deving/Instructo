@@ -1,7 +1,7 @@
 ﻿
 namespace Instructo.Domain.Common;
 
-public interface IEntity<T> where T : class, IComparable
+public interface IEntity<T> where T : struct
 {
     IReadOnlyCollection<BaseEvent> DomainEvents { get; }
     T Id { get; }

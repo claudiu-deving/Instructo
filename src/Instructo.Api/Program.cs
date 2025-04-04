@@ -1,5 +1,6 @@
 using Instructo.Domain.ValueObjects;
 using Instructo.Infrastructure.Data.Repositories.Commands;
+using Instructo.Infrastructure.Data.Repositories.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ builder.Host.UseSerilog((context, services, loggerConfiguration) =>
         .Enrich.WithThreadId()
         .WriteTo.Console()
         .WriteTo.Seq(context.Configuration["Seq:ServerUrl"]??
-        throw new ArgumentNullException("Provide the url for the seq server"));
+        throw new ArgumentException("Provide the url for the seq server"));
 });
 
 // Add OpenTelemetry
@@ -65,12 +66,14 @@ builder.Services.AddOpenTelemetry()
     });
 
 // Integration between Serilog and OpenTelemetry
-builder.Services.AddSingleton<IDiagnosticContext>(sp => sp.GetRequiredService<DiagnosticContext>());
+builder.Services.AddSingleton<IDiagnosticContext>(sp =>
+sp.GetRequiredService<DiagnosticContext>());
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration["DefaultConnection"];
+var connectionString = builder.Configuration["DefaultConnection"]??
+    throw new ArgumentException("{DefaultConnection} is null, provide a valid DB Connection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -82,7 +85,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null);
     });
 });
-builder.Services.AddTransient<IUserQueries>(p => new UserQueries(connectionString));
+builder.Services.AddTransient<IUserQueries>(p => new UserQueryRepository(connectionString));
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -150,8 +153,10 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 
 builder.Services.AddMemoryCache();
-builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
-builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+builder.Services.Configure<IpRateLimitOptions>(
+    builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(
+    builder.Configuration.GetSection("IpRateLimitPolicies"));
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
@@ -159,20 +164,28 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 // Add authorization policies
 builder.Services.AddAuthorizationBuilder()
     // Add authorization policies
-    .AddPolicy("IronMan", policy => policy.RequireRole("IronMan").RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "4651c07c-e1f7-48dc-bc83-f07bda50b96e"))
+    .AddPolicy("IronMan", policy => policy.RequireRole("IronMan")
+    .RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+    "4651c07c-e1f7-48dc-bc83-f07bda50b96e"))
     // Add authorization policies
     .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
     // Add authorization policies
     .AddPolicy("SchoolOwners", policy => policy.RequireRole("Admin", "SchoolOwner"));
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+builder.Services.AddSingleton<IDbConnectionProvider>(
+    new DbConnectionProvider(connectionString));
+builder.Services.AddScoped<IQueryRepository<School, SchoolId>, SchoolQueriesRepository>();
+builder.Services.AddScoped<ICommandRepository<School, SchoolId>, SchoolCommandRepository>();
 builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
 var app = builder.Build();
 
 
 //await DbInitializer.SeedRolesAndAdminUser(app.Services);
 app.MapUserEndpoints();
+app.MapSchoolEndpoints();
 app.MapAuthEndpoints();
+
 
 if(app.Environment.IsDevelopment())
 {
@@ -193,7 +206,8 @@ app.UseSerilogRequestLogging(options =>
 
         if(httpContext.User?.Identity?.IsAuthenticated==true)
         {
-            diagnosticContext.Set("UserId", httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            diagnosticContext.Set("UserId",
+                httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }
     };
 });

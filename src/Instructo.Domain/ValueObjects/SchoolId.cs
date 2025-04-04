@@ -1,18 +1,11 @@
 ﻿namespace Instructo.Domain.ValueObjects;
 
-public sealed class SchoolId : ValueObject
+
+public readonly record struct SchoolId(Guid Id)
 {
-    private SchoolId(int id)
-    {
-        Id=id;
-    }
-    public int Id { get; }
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        return [Id];
-    }
-
-    public static implicit operator int(SchoolId studentId) => studentId.Id;
-
-    public static SchoolId Create(int id) => new(id);
+    public SchoolId() : this(Guid.NewGuid()) { }
+    public static implicit operator Guid(SchoolId imageId) => imageId.Id;
+    public static implicit operator SchoolId(Guid guid) =>CreateNew(guid);
+    public static SchoolId CreateNew() => new();
+    public static SchoolId CreateNew(Guid id) => new(id);
 }

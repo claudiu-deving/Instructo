@@ -17,15 +17,20 @@ class SchoolsConfiguration : IEntityTypeConfiguration<School>
     {
         builder.ToTable("Schools");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasConversion(new SchoolIdConverter());
+        builder.Property(x => x.Id).HasConversion(new SchoolIdConverter()).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasConversion(new SchoolNameConverter());
         builder.Property(x => x.CompanyName).HasConversion(new CompanyNameConverter());
         builder.Property(x => x.Name).IsRequired();
+        builder.HasMany(s => s.WebsiteLinks)
+                 .WithMany(w => w.Schools)
+                 .UsingEntity(j => j.ToTable("SchoolWebsiteLinks"));
+        builder.Navigation(s => s.WebsiteLinks)
+          .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
 
 public class SchoolIdConverter(ConverterMappingHints? mappingHints = null) :
-    ValueConverter<SchoolId, int>(x => x.Id, x => SchoolId.Create(x), mappingHints);
+    ValueConverter<SchoolId, Guid>(x => x.Id, x => SchoolId.CreateNew(), mappingHints);
 
 public class SchoolNameConverter(ConverterMappingHints? mappingHints = null) :
     ValueConverter<SchoolName, string>(x => x.Name, x => new SchoolName(x), mappingHints);

@@ -4,6 +4,7 @@ using Instructo.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Instructo.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250403190456_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,6 +256,9 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("SchoolId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -260,6 +266,8 @@ namespace Instructo.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IconId");
+
+                    b.HasIndex("SchoolId");
 
                     b.ToTable("WebsiteLinks", (string)null);
                 });
@@ -370,21 +378,6 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SchoolWebsiteLink", b =>
-                {
-                    b.Property<Guid>("SchoolsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("WebsiteLinksId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("SchoolsId", "WebsiteLinksId");
-
-                    b.HasIndex("WebsiteLinksId");
-
-                    b.ToTable("SchoolWebsiteLinks", (string)null);
-                });
-
             modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.Image", "Icon")
@@ -405,6 +398,10 @@ namespace Instructo.Infrastructure.Migrations
                     b.HasOne("Instructo.Domain.Entities.Image", "Icon")
                         .WithMany()
                         .HasForeignKey("IconId");
+
+                    b.HasOne("Instructo.Domain.Entities.School", null)
+                        .WithMany("WebsiteLinks")
+                        .HasForeignKey("SchoolId");
 
                     b.Navigation("Icon");
                 });
@@ -460,19 +457,9 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SchoolWebsiteLink", b =>
+            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
                 {
-                    b.HasOne("Instructo.Domain.Entities.School", null)
-                        .WithMany()
-                        .HasForeignKey("SchoolsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Instructo.Domain.Entities.WebsiteLink", null)
-                        .WithMany()
-                        .HasForeignKey("WebsiteLinksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("WebsiteLinks");
                 });
 #pragma warning restore 612, 618
         }

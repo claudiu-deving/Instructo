@@ -26,23 +26,22 @@ public static class DbInitializer
         string[] roleNames = ["Admin", "Owner", "Instructor", "Student"];
 
 
-        //await roleManager.CreateAsync(new ApplicationRole() { Name="IronMan", Description="I am Ironman" });
-        //await roleManager.CreateAsync(new ApplicationRole() { Name="Admin", Description="Can manage a school, cannot delete it" });
-        //await roleManager.CreateAsync(new ApplicationRole() { Name="Owner", Description="Can manage a school, can delete it" });
-        //await roleManager.CreateAsync(new ApplicationRole() { Name="Instructor", Description="Can manage session" });
-        //await roleManager.CreateAsync(new ApplicationRole() { Name="Student", Description="Can view session" });
+        await roleManager.CreateAsync(new ApplicationRole() { Name="IronMan", Description="I am Ironman" });
+        await roleManager.CreateAsync(new ApplicationRole() { Name="Admin", Description="Can manage a school, cannot delete it" });
+        await roleManager.CreateAsync(new ApplicationRole() { Name="Owner", Description="Can manage a school, can delete it" });
+        await roleManager.CreateAsync(new ApplicationRole() { Name="Instructor", Description="Can manage session" });
+        await roleManager.CreateAsync(new ApplicationRole() { Name="Student", Description="Can view session" });
 
-        //Create the IronMan user
-        //var ironMan = new ApplicationUser()
-        //{
-        //    Email="claudiu.c.strugar@gmail.com",
-        //    LastName="Strugar",
-        //    FirstName="Claudiu",
-        //    PhoneNumber="1234567890",
-        //    UserName="claudiu.c.strugar@gmail.com"
-        //};
-        //await userManager.CreateAsync(ironMan, "Password123!");
-        //await userManager.AddToRoleAsync(ironMan, "IronMan");
+        var ironMan = new ApplicationUser()
+        {
+            Email="claudiu.c.strugar@gmail.com",
+            LastName="Strugar",
+            FirstName="Claudiu",
+            PhoneNumber="1234567890",
+            UserName="claudiu.c.strugar@gmail.com"
+        };
+        await userManager.CreateAsync(ironMan, "Password123!");
+        await userManager.AddToRoleAsync(ironMan, "IronMan");
 
         int count = 2000;
         // Generate fake users with Bogus
