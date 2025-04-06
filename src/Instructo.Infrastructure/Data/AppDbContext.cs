@@ -32,13 +32,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     {
 
         base.OnModelCreating(modelBuilder);
-        Console.WriteLine("Creating");
         // Apply entity configurations
         modelBuilder.ApplyConfiguration(new SchoolsConfiguration());
         modelBuilder.ApplyConfiguration(new WebsiteLinksConfiguration());
         modelBuilder.ApplyConfiguration(new ImagesConfiguration());
 
         modelBuilder.Entity<ApplicationUser>().ToTable("Users").HasIndex(u => u.Email).IsUnique();
+        //modelBuilder.Entity<ApplicationUser>().HasOne(x => x.School).WithOne(s => s.Owner);
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
         modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
@@ -51,11 +51,18 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         ConfigCategories(modelBuilder);
     }
 
-    // In your DbContext class
     public override int SaveChanges()
     {
-        // Find all VehicleCategory and ArrCertificate entities that are marked as Added
-        // and set them to Unchanged state instead
+        SetToUnchanged();
+
+        return base.SaveChanges();
+    }
+
+    /// <summary>
+    /// We retrieve these hard coded entities with Dapper, EF doesn't know about them
+    /// </summary>
+    private void SetToUnchanged()
+    {
         foreach(var entry in ChangeTracker.Entries<VehicleCategory>()
             .Where(e => e.State==EntityState.Added))
         {
@@ -67,28 +74,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         {
             entry.State=EntityState.Unchanged;
         }
-
-        // Continue with normal SaveChanges
-        return base.SaveChanges();
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // Find all VehicleCategory and ArrCertificate entities that are marked as Added
-        // and set them to Unchanged state instead
-        foreach(var entry in ChangeTracker.Entries<VehicleCategory>()
-            .Where(e => e.State==EntityState.Added))
-        {
-            entry.State=EntityState.Unchanged;
-        }
+        SetToUnchanged();
 
-        foreach(var entry in ChangeTracker.Entries<ArrCertificate>()
-            .Where(e => e.State==EntityState.Added))
-        {
-            entry.State=EntityState.Unchanged;
-        }
-
-        // Continue with normal SaveChanges
         return base.SaveChangesAsync(cancellationToken);
     }
 

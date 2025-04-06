@@ -170,9 +170,9 @@ builder.Services.AddAuthorizationBuilder()
     .RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
     "4651c07c-e1f7-48dc-bc83-f07bda50b96e"))
     // Add authorization policies
-    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin", "Owner", "IronMan"))
     // Add authorization policies
-    .AddPolicy("SchoolOwners", policy => policy.RequireRole("Admin", "SchoolOwner"));
+    .AddPolicy("SchoolOwners", policy => policy.RequireRole("Owner"));
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 builder.Services.AddSingleton<IDbConnectionProvider>(

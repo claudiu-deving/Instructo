@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Schools\Commands\DeleteSchool\" />
     <Folder Include="Schools\Commands\UpdateSchool\" />
   </ItemGroup>
 

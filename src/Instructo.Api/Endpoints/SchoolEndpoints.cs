@@ -1,7 +1,9 @@
 ﻿using Instructo.Application.Schools.Commands.CreateSchool;
+using Instructo.Application.Schools.Commands.DeleteSchool;
 using Instructo.Application.Schools.Queries.GetSchoolById;
 using Instructo.Application.Schools.Queries.GetSchools;
 using Instructo.Domain.Dtos.School;
+using Instructo.Domain.ValueObjects;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,13 +16,33 @@ public static class SchoolEndpoints
         var group = app.MapGroup("api/schools").WithTags("Schools");
 
 
-        group.MapGet("/", GetAllSchools).WithName("Get all schools");
-        group.MapGet("/{id}", GetSchoolById).WithName("Get a School By Id");
+        group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
+        group.MapGet("/{id}", GetSchoolById).WithName("Get a School By Id").AllowAnonymous();
         group.MapPost("/", CreateSchool).WithName("Create School");
         //group.MapPatch("/{id}", UpdateSchool).WithName("Update SchoolEntities");
-        //group.MapDelete("/{id}", DeleteSchoolById);
-        group.AllowAnonymous().WithOpenApi();
+        group.MapDelete("/{id}", DeleteSchool);
+        group.WithOpenApi();
         return app;
+    }
+    private static async Task<IResult> DeleteSchool(
+        HttpContext context,
+        [FromServices] ISender sender,
+        Guid id)
+    {
+        var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(userId is null)
+        {
+            return TypedResults.Unauthorized();
+        }
+        var deletionRequest = await sender.Send(new DeleteSchoolCommand(SchoolId.CreateNew(id), userId));
+        if(deletionRequest.IsError)
+        {
+            return TypedResults.BadRequest(new { errors = deletionRequest.Errors.ToList() });
+        }
+        else
+        {
+            return TypedResults.Ok();
+        }
     }
 
     private static async Task<IResult> CreateSchool([FromServices] ISender sender, [FromBody] CreateSchoolCommandDto createSchoolCommand)

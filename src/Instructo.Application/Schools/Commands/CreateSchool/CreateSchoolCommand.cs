@@ -31,6 +31,6 @@ public partial record CreateSchoolCommand : ICommand<Result<SchoolReadDto>>
     public WebsiteLinkReadDto WebsiteLink { get; internal set; }
     public List<SocialMediaLinkDto> SocialMediaLinks { get; internal set; } = [];
     public BussinessHours BussinessHours { get; internal set; } = BussinessHours.Empty;
-    public List<VehicleCategoryType> VehicleCategories { get; internal set; }
-    public List<ARRCertificateType> Certificates { get; internal set; }
+    public List<VehicleCategoryType> VehicleCategories { get; internal set; } = [];
+    public List<ARRCertificateType> Certificates { get; internal set; } = [];
 }

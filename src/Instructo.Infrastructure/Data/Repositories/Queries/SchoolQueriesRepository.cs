@@ -79,8 +79,10 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>
             var sql = @"
             SELECT s.Id,
             s.Name,
-            s.CompanyName
+            s.CompanyName,
+            u.Id as OwnerId
             FROM Schools s
+            JOIN Users u on s.OwnerId = u.Id
             WHERE s.Id=@Id";
             var queryResult = await connection.QuerySingleAsync<School>(sql, new { id.Id });
             return Result<School?>.Success(queryResult);

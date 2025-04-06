@@ -2,6 +2,7 @@
 using Instructo.Domain.Dtos.School;
 using Instructo.Domain.Entities.SchoolEntities;
 using Instructo.Domain.Interfaces;
+using Instructo.Domain.Mappers;
 using Instructo.Domain.Shared;
 using Instructo.Domain.ValueObjects;
 
@@ -16,13 +17,6 @@ public class GetSchoolByIdQueryHandler(IQueryRepository<School, SchoolId> reposi
         {
             return Result<SchoolReadDto>.Failure(repositoryRequest.Errors);
         }
-        return repositoryRequest.Map(x => x is null ? new SchoolReadDto() : new SchoolReadDto
-        {
-            Id=x.Id.Id,
-            Name=x.Name,
-            CompanyName=x.CompanyName,
-            Email=x.Email,
-            PhoneNumber=x.PhoneNumber
-        });
+        return repositoryRequest.Map(x => x is null ? new SchoolReadDto() : x.ToReadDto());
     }
 }
