@@ -2,7 +2,7 @@
 
 namespace Instructo.Domain.Common;
 
-public abstract class BaseEntity<T> : IEntity<T> where T : struct
+public abstract class BaseEntity<T> : IEntity<T> where T : notnull
 {
     private T _id = default!;
     public T Id

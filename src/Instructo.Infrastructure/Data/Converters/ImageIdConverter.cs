@@ -4,5 +4,5 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Instructo.Infrastructure.Data.Converters;
 
-internal class ImageIdConverter(ConverterMappingHints? mappingHints = null) :
+internal sealed class ImageIdConverter(ConverterMappingHints? mappingHints = null) :
     ValueConverter<ImageId, Guid>(x => x.Id, x => ImageId.CreateNew(), mappingHints);

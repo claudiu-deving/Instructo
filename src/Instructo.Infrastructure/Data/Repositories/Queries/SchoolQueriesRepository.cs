@@ -4,6 +4,7 @@ using System.Data.Common;
 using Dapper;
 
 using Instructo.Domain.Entities;
+using Instructo.Domain.Entities.SchoolEntities;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 using Instructo.Domain.ValueObjects;
@@ -13,14 +14,24 @@ using Microsoft.Data.SqlClient;
 
 namespace Instructo.Infrastructure.Data.Repositories.Queries;
 
-public class SchoolQueriesRepository(IDbConnectionProvider dbConnectionProvider) : IQueryRepository<School, SchoolId>
+public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>
 {
+    private readonly IDbConnectionProvider _dbConnectionProvider;
+
+    public SchoolQueriesRepository(IDbConnectionProvider dbConnectionProvider)
+    {
+        _dbConnectionProvider=dbConnectionProvider;
+        SqlMapper.AddTypeHandler(new SchoolIdTypeHandler());
+        SqlMapper.AddTypeHandler(new SchoolNameTypeHandler());
+        SqlMapper.AddTypeHandler(new LegalNameTypeHandler());
+    }
+
     public async Task<Result<IEnumerable<School>?>> GetAllAsync()
     {
         try
         {
-            SqlMapper.AddTypeHandler(new SchoolIdTypeHandler());
-            using var connection = new SqlConnection(dbConnectionProvider.ConnectionString);
+
+            using var connection = new SqlConnection(_dbConnectionProvider.ConnectionString);
             await connection.OpenAsync();
             var getSchoolSql = @"
             SELECT s.Id,
@@ -40,7 +51,7 @@ public class SchoolQueriesRepository(IDbConnectionProvider dbConnectionProvider)
             ";
             foreach(School school in queryResult)
             {
-                var websiteLinks = await connection.QueryAsync<WebsiteLink>(getLinksSql,new { Id = school.Id.Id });
+                var websiteLinks = await connection.QueryAsync<WebsiteLink>(getLinksSql, new { Id = school.Id.Id });
                 foreach(var link in websiteLinks)
                 {
                     school.AddLink(link);
@@ -64,7 +75,7 @@ public class SchoolQueriesRepository(IDbConnectionProvider dbConnectionProvider)
     {
         try
         {
-            using var connection = new SqlConnection(dbConnectionProvider.ConnectionString);
+            using var connection = new SqlConnection(_dbConnectionProvider.ConnectionString);
             var sql = @"
             SELECT s.Id,
             s.Name,
@@ -87,16 +98,62 @@ public class SchoolQueriesRepository(IDbConnectionProvider dbConnectionProvider)
             return Result<School?>.Failure([new Error("GetSchoolById-Db", ex.Message)]);
         }
     }
-}
-public class SchoolIdTypeHandler : SqlMapper.TypeHandler<SchoolId>
-{
-    public override SchoolId Parse(object value)
+
+    public async Task<Result<IEnumerable<School>?>> GetByIndexed(string value)
     {
-        return value is Guid guid ? SchoolId.CreateNew(guid) : default;
+        using var connection = new SqlConnection(_dbConnectionProvider.ConnectionString);
+        var sql = @$"
+            SELECT s.Id,
+            s.Name,
+            s.CompanyName
+            FROM Schools s
+            WHERE s.CompanyName=@value";
+        var queryResult = await connection.QueryAsync<School>(sql, new { value });
+
+        return Result<IEnumerable<School>?>.Success(queryResult);
+    }
+    /// <summary>
+    /// Custom type handler for SchoolId.
+    /// </summary>
+    private class SchoolIdTypeHandler : SqlMapper.TypeHandler<SchoolId>
+    {
+        public override SchoolId Parse(object value)
+        {
+            return value is Guid guid ? SchoolId.CreateNew(guid) : default;
+        }
+
+        public override void SetValue(IDbDataParameter parameter, SchoolId value)
+        {
+            parameter.Value=value.Id;
+        }
+    }
+    /// <summary>
+    /// Custom type handler for SchoolName
+    /// </summary>
+    private class SchoolNameTypeHandler : SqlMapper.TypeHandler<SchoolName>
+    {
+        public override SchoolName Parse(object value)
+        {
+            return value is string name ? SchoolName.Wrap(name) : default;
+        }
+        public override void SetValue(IDbDataParameter parameter, SchoolName value)
+        {
+            parameter.Value=value.Value;
+        }
     }
 
-    public override void SetValue(IDbDataParameter parameter, SchoolId value)
+    /// <summary>
+    /// Custom type handler for LegalName
+    /// </summary>
+    private class LegalNameTypeHandler : SqlMapper.TypeHandler<LegalName>
     {
-        parameter.Value=value.Id;
+        public override LegalName Parse(object value)
+        {
+            return value is string name ? LegalName.Wrap(name) : default;
+        }
+        public override void SetValue(IDbDataParameter parameter, LegalName value)
+        {
+            parameter.Value=value.Value;
+        }
     }
 }

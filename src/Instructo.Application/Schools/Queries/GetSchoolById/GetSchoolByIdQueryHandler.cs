@@ -1,6 +1,6 @@
 ﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Dtos;
-using Instructo.Domain.Entities;
+using Instructo.Domain.Dtos.School;
+using Instructo.Domain.Entities.SchoolEntities;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 using Instructo.Domain.ValueObjects;
@@ -21,8 +21,8 @@ public class GetSchoolByIdQueryHandler(IQueryRepository<School, SchoolId> reposi
             Id=x.Id.Id,
             Name=x.Name,
             CompanyName=x.CompanyName,
-            Email=x.Email??"",
-            PhoneNumber=x.PhoneNumber??""
+            Email=x.Email,
+            PhoneNumber=x.PhoneNumber
         });
     }
 }

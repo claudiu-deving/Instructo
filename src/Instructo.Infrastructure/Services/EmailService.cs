@@ -1,4 +1,4 @@
-﻿using Instructo.Application;
+﻿using Instructo.Domain.Interfaces;
 
 namespace Instructo.Infrastructure.Services;
 

@@ -1,4 +1,7 @@
-﻿using Instructo.Domain.Dtos;
+﻿using Instructo.Domain.Dtos.Image;
+using Instructo.Domain.Dtos.Link;
+using Instructo.Domain.Entities.SchoolEntities;
+using Instructo.Domain.Shared;
 using Instructo.Domain.ValueObjects;
 
 namespace Instructo.Domain.Entities;
@@ -6,21 +9,33 @@ namespace Instructo.Domain.Entities;
 public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
 {
     private readonly List<School> _schools = [];
-    public WebsiteLink(string url, string name, string description, Image icon)
-    {
-        Id=WebsiteLinkId.CreateNew();
-        Url=url;
-        Name=name;
-        Description=description;
-        Icon=icon;
-    }
-
     private WebsiteLink() { }
+
     public Url Url { get; private set; }
     public WebsiteLinkName Name { get; private set; }
     public string? Description { get; private set; }
     public virtual Image? Icon { get; private set; }
     public virtual IReadOnlyCollection<School> Schools => _schools.AsReadOnly();
+
+    public static Result<WebsiteLink> Create(string url, string name, string description, Image icon)
+    {
+        var websiteLink = new WebsiteLink();
+        var errors = new List<Error>();
+        var urlResult = Url.Create(url)
+            .OnSuccess(url => websiteLink.Url=url)
+            .OnError(errors.AddRange);
+        var nameResult = WebsiteLinkName.Create(name)
+            .OnSuccess(name => websiteLink.Name=name)
+            .OnError(errors.AddRange);
+        websiteLink.Description=description;
+        websiteLink.Icon=icon;
+        websiteLink.Id=WebsiteLinkId.CreateNew();
+        if(errors.Count>0)
+        {
+            return Result<WebsiteLink>.Failure([.. errors]);
+        }
+        return websiteLink;
+    }
 
     public WebsiteLinkReadDto ToDto()
     {
@@ -29,7 +44,7 @@ public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
             Url=Url,
             Name=Name,
             Description=Description??"",
-            Image=Icon?.ToDto()??new ImageReadDto()
+            IconData=Icon?.ToDto()??new ImageReadDto()
         };
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Dapper;
 
-using Instructo.Domain.Dtos;
+using Instructo.Domain.Dtos.User;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 
@@ -56,7 +56,7 @@ public class UserQueryRepository : IUserQueries
         return await connection.QueryAsync<UserReadDto>(sql);
     }
 
-    public async Task<UserReadDto> GetUsersByIdAsync(string userId)
+    public async Task<UserReadDto> GetUsersByIdAsync(Guid userId)
     {
         using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
@@ -73,7 +73,7 @@ public class UserQueryRepository : IUserQueries
         return await connection.QueryFirstAsync<UserReadDto>(sql, userId);
     }
 
-    public async Task<UserReadSuperDto> GetUsersByIdBySuperAsync(string userId)
+    public async Task<UserReadSuperDto> GetUsersByIdBySuperAsync(Guid userId)
     {
         using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();

@@ -1,4 +1,4 @@
-﻿using Instructo.Domain.Dtos;
+﻿using Instructo.Domain.Dtos.User;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 

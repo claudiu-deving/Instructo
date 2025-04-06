@@ -3,7 +3,7 @@ using Instructo.Application.Users.Commands.UpdateUser;
 using Instructo.Application.Users.Queries.GetUserByEmail;
 using Instructo.Application.Users.Queries.GetUserByIdSuper;
 using Instructo.Application.Users.Queries.GetUsersBySuper;
-using Instructo.Domain.Dtos;
+using Instructo.Domain.Dtos.User;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,7 +59,7 @@ public static class UserEndpoint
 
     }
 
-    private static async Task<IResult> GetUserById([FromServices] ISender sender, string id)
+    private static async Task<IResult> GetUserById([FromServices] ISender sender, Guid id)
     {
         var query = new GetUserByIdBySuperQuery(id);
         var userRequest = await sender.Send(query);
@@ -92,7 +92,7 @@ public static class UserEndpoint
         return result;
     }
 
-    private static async Task<IResult> UpdateUser([FromServices] ISender sender, [FromServices] ILogger<Program> logger, string id, [FromBody] UserUpdateDto userUpdateDto)
+    private static async Task<IResult> UpdateUser([FromServices] ISender sender, [FromServices] ILogger<Program> logger, Guid id, [FromBody] UserUpdateDto userUpdateDto)
     {
         logger.LogInformation("Registering by admin for user: {user}", userUpdateDto);
         var userRetrievalRequest = await sender.Send(new GetUserByIdBySuperQuery(id));
@@ -120,7 +120,7 @@ public static class UserEndpoint
             });
     }
 
-    private static async Task<IResult> DeleteUserById([FromServices] ISender sender, string id)
+    private static async Task<IResult> DeleteUserById([FromServices] ISender sender, Guid id)
     {
         var userRetrievalRequest = await sender.Send(new GetUserByIdBySuperQuery(id));
         return await userRetrievalRequest.Match<Task<IResult>>(async ok =>

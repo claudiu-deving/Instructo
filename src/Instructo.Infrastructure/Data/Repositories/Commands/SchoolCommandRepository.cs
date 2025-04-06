@@ -1,4 +1,4 @@
-﻿using Instructo.Domain.Entities;
+﻿using Instructo.Domain.Entities.SchoolEntities;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 
@@ -7,18 +7,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Instructo.Infrastructure.Data.Repositories.Commands;
 
-public class SchoolCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<Domain.Entities.School, Domain.ValueObjects.SchoolId>
+public class SchoolCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<School, Domain.ValueObjects.SchoolId>
 {
     public async Task<Result<School>> AddAsync(School entity)
     {
         try
         {
             await appDbContext.Schools.AddAsync(entity);
-          var affectedRows =   await appDbContext.SaveChangesAsync();
-        
-            if(affectedRows ==0)
+            var affectedRows = await appDbContext.SaveChangesAsync();
+
+            if(affectedRows==0)
             {
-                logger.LogError("Failed to add {school}", entity.Name );
+                logger.LogError("Failed to add {school}", entity.Name);
                 return Result<School>.Failure([new Error("School-Add", "Failed to add school")]);
             }
             return Result<School>.Success(entity);

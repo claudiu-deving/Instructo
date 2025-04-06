@@ -4,5 +4,5 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Instructo.Infrastructure.Data.Converters;
 
-internal class WebsiteLinkIdConverter(ConverterMappingHints? mappingHints = null) :
+internal sealed class WebsiteLinkIdConverter(ConverterMappingHints? mappingHints = null) :
     ValueConverter<WebsiteLinkId, Guid>(x => x.Id, x => WebsiteLinkId.CreateNew(), mappingHints);

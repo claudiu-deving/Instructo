@@ -4,5 +4,5 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Instructo.Infrastructure.Data.Converters;
 
-internal class UrlConverter(ConverterMappingHints? mappingHints = null) :
-    ValueConverter<Url, string>(x => x.Value, x => new Url(x), mappingHints);
+internal sealed class UrlConverter(ConverterMappingHints? mappingHints = null) :
+    ValueConverter<Url, string>(x => x.Value, x => Url.Wrap(x), mappingHints);

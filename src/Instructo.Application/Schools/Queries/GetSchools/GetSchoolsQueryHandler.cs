@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 using Instructo.Application.Abstractions.Messaging;
 using Instructo.Domain.Dtos;
-using Instructo.Domain.Entities;
+using Instructo.Domain.Dtos.Image;
+using Instructo.Domain.Dtos.School;
+using Instructo.Domain.Entities.SchoolEntities;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
 using Instructo.Domain.ValueObjects;
@@ -27,8 +29,8 @@ public class GetSchoolsQueryHandler(IQueryRepository<School, SchoolId> repositor
             Id=s.Id.Id,
             Name=s.Name,
             CompanyName=s.CompanyName,
-            Email=s.Email??"",
-            PhoneNumber=s.PhoneNumber??"",
+            Email=s.Email,
+            PhoneNumber=s.PhoneNumber,
             Links= [.. s.WebsiteLinks.Select(x => x.ToDto())],
             IconData=s.Icon?.ToDto()??new ImageReadDto(),
         })?? []);

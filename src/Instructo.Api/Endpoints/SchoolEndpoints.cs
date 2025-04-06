@@ -1,6 +1,7 @@
 ﻿using Instructo.Application.Schools.Commands.CreateSchool;
 using Instructo.Application.Schools.Queries.GetSchoolById;
 using Instructo.Application.Schools.Queries.GetSchools;
+using Instructo.Domain.Dtos.School;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,7 @@ public static class SchoolEndpoints
         group.MapGet("/", GetAllSchools).WithName("Get all schools");
         group.MapGet("/{id}", GetSchoolById).WithName("Get a School By Id");
         group.MapPost("/", CreateSchool).WithName("Create School");
-        //group.MapPatch("/{id}", UpdateSchool).WithName("Update School");
+        //group.MapPatch("/{id}", UpdateSchool).WithName("Update SchoolEntities");
         //group.MapDelete("/{id}", DeleteSchoolById);
         group.AllowAnonymous().WithOpenApi();
         return app;
@@ -24,19 +25,17 @@ public static class SchoolEndpoints
 
     private static async Task<IResult> CreateSchool([FromServices] ISender sender, [FromBody] CreateSchoolCommandDto createSchoolCommand)
     {
-        var command = new CreateSchoolCommand(
-            createSchoolCommand.Name,
-            createSchoolCommand.CompanyName,
-            createSchoolCommand.OwnerEmail,
-            createSchoolCommand.OwnerPassword,
-            createSchoolCommand.OwnerFirstName,
-            createSchoolCommand.OwnerLastName,
-            createSchoolCommand.City,
-            createSchoolCommand.Address,
-            createSchoolCommand.PhoneNumber,
-            createSchoolCommand.ImagePath,
-            createSchoolCommand.ImageContentType
-            );
+        var errors = new List<Error>();
+        CreateSchoolCommand? command = null;
+        CreateSchoolCommand.Create(createSchoolCommand)
+           .OnSuccess(value => command=value)
+           .OnError(errors.AddRange);
+
+        if(errors.Count>0||command is null)
+        {
+            return TypedResults.BadRequest(new { errors = errors.ToList() });
+        }
+
         var userRequest = await sender.Send(command);
         return userRequest.Match<IResult>(
             ok => TypedResults.Created($"/api/schools/{ok.Id}", ok),
@@ -50,7 +49,7 @@ public static class SchoolEndpoints
         return userRequest.Match<IResult>(
             ok =>
             {
-                if(ok==new Domain.Dtos.SchoolReadDto())
+                if(ok==new SchoolReadDto())
                 {
                     return TypedResults.NotFound();
                 }

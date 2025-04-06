@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Bogus;
 
 using Instructo.Domain.Entities;
+using Instructo.Domain.Enums;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +44,8 @@ public static class DbInitializer
         await userManager.CreateAsync(ironMan, "Password123!");
         await userManager.AddToRoleAsync(ironMan, "IronMan");
 
-        int count = 2000;
+
+        int count = 0;
         // Generate fake users with Bogus
         var faker = new Faker<ApplicationUser>()
             .RuleFor(u => u.FirstName, f => f.Name.FirstName())

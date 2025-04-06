@@ -22,10 +22,26 @@ namespace Instructo.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ArrCertificateSchool", b =>
+                {
+                    b.Property<int>("CertificatesId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SchoolsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CertificatesId", "SchoolsId");
+
+                    b.HasIndex("SchoolsId");
+
+                    b.ToTable("SchoolCertificates", (string)null);
+                });
+
             modelBuilder.Entity("Instructo.Domain.Entities.ApplicationRole", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -58,8 +74,9 @@ namespace Instructo.Infrastructure.Migrations
 
             modelBuilder.Entity("Instructo.Domain.Entities.ApplicationUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -142,6 +159,82 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Instructo.Domain.Entities.ArrCertificate", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ARRCertificates", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Certificate for general goods transportation",
+                            Name = "Atestat pentru transport marfă"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Certificate for passenger transportation",
+                            Name = "Atestat pentru transport persoane"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Certificate for dangerous goods transportation (ADR)",
+                            Name = "Atestat ADR"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Certificate for oversized load transportation",
+                            Name = "Atestat pentru transport agabaritic"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Description = "Certificate for taxi transportation",
+                            Name = "Atestat pentru transport taxi"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Description = "Certificate for transport managers (CPI)",
+                            Name = "Atestat pentru manager de transport (CPI)"
+                        },
+                        new
+                        {
+                            Id = 64,
+                            Description = "Certificate for driving instructors",
+                            Name = "Atestat pentru instructor auto"
+                        },
+                        new
+                        {
+                            Id = 128,
+                            Description = "Certificate for road legislation teachers",
+                            Name = "Atestat pentru profesor de legislație rutieră"
+                        },
+                        new
+                        {
+                            Id = 256,
+                            Description = "Certificate for safety advisors for the transport of dangerous goods",
+                            Name = "Atestat pentru consilier de siguranță"
+                        });
+                });
+
             modelBuilder.Entity("Instructo.Domain.Entities.Image", b =>
                 {
                     b.Property<Guid>("Id")
@@ -179,15 +272,19 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("Images", (string)null);
                 });
 
-            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
+            modelBuilder.Entity("Instructo.Domain.Entities.SchoolEntities.School", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CompanyName")
+                    b.Property<string>("BussinessHours")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("datetimeoffset");
@@ -196,6 +293,7 @@ namespace Instructo.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("IconId")
@@ -211,19 +309,153 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OwnerId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyName");
+
                     b.HasIndex("IconId");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
 
                     b.ToTable("Schools", (string)null);
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.VehicleCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VehicleCategories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 0,
+                            Description = "Mopeds",
+                            Name = "AM"
+                        },
+                        new
+                        {
+                            Id = 1,
+                            Description = "Motorcycles with maximum 125cm³ cylinder capacity, maximum power of 11kW, and power-to-weight ratio not exceeding 0.1kW/kg; Motor tricycles with maximum power of 15kW",
+                            Name = "A1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Motorcycles with maximum power of 35kW, power-to-weight ratio not exceeding 0.2kW/kg, and not derived from a vehicle with more than twice its power",
+                            Name = "A2"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Motorcycles with or without sidecar and motor tricycles with power over 15kW",
+                            Name = "A"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Quadricycles with unladen mass not exceeding 400kg (550kg for goods transport vehicles), excluding the mass of batteries for electric vehicles, equipped with internal combustion engine not exceeding 15kW net maximum power or electric motor not exceeding 15kW continuous rated power",
+                            Name = "B1"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Vehicles with maximum authorized mass not exceeding 3,500kg and with no more than 8 seats in addition to the driver's seat; Vehicle-trailer combinations where the trailer's maximum authorized mass doesn't exceed 750kg; Vehicle-trailer combinations not exceeding 4,250kg total, where the trailer's maximum authorized mass exceeds 750kg",
+                            Name = "B"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Vehicle-trailer combinations exceeding 4,250kg total, comprising a category B vehicle and a trailer or semi-trailer with maximum authorized mass not exceeding 3,500kg",
+                            Name = "BE"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Vehicles other than those in categories D or D1, with maximum authorized mass exceeding 3,500kg but not exceeding 7,500kg, designed to carry maximum 8 passengers in addition to the driver. These vehicles may be coupled with a trailer not exceeding 750kg maximum authorized mass",
+                            Name = "C1"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Vehicle-trailer combinations comprising a C1 vehicle and a trailer or semi-trailer with maximum authorized mass exceeding 750kg, provided the total doesn't exceed 12,000kg; Combinations where the towing vehicle is category B and the trailer or semi-trailer has a maximum authorized mass exceeding 3,500kg, provided the total doesn't exceed 12,000kg",
+                            Name = "C1E"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Vehicles other than those in categories D or D1, with maximum authorized mass exceeding 3,500kg, designed to carry maximum 8 passengers in addition to the driver; Combinations comprising a category C vehicle and a trailer with maximum authorized mass not exceeding 750kg",
+                            Name = "C"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Vehicle-trailer combinations comprising a category C vehicle and a trailer or semi-trailer with maximum authorized mass exceeding 750kg",
+                            Name = "CE"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Description = "Vehicles designed to carry maximum 16 passengers in addition to the driver, with maximum length not exceeding 8m; Combinations comprising a D1 vehicle and a trailer with maximum authorized mass not exceeding 750kg",
+                            Name = "D1"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "Vehicle-trailer combinations comprising a D1 vehicle and a trailer with maximum authorized mass exceeding 750kg. The trailer must not be designed to carry passengers",
+                            Name = "D1E"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Vehicles designed to carry more than 8 passengers in addition to the driver. These vehicles may be coupled with a trailer not exceeding 750kg maximum authorized mass",
+                            Name = "D"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "Vehicle-trailer combinations comprising a category D vehicle and a trailer with maximum authorized mass exceeding 750kg. The trailer must not be designed to carry passengers",
+                            Name = "DE"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Description = "Agricultural or forestry tractors",
+                            Name = "Tr"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Description = "Trolleybus",
+                            Name = "Tb"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Description = "Tram",
+                            Name = "Tv"
+                        });
                 });
 
             modelBuilder.Entity("Instructo.Domain.Entities.WebsiteLink", b =>
@@ -264,7 +496,7 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("WebsiteLinks", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -278,9 +510,8 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -289,7 +520,7 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("RoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -303,9 +534,8 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -314,7 +544,7 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("UserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -325,9 +555,8 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -336,13 +565,13 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("UserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -351,10 +580,10 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("UserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -368,6 +597,21 @@ namespace Instructo.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("UserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("SchoolVehicleCategory", b =>
+                {
+                    b.Property<Guid>("SchoolsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VehicleCategoriesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SchoolsId", "VehicleCategoriesId");
+
+                    b.HasIndex("VehicleCategoriesId");
+
+                    b.ToTable("SchoolCategories", (string)null);
                 });
 
             modelBuilder.Entity("SchoolWebsiteLink", b =>
@@ -385,19 +629,92 @@ namespace Instructo.Infrastructure.Migrations
                     b.ToTable("SchoolWebsiteLinks", (string)null);
                 });
 
-            modelBuilder.Entity("Instructo.Domain.Entities.School", b =>
+            modelBuilder.Entity("ArrCertificateSchool", b =>
+                {
+                    b.HasOne("Instructo.Domain.Entities.ArrCertificate", null)
+                        .WithMany()
+                        .HasForeignKey("CertificatesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Instructo.Domain.Entities.SchoolEntities.School", null)
+                        .WithMany()
+                        .HasForeignKey("SchoolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.SchoolEntities.School", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.Image", "Icon")
                         .WithMany()
                         .HasForeignKey("IconId");
 
                     b.HasOne("Instructo.Domain.Entities.ApplicationUser", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
+                        .WithOne("School")
+                        .HasForeignKey("Instructo.Domain.Entities.SchoolEntities.School", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("Instructo.Domain.Entities.SchoolEntities.PhoneNumbersGroup", "PhoneNumbersGroups", b1 =>
+                        {
+                            b1.Property<Guid>("SchoolId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("SchoolId", "Id");
+
+                            b1.ToTable("PhoneNumbersGroup");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SchoolId");
+
+                            b1.OwnsMany("Instructo.Domain.ValueObjects.PhoneNumber", "PhoneNumbers", b2 =>
+                                {
+                                    b2.Property<Guid>("PhoneNumbersGroupSchoolId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<int>("PhoneNumbersGroupId")
+                                        .HasColumnType("int");
+
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("int");
+
+                                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b2.Property<int>("Id"));
+
+                                    b2.Property<string>("Name")
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.Property<string>("Value")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.HasKey("PhoneNumbersGroupSchoolId", "PhoneNumbersGroupId", "Id");
+
+                                    b2.ToTable("PhoneNumber");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PhoneNumbersGroupSchoolId", "PhoneNumbersGroupId");
+                                });
+
+                            b1.Navigation("PhoneNumbers");
+                        });
 
                     b.Navigation("Icon");
 
                     b.Navigation("Owner");
+
+                    b.Navigation("PhoneNumbersGroups");
                 });
 
             modelBuilder.Entity("Instructo.Domain.Entities.WebsiteLink", b =>
@@ -409,7 +726,7 @@ namespace Instructo.Infrastructure.Migrations
                     b.Navigation("Icon");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.ApplicationRole", null)
                         .WithMany()
@@ -418,7 +735,7 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.ApplicationUser", null)
                         .WithMany()
@@ -427,7 +744,7 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.ApplicationUser", null)
                         .WithMany()
@@ -436,7 +753,7 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.ApplicationRole", null)
                         .WithMany()
@@ -451,18 +768,33 @@ namespace Instructo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.HasOne("Instructo.Domain.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SchoolVehicleCategory", b =>
+                {
+                    b.HasOne("Instructo.Domain.Entities.SchoolEntities.School", null)
+                        .WithMany()
+                        .HasForeignKey("SchoolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Instructo.Domain.Entities.VehicleCategory", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleCategoriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("SchoolWebsiteLink", b =>
                 {
-                    b.HasOne("Instructo.Domain.Entities.School", null)
+                    b.HasOne("Instructo.Domain.Entities.SchoolEntities.School", null)
                         .WithMany()
                         .HasForeignKey("SchoolsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -473,6 +805,11 @@ namespace Instructo.Infrastructure.Migrations
                         .HasForeignKey("WebsiteLinksId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Instructo.Domain.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("School");
                 });
 #pragma warning restore 612, 618
         }

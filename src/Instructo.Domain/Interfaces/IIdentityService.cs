@@ -1,4 +1,4 @@
-﻿using Instructo.Domain.Dtos;
+﻿using Instructo.Domain.Dtos.User;
 using Instructo.Domain.Entities;
 using Instructo.Domain.Shared;
 
@@ -12,7 +12,7 @@ public interface IIdentityService
     Task<Result<string>> CheckPasswordSignInAsync(ApplicationUser user, string password);
     Task<Result<string>> CreateAsync(ApplicationUser user, string password);
     Task<Result<string>> DeleteAsync(ApplicationUser user);
-    Task<ApplicationUser?> GetUserByIdAsync(string id);
+    Task<ApplicationUser?> GetUserByIdAsync(Guid id);
     Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
     Task<string> GenerateJwtTokenAsync(ApplicationUser user);
     Task<ApplicationUser?> GetUserByEmailAsync(string email);

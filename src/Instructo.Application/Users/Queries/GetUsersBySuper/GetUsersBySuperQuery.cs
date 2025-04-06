@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Instructo.Domain.Dtos;
+using Instructo.Domain.Dtos.User;
 using Instructo.Domain.Shared;
 
 using MediatR;

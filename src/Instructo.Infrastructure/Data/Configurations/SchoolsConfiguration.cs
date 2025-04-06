@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
-using Instructo.Domain.Entities;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+using Instructo.Domain.Entities.SchoolEntities;
 using Instructo.Domain.ValueObjects;
+using Instructo.Infrastructure.Data.Converters;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Instructo.Infrastructure.Data.Configurations;
 
@@ -17,23 +16,34 @@ class SchoolsConfiguration : IEntityTypeConfiguration<School>
     {
         builder.ToTable("Schools");
         builder.HasKey(x => x.Id);
+        builder.HasIndex(x => x.CompanyName);
         builder.Property(x => x.Id).HasConversion(new SchoolIdConverter()).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasConversion(new SchoolNameConverter());
         builder.Property(x => x.CompanyName).HasConversion(new CompanyNameConverter());
+        builder.Property(x => x.Email).HasConversion(new EmailConverter());
+        builder.Property(x => x.PhoneNumber).HasConversion(new PhoneNumberConverter());
+        builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());
         builder.Property(x => x.Name).IsRequired();
+        builder.HasMany(x => x.VehicleCategories)
+               .WithMany(c => c.Schools)
+               .UsingEntity(j => j.ToTable("SchoolCategories"));
+
+        builder.HasMany(x => x.Certificates)
+               .WithMany(c => c.Schools)
+               .UsingEntity(j => j.ToTable("SchoolCertificates"));
+
+        builder.OwnsMany(x => x.PhoneNumbersGroups, pg =>
+        {
+            pg.OwnsMany(x => x.PhoneNumbers);
+        });
         builder.HasMany(s => s.WebsiteLinks)
                  .WithMany(w => w.Schools)
                  .UsingEntity(j => j.ToTable("SchoolWebsiteLinks"));
         builder.Navigation(s => s.WebsiteLinks)
           .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
-}
-
-public class SchoolIdConverter(ConverterMappingHints? mappingHints = null) :
+    private class SchoolIdConverter(ConverterMappingHints? mappingHints = null) :
     ValueConverter<SchoolId, Guid>(x => x.Id, x => SchoolId.CreateNew(), mappingHints);
-
-public class SchoolNameConverter(ConverterMappingHints? mappingHints = null) :
-    ValueConverter<SchoolName, string>(x => x.Name, x => new SchoolName(x), mappingHints);
-
-public class CompanyNameConverter(ConverterMappingHints? mappingHints = null) :
-    ValueConverter<CompanyName, string>(x => x.Name, x => new CompanyName(x), mappingHints);
+    private class SchoolNameConverter(ConverterMappingHints? mappingHints = null) :
+    ValueConverter<SchoolName, string>(x => x.Value, x => SchoolName.Wrap(x), mappingHints);
+}

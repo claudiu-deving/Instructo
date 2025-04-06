@@ -2,7 +2,7 @@
 using Instructo.Application.Users.Commands.ForgotPassoword;
 using Instructo.Application.Users.Commands.LoginUser;
 using Instructo.Application.Users.Commands.RegisterUser;
-using Instructo.Domain.Dtos;
+using Instructo.Domain.Dtos.User;
 
 using MediatR;
 

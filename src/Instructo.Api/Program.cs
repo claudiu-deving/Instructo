@@ -1,10 +1,12 @@
+using Instructo.Domain.Entities.SchoolEntities;
+using Instructo.Domain.Enums;
 using Instructo.Domain.ValueObjects;
 using Instructo.Infrastructure.Data.Repositories.Commands;
 using Instructo.Infrastructure.Data.Repositories.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Logging.ClearProviders();
 
 builder.Host.UseSerilog((context, services, loggerConfiguration) =>
 {
@@ -35,10 +37,6 @@ builder.Services.AddOpenTelemetry()
                     activity.SetTag("http.request.headers.correlation_id",
                         httpRequest.Headers["X-Correlation-ID"].FirstOrDefault()??"");
                 };
-                options.EnrichWithHttpResponse=(activity, httpResponse) =>
-                {
-                    // Add custom response enrichment if needed
-                };
             })
             .AddHttpClientInstrumentation(options =>
             {
@@ -48,10 +46,6 @@ builder.Services.AddOpenTelemetry()
                     activity.SetTag("error.type", exception.GetType().Name);
                     activity.SetTag("error.message", exception.Message);
                 };
-            })
-            .AddOtlpExporter(options =>
-            {
-                options.Endpoint=new Uri(builder.Configuration["OpenTelemetry:OtlpEndpoint"]);
             });
     })
     .WithMetrics(metricsProviderBuilder =>
@@ -84,6 +78,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorNumbersToAdd: null);
     });
+    if(builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+    else
+    {
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    }
 });
 builder.Services.AddTransient<IUserQueries>(p => new UserQueryRepository(connectionString));
 
@@ -176,8 +178,11 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 builder.Services.AddSingleton<IDbConnectionProvider>(
     new DbConnectionProvider(connectionString));
 builder.Services.AddScoped<IQueryRepository<School, SchoolId>, SchoolQueriesRepository>();
+builder.Services.AddScoped<IQueryRepository<VehicleCategory, VehicleCategoryType>, VehicleCategoryQueriesRepository>();
+builder.Services.AddScoped<IQueryRepository<ArrCertificate, ARRCertificateType>, ArrCertificateQueriesRepository>();
 builder.Services.AddScoped<ICommandRepository<School, SchoolId>, SchoolCommandRepository>();
 builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
+builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
 var app = builder.Build();
 
 
@@ -191,6 +196,7 @@ if(app.Environment.IsDevelopment())
 {
     app.MapScalarApiReference();
     app.MapOpenApi();
+    app.UseDeveloperExceptionPage();
 }
 app.UseExceptionHandler(exceptionHandlerApp
     => exceptionHandlerApp.Run(async context

@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 
-using Instructo.Domain.Dtos;
+using Instructo.Domain.Dtos.User;
 using Instructo.Domain.Entities;
 using Instructo.Domain.Interfaces;
 using Instructo.Domain.Shared;
@@ -22,9 +22,9 @@ public class IdentityService(
     {
         return await userManager.FindByEmailAsync(email);
     }
-    public async Task<ApplicationUser?> GetUserByIdAsync(string id)
+    public async Task<ApplicationUser?> GetUserByIdAsync(Guid id)
     {
-        return await userManager.FindByIdAsync(id);
+        return await userManager.FindByIdAsync(id.ToString());
     }
     public async Task<Result<string>> CheckPasswordSignInAsync(ApplicationUser user, string password)
     {
@@ -55,7 +55,7 @@ public class IdentityService(
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.Name, user.UserName)

@@ -9,7 +9,7 @@ namespace Instructo.Tests.Common;
 public class UserBuilder
 {
     private static readonly Faker _faker = new Faker("ro");
-    private string _id = _faker.Random.Guid().ToString();
+    private Guid _id = _faker.Random.Guid();
     private string _firstName = _faker.Person.FirstName;
     private string _lastName = _faker.Person.LastName;
     private string _email = _faker.Person.Email;
@@ -17,7 +17,7 @@ public class UserBuilder
     private string _phoneNumber = _faker.Phone.PhoneNumber();
     private List<string> _roles = new List<string>();
 
-    public UserBuilder WithId(string id)
+    public UserBuilder WithId(Guid id)
     {
         _id=id;
         return this;

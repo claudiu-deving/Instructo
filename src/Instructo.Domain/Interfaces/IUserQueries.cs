@@ -1,12 +1,12 @@
-﻿using Instructo.Domain.Dtos;
+﻿using Instructo.Domain.Dtos.User;
 
 namespace Instructo.Domain.Interfaces;
 
 public interface IUserQueries
 {
-    Task<UserReadDto> GetUsersByIdAsync(string userId);
+    Task<UserReadDto> GetUsersByIdAsync(Guid userId);
     Task<IEnumerable<UserReadDto>> GetUsers();
-    Task<UserReadSuperDto> GetUsersByIdBySuperAsync(string userId);
+    Task<UserReadSuperDto> GetUsersByIdBySuperAsync(Guid userId);
     Task<IEnumerable<UserReadSuperDto>> GetUsersBySuper();
     Task<UserReadDto> GetUserByEmailAsync(string email);
     Task<bool> IsEmailUnique(string email);
