@@ -2,15 +2,15 @@
 
 using Dapper;
 
-using Instructo.Domain.Entities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+using Domain.Entities;
+using Domain.Enums;
+using Domain.Interfaces;
+using Domain.Shared;
 
 using Microsoft.Data;
 using Microsoft.Data.SqlClient;
 
-namespace Instructo.Infrastructure.Data.Repositories.Queries;
+namespace Infrastructure.Data.Repositories.Queries;
 
 public class VehicleCategoryQueriesRepository : IQueryRepository<VehicleCategory, VehicleCategoryType>
 {

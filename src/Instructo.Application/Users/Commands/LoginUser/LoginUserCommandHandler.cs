@@ -1,10 +1,11 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
+
+using Domain.Interfaces;
+using Domain.Shared;
 
 using Microsoft.Extensions.Logging;
 
-namespace Instructo.Application.Users.Commands.LoginUser;
+namespace Application.Users.Commands.LoginUser;
 
 public class LoginUserCommandHandler(IIdentityService identityService, ILogger<LoginUserCommandHandler> logger) : ICommandHandler<LoginUserCommand, Result<string>>
 {
@@ -12,18 +13,14 @@ public class LoginUserCommandHandler(IIdentityService identityService, ILogger<L
     {
         var user = await identityService.GetUserByEmailAsync(request.Email);
         if(user is null)
-        {
             return Result<string>.Failure([new Error("Login-User", "User not found")]);
-        }
         var loginRequest = await identityService.CheckPasswordSignInAsync(user, request.Password);
         if(loginRequest.IsError)
         {
             user.AccessFailedCount++;
             var updateAttemptsCountRequest = await identityService.UpdateAsync(user);
             if(updateAttemptsCountRequest.IsError)
-            {
                 logger.LogError("Failed to update user access failed count: {Email}", request.Email);
-            }
             return loginRequest;
         }
         else

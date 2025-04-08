@@ -1,4 +1,4 @@
-﻿namespace Instructo.Domain.Enums;
+﻿namespace Domain.Enums;
 
 /// <summary>
 /// Enum representing the vehicle categories for which driving licenses are issued,

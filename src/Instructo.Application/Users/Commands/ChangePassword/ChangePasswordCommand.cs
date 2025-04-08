@@ -1,6 +1,7 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Users.Commands.ChangePassword;
+using Domain.Shared;
+
+namespace Application.Users.Commands.ChangePassword;
 
 public record ChangePasswordCommand(string Email, string CurrentPassword, string NewPassword) : ICommand<Result<string>>;

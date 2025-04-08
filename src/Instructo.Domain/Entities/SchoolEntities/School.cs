@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-using Instructo.Domain.Enums;
-using Instructo.Domain.ValueObjects;
+using Domain.ValueObjects;
 
-namespace Instructo.Domain.Entities.SchoolEntities;
+namespace Domain.Entities.SchoolEntities;
 /// <summary>
 /// The school
 /// </summary>

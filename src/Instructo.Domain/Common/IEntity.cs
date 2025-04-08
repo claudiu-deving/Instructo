@@ -1,5 +1,4 @@
-﻿
-namespace Instructo.Domain.Common;
+﻿namespace Domain.Common;
 
 public interface IEntity<T> where T : notnull
 {

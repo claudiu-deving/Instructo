@@ -1,9 +1,8 @@
-﻿using FluentAssertions;
+﻿using Domain.Dtos.Link;
+
+using FluentAssertions;
 
 using Instructo.Application.Schools.Commands.CreateSchool;
-using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Dtos.PhoneNumbers;
-using Instructo.Domain.Dtos.School;
 
 namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 

@@ -1,7 +1,7 @@
-﻿using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Dtos.PhoneNumbers;
+﻿using Domain.Dtos.Link;
+using Domain.Dtos.PhoneNumbers;
 
-namespace Instructo.Domain.Dtos.School;
+namespace Domain.Dtos.School;
 
 public readonly record struct CreateSchoolCommandDto(
     string Name,

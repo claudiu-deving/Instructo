@@ -1,7 +1,7 @@
-﻿using Instructo.Domain.Dtos;
-using Instructo.Domain.Shared;
+﻿using Domain.Dtos;
+using Domain.Shared;
 
-namespace Instructo.Domain.ValueObjects;
+namespace Domain.ValueObjects;
 
 public record BussinessHours
 {
@@ -31,9 +31,7 @@ public record BussinessHours
             entries.Add(new BussinessHoursEntry(daysOfTheWeek, times));
         });
         if(errors.Count!=0)
-        {
             return Result<BussinessHours>.WithErrors([.. errors]);
-        }
         return Result<BussinessHours>.Success(new BussinessHours(entries));
     }
 

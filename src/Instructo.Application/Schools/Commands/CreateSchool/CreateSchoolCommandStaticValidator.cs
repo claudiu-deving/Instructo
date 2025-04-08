@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Dtos.PhoneNumbers;
+using Domain.Dtos.School;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
+using Domain.Shared;
+using Domain.ValueObjects;
 
-using Instructo.Domain.Dtos.PhoneNumbers;
-using Instructo.Domain.Dtos.School;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
-
-namespace Instructo.Application.Schools.Commands.CreateSchool;
+namespace Application.Schools.Commands.CreateSchool;
 
 public partial record CreateSchoolCommand
 {
@@ -40,11 +33,11 @@ public partial record CreateSchoolCommand
             .OnSuccess(value => createSchoolCommand.OwnerPassword=value)
             .OnError(errors.AddRange);
 
-        Instructo.Domain.ValueObjects.Name.Create(createSchoolCommandDto.OwnerFirstName)
+        Domain.ValueObjects.Name.Create(createSchoolCommandDto.OwnerFirstName)
             .OnSuccess(value => createSchoolCommand.OwnerFirstName=value)
             .OnError(errors.AddRange);
 
-        Instructo.Domain.ValueObjects.Name.Create(createSchoolCommandDto.OwnerLastName)
+        Domain.ValueObjects.Name.Create(createSchoolCommandDto.OwnerLastName)
             .OnSuccess(value => createSchoolCommand.OwnerLastName=value)
             .OnError(errors.AddRange);
 
@@ -78,7 +71,7 @@ public partial record CreateSchoolCommand
 
         createSchoolCommand.SocialMediaLinks=createSchoolCommandDto.SocialMediaLinks;
 
-        Instructo.Domain.ValueObjects.BussinessHours.Create(createSchoolCommandDto.BussinessHours)
+        BussinessHours.Create(createSchoolCommandDto.BussinessHours)
             .OnSuccess(value => createSchoolCommand.BussinessHours=value)
             .OnError(errors.AddRange);
 

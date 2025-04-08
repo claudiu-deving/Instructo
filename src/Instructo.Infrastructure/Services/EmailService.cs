@@ -1,6 +1,6 @@
-﻿using Instructo.Domain.Interfaces;
+﻿using Domain.Interfaces;
 
-namespace Instructo.Infrastructure.Services;
+namespace Infrastructure.Services;
 
 public class EmailService : IEmailService
 {

@@ -1,8 +1,8 @@
-﻿using FluentValidation;
+﻿using Domain.Interfaces;
 
-using Instructo.Domain.Interfaces;
+using FluentValidation;
 
-namespace Instructo.Application.Users.Commands.RegisterUser;
+namespace Application.Users.Commands.RegisterUser;
 
 public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {

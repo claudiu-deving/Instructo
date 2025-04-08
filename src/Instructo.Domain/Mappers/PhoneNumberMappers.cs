@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Dtos.PhoneNumbers;
+using Domain.Entities.SchoolEntities;
+using Domain.ValueObjects;
 
-using Instructo.Domain.Dtos.PhoneNumbers;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.ValueObjects;
-
-namespace Instructo.Domain.Mappers;
+namespace Domain.Mappers;
 
 public static class PhoneNumberMappers
 {

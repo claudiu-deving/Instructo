@@ -1,4 +1,4 @@
-﻿namespace Instructo.Domain.Enums;
+﻿namespace Domain.Enums;
 
 public interface ISocialMediaPlatformImageProvider
 {

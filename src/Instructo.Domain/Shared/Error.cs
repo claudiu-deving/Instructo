@@ -1,4 +1,4 @@
-﻿namespace Instructo.Domain.Shared;
+﻿namespace Domain.Shared;
 
 public class Error(string code, string message) : IEquatable<Error>
 {
@@ -15,7 +15,7 @@ public class Error(string code, string message) : IEquatable<Error>
         if(string.IsNullOrEmpty(Code)||string.IsNullOrEmpty(other.Code))
             return false;
 
-        return this.Code.Equals(other.Code);
+        return Code.Equals(other.Code);
     }
 
     public static implicit operator string(Error error) => error.Code;
@@ -23,26 +23,18 @@ public class Error(string code, string message) : IEquatable<Error>
     public static bool operator ==(Error? left, Error? right)
     {
         if(left is null&&right is null)
-        {
             return true;
-        }
         if(left is null||right is null)
-        {
             return false;
-        }
         return left.Code.Equals(right.Code);
     }
 
     public static bool operator !=(Error? left, Error? right)
     {
         if(left is null&&right is null)
-        {
             return false;
-        }
         if(left is null||right is null)
-        {
             return true;
-        }
         return !left.Code.Equals(right.Code);
     }
     public override bool Equals(object? obj)

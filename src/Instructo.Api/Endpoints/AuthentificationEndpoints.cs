@@ -1,16 +1,15 @@
-﻿using Instructo.Application.Users.Commands.ChangePassword;
-using Instructo.Application.Users.Commands.ForgotPassoword;
-using Instructo.Application.Users.Commands.LoginUser;
-using Instructo.Application.Users.Commands.RegisterUser;
-using Instructo.Domain.Dtos.User;
+﻿using Application.Users.Commands.ChangePassword;
+using Application.Users.Commands.ForgotPassoword;
+using Application.Users.Commands.LoginUser;
+using Application.Users.Commands.RegisterUser;
 
-using MediatR;
+using Domain.Dtos.User;
 
 using Microsoft.AspNetCore.Mvc;
 
 using ILogger = Serilog.ILogger;
 
-namespace Instructo.Api.Endpoints;
+namespace Api.Endpoints;
 
 public static class AuthentificationEndpoints
 {

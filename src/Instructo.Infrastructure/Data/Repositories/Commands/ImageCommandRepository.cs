@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Instructo.Domain.Entities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+﻿using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Shared;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Instructo.Infrastructure.Data.Repositories.Commands;
+namespace Infrastructure.Data.Repositories.Commands;
 
-public class ImageCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<Domain.Entities.Image, Domain.ValueObjects.ImageId>
+public class ImageCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<Image, Domain.ValueObjects.ImageId>
 {
     public async Task<Result<Image>> AddAsync(Image entity)
     {

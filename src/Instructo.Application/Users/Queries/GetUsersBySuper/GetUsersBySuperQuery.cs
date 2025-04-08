@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Shared;
+﻿using Domain.Dtos.User;
+using Domain.Shared;
 
 using MediatR;
 
-namespace Instructo.Application.Users.Queries.GetUsersBySuper;
+namespace Application.Users.Queries.GetUsersBySuper;
 
 public class GetUsersBySuperQuery : IRequest<Result<IEnumerable<UserReadSuperDto>>>
 {

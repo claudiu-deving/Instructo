@@ -1,9 +1,10 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Users.Queries.GetUserByEmail;
+using Domain.Dtos.User;
+using Domain.Interfaces;
+using Domain.Shared;
+
+namespace Application.Users.Queries.GetUserByEmail;
 
 public class GetUserByEmailQueryHandler : ICommandHandler<GetUserByEmailQuery, Result<UserReadDto>>
 {

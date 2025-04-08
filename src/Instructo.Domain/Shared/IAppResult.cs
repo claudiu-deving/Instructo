@@ -1,5 +1,4 @@
-﻿
-namespace Instructo.Domain.Shared;
+﻿namespace Domain.Shared;
 public interface IAppResult
 {
     bool IsError { get; }

@@ -1,4 +1,4 @@
-﻿namespace Instructo.Shared;
+﻿namespace Shared;
 
 public enum UserTypes
 {

@@ -1,12 +1,13 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Dtos.School;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Mappers;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Schools.Queries.GetSchoolById;
+using Domain.Dtos.School;
+using Domain.Entities.SchoolEntities;
+using Domain.Interfaces;
+using Domain.Mappers;
+using Domain.Shared;
+using Domain.ValueObjects;
+
+namespace Application.Schools.Queries.GetSchoolById;
 
 public class GetSchoolByIdQueryHandler(IQueryRepository<School, SchoolId> repository) : ICommandHandler<GetSchoolByIdQuery, Result<SchoolReadDto>>
 {
@@ -14,9 +15,7 @@ public class GetSchoolByIdQueryHandler(IQueryRepository<School, SchoolId> reposi
     {
         var repositoryRequest = await repository.GetByIdAsync(SchoolId.CreateNew(request.Id));
         if(repositoryRequest.IsError)
-        {
             return Result<SchoolReadDto>.Failure(repositoryRequest.Errors);
-        }
         return repositoryRequest.Map(x => x is null ? new SchoolReadDto() : x.ToReadDto());
     }
 }

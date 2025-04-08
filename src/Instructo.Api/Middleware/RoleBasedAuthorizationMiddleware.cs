@@ -1,10 +1,6 @@
-﻿using Instructo.Domain.Entities;
+﻿using Domain.Entities;
 
-using Microsoft.AspNetCore.Identity;
-
-using System.Security.Claims;
-
-namespace Instructo.Api.Middleware;
+namespace Api.Middleware;
 
 public class RoleBasedAuthorizationMiddleware
 {

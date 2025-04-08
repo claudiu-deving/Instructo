@@ -1,4 +1,4 @@
-﻿namespace Instructo.Infrastructure;
+﻿namespace Infrastructure;
 
 public class Class1
 {

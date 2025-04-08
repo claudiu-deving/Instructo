@@ -1,11 +1,12 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
+
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Shared;
 
 using Microsoft.Extensions.Logging;
 
-namespace Instructo.Application.Users.Commands.RegisterUser;
+namespace Application.Users.Commands.RegisterUser;
 
 public class RegisterUserCommandHandler(IIdentityService identityService, ILogger<RegisterUserCommandHandler> logger) : ICommandHandler<RegisterUserCommand, Result<string>>
 {
@@ -23,7 +24,7 @@ public class RegisterUserCommandHandler(IIdentityService identityService, ILogge
             FirstName=request.FirstName,
             LastName=request.LastName,
             PhoneNumber=request.PhoneNumber,
-            UserName = request.Email
+            UserName=request.Email
         }, request.Password);
 
 

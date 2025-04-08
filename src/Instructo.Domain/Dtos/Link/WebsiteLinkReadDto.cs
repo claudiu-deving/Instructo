@@ -1,6 +1,6 @@
-﻿using Instructo.Domain.Dtos.Image;
+﻿using Domain.Dtos.Image;
 
-namespace Instructo.Domain.Dtos.Link;
+namespace Domain.Dtos.Link;
 
 public readonly record struct WebsiteLinkReadDto(string Url, string Name, string Description, ImageReadDto IconData)
 {

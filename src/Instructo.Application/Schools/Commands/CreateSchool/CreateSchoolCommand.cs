@@ -1,14 +1,13 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Dtos;
-using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Dtos.PhoneNumbers;
-using Instructo.Domain.Dtos.School;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Schools.Commands.CreateSchool;
+using Domain.Dtos.Link;
+using Domain.Dtos.School;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
+using Domain.Shared;
+using Domain.ValueObjects;
+
+namespace Application.Schools.Commands.CreateSchool;
 
 public partial record CreateSchoolCommand : ICommand<Result<SchoolReadDto>>
 {

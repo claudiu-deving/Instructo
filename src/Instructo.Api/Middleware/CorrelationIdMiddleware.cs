@@ -1,8 +1,8 @@
-﻿using Serilog.Context;
+﻿using System.Diagnostics;
 
-using System.Diagnostics;
+using Serilog.Context;
 
-namespace Instructo.Api.Middleware;
+namespace Api.Middleware;
 public class CorrelationIdMiddleware(RequestDelegate next)
 {
     private const string _correlationIdHeaderName = "X-Correlation-ID";
@@ -20,9 +20,7 @@ public class CorrelationIdMiddleware(RequestDelegate next)
         {
             // Add the correlation ID to the current activity
             if(Activity.Current!=null)
-            {
                 Activity.Current.SetTag("correlation_id", correlationId);
-            }
 
             await next(context);
         }

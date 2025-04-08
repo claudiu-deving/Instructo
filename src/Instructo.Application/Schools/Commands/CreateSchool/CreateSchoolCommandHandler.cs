@@ -1,23 +1,24 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
-using Instructo.Application.Abstractions.Messaging;
-using Instructo.Application.Users.Commands.RegisterUser;
-using Instructo.Domain.Dtos.School;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Mappers;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+using Application.Abstractions.Messaging;
+
+using Domain.Dtos.School;
+using Domain.Entities;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
+using Domain.Interfaces;
+using Domain.Mappers;
+using Domain.Shared;
+using Domain.ValueObjects;
+
+using Application.Schools.Commands.CreateSchool;
 
 using MediatR;
 
 using Microsoft.Extensions.Logging;
+using Application.Users.Commands.RegisterUser;
 [assembly: InternalsVisibleTo("Instructo.UnitTests")]
-namespace Instructo.Application.Schools.Commands.CreateSchool;
+namespace Application.Schools.Commands.CreateSchool;
 
 public class CreateSchoolCommandHandler(
     ICommandRepository<School, SchoolId> repository,
@@ -48,9 +49,7 @@ public class CreateSchoolCommandHandler(
         foreach(var socialMediaLink in request.SocialMediaLinks)
         {
             if(string.IsNullOrEmpty(socialMediaLink.Url))
-            {
                 continue;
-            }
             try
             {
                 var platform = socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName);
@@ -60,9 +59,7 @@ public class CreateSchoolCommandHandler(
               platform.IconPath,
               socialMediaLink.SocialPlatformName);
                 if(platformImageCreationResult.IsError)
-                {
                     return Result<School>.Failure(platformImageCreationResult.Errors);
-                }
                 var platformImage = platformImageCreationResult.Value!;
                 var linkCreationResult = WebsiteLink.Create(
                     socialMediaLink.Url,
@@ -70,9 +67,7 @@ public class CreateSchoolCommandHandler(
                     $"{socialMediaLink.SocialPlatformName} {platform.Description}",
                     platformImage);
                 if(linkCreationResult.IsError)
-                {
                     return Result<School>.Failure(linkCreationResult.Errors);
-                }
                 var link = linkCreationResult.Value!;
 
                 school.AddLink(link);
@@ -99,9 +94,7 @@ public class CreateSchoolCommandHandler(
               request.WebsiteLink.IconData.Url,
               "Company Website Icon");
         if(websiteLinkIconResult.IsError)
-        {
             return Result<School>.Failure(websiteLinkIconResult.Errors);
-        }
         var websiteLinkIcon = websiteLinkIconResult.Value!;
 
         var websiteLinkCreationResult = WebsiteLink.Create(
@@ -110,9 +103,7 @@ public class CreateSchoolCommandHandler(
             request.WebsiteLink.Description,
             websiteLinkIcon);
         if(websiteLinkCreationResult.IsError)
-        {
             return Result<School>.Failure(websiteLinkCreationResult.Errors);
-        }
         var websiteLink = websiteLinkCreationResult.Value!;
 
         school.AddLink(websiteLink);
@@ -146,9 +137,7 @@ public class CreateSchoolCommandHandler(
         }
         );
         if(vehiclesCategoryRetrievalErrors.Count>0)
-        {
             return Result<School>.WithErrors([.. vehiclesCategoryRetrievalErrors]);
-        }
 
         var certificatesRetrievalErrors = new List<Error>();
         var selectedCertificates = new List<ArrCertificate>();
@@ -156,9 +145,7 @@ public class CreateSchoolCommandHandler(
         {
             var certificateRequest = await certificatesRepository.GetByIdAsync(certificateType);
             if(certificateRequest.IsError)
-            {
                 certificatesRetrievalErrors.AddRange(certificateRequest.Errors);
-            }
             selectedCertificates.Add(certificateRequest.Value!);
         });
 
@@ -191,9 +178,7 @@ public class CreateSchoolCommandHandler(
         var userRegistrationRequest = await sender.Send(
             registerUserCommand, cancellationToken);
         if(userRegistrationRequest.IsError)
-        {
             return Result<ApplicationUser>.Failure(userRegistrationRequest.Errors);
-        }
         var user = await identityService.GetUserByEmailAsync(request.OwnerEmail);
         if(user is null)
         {

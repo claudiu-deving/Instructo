@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Domain.Entities.SchoolEntities;
+using Domain.ValueObjects;
 
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.ValueObjects;
-using Instructo.Infrastructure.Data.Converters;
+using Infrastructure.Data.Converters;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Instructo.Infrastructure.Data.Configurations;
+namespace Infrastructure.Data.Configurations;
 
 class SchoolsConfiguration : IEntityTypeConfiguration<School>
 {

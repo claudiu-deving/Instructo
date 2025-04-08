@@ -1,8 +1,8 @@
-﻿using Instructo.Domain.Dtos.Image;
-using Instructo.Domain.Dtos.School;
-using Instructo.Domain.Entities.SchoolEntities;
+﻿using Domain.Dtos.Image;
+using Domain.Dtos.School;
+using Domain.Entities.SchoolEntities;
 
-namespace Instructo.Domain.Mappers;
+namespace Domain.Mappers;
 
 public static class SchoolMappers
 {

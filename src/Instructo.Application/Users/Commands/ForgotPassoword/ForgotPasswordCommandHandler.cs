@@ -1,7 +1,8 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Users.Commands.ForgotPassoword;
+using Domain.Shared;
+
+namespace Application.Users.Commands.ForgotPassoword;
 
 public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordCommand, Result<string>>
 {

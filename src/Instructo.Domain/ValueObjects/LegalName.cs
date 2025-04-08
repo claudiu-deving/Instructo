@@ -1,7 +1,7 @@
-﻿using Instructo.Domain.Shared;
+﻿using Domain.Shared;
 
-using static Instructo.Domain.ValueObjects.ResultHelperExtensions;
-namespace Instructo.Domain.ValueObjects;
+using static Domain.ValueObjects.ResultHelperExtensions;
+namespace Domain.ValueObjects;
 
 public readonly record struct LegalName
 {

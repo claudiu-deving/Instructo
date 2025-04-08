@@ -1,8 +1,8 @@
-﻿using Instructo.Domain.Common;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
+﻿using Domain.Common;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
 
-namespace Instructo.Domain.Entities;
+namespace Domain.Entities;
 
 public class VehicleCategory : BaseEntity<VehicleCategoryType>
 {

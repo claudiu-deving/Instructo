@@ -1,12 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.ValueObjects;
+﻿using Domain.Entities.SchoolEntities;
 
 using Microsoft.AspNetCore.Identity;
 
 
-namespace Instructo.Domain.Entities;
+namespace Domain.Entities;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
@@ -19,9 +16,7 @@ public class ApplicationUser : IdentityUser<Guid>
     public override bool Equals(object obj)
     {
         if(obj==null||GetType()!=obj.GetType())
-        {
             return false;
-        }
         var user = (ApplicationUser)obj;
         return user.Id==Id;
     }

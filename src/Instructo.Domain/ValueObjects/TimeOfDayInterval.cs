@@ -1,6 +1,6 @@
-﻿using Instructo.Domain.Shared;
+﻿using Domain.Shared;
 
-namespace Instructo.Domain.ValueObjects;
+namespace Domain.ValueObjects;
 
 public record TimeOfDayInterval(TimeOfDay Start, TimeOfDay End, TimeSpan Span)
 {
@@ -23,14 +23,10 @@ public record TimeOfDayInterval(TimeOfDay Start, TimeOfDay End, TimeSpan Span)
             .OnError(errors.AddRange)
             .OnSuccess(timeofDay => endOfTimeOfDay=timeofDay);
         if(errors.Count!=0||startOfTimeOfDay is null||endOfTimeOfDay is null)
-        {
             return Result<TimeOfDayInterval>.WithErrors([.. errors]);
-        }
 
         if(startOfTimeOfDay.Hour>=endOfTimeOfDay.Hour)
-        {
             errors.Add(new Error("TimeOfDay-Error", "The starting hour cannot be after ending hour"));
-        }
         var span = TimeSpan.FromHours(endOfTimeOfDay.ExpressedAsHour()-startOfTimeOfDay.ExpressedAsHour());
         return Result<TimeOfDayInterval>.Success(
             new TimeOfDayInterval(startOfTimeOfDay, endOfTimeOfDay, span));

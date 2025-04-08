@@ -1,13 +1,15 @@
-﻿using Instructo.Application.Users.Commands.DeleteUser;
-using Instructo.Application.Users.Commands.UpdateUser;
-using Instructo.Application.Users.Queries.GetUserByEmail;
-using Instructo.Application.Users.Queries.GetUserByIdSuper;
-using Instructo.Application.Users.Queries.GetUsersBySuper;
-using Instructo.Domain.Dtos.User;
+﻿using Application.Users.Commands.DeleteUser;
+using Application.Users.Commands.RegisterUser;
+using Application.Users.Commands.UpdateUser;
+using Application.Users.Queries.GetUserByEmail;
+using Application.Users.Queries.GetUserByIdSuper;
+using Application.Users.Queries.GetUsersBySuper;
+
+using Domain.Dtos.User;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Instructo.Api.Endpoints;
+namespace Api.Endpoints;
 
 public static class UserEndpoint
 {
@@ -37,17 +39,11 @@ public static class UserEndpoint
                    ok =>
                    {
                        if(!string.IsNullOrEmpty(parameters.SearchTerm))
-                       {
                            ok= [.. ok.Where(x => x.Email.Contains(parameters.SearchTerm)||x.FirstName.Contains(parameters.SearchTerm)||x.LastName.Contains(parameters.SearchTerm))];
-                       }
                        if(!string.IsNullOrEmpty(parameters.Role))
-                       {
                            ok= [.. ok.Where(x => x.Role==parameters.Role)];
-                       }
                        if(parameters.IsActive.HasValue)
-                       {
                            ok= [.. ok.Where(x => x.IsActive==parameters.IsActive.Value)];
-                       }
                        ok= [.. ok.Skip((parameters.PageNumber-1)*parameters.PageSize).Take(parameters.PageSize)];
 
                        return TypedResults.Ok(ok);

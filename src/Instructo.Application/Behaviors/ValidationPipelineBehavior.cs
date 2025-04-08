@@ -1,15 +1,13 @@
 ﻿
 using System.Reflection;
 
-using FluentValidation;
+using Domain.Shared;
 
-using Instructo.Domain.Shared;
+using FluentValidation;
 
 using MediatR;
 
-using Microsoft.Extensions.Logging;
-
-namespace Instructo.Application.Behaviors;
+namespace Application.Behaviors;
 
 public class ValidationPipelineBehavior<TRequest, TResponse> :
     IPipelineBehavior<TRequest, TResponse>
@@ -26,9 +24,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         if(!_validators.Any())
-        {
             return await next();
-        }
         var requestName = typeof(TRequest).Name;
 
         var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(request, cancellationToken)));
@@ -40,9 +36,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
             .ToArray();
 
         if(errors.Length!=0)
-        {
             return CreateValidationResult<TResponse>(errors);
-        }
         else
         {
             return await next();
@@ -63,9 +57,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
                 BindingFlags.Public|BindingFlags.Static);
 
             if(method!=null)
-            {
                 return (TResult)method.Invoke(null, new object[] { errors });
-            }
         }
 
         throw new InvalidOperationException($"Type {typeof(TResult).Name} does not support validation errors");

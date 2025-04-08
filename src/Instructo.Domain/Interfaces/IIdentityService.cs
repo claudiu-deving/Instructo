@@ -1,10 +1,8 @@
-﻿using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Shared;
+﻿using Domain.Dtos.User;
+using Domain.Entities;
+using Domain.Shared;
 
-using Microsoft.AspNetCore.Identity;
-
-namespace Instructo.Domain.Interfaces;
+namespace Domain.Interfaces;
 public interface IIdentityService
 {
     Task<Result<string>> AddToRoleAsync(ApplicationUser user, string role);

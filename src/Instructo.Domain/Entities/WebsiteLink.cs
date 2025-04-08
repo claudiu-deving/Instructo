@@ -1,10 +1,10 @@
-﻿using Instructo.Domain.Dtos.Image;
-using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+﻿using Domain.Dtos.Image;
+using Domain.Dtos.Link;
+using Domain.Entities.SchoolEntities;
+using Domain.Shared;
+using Domain.ValueObjects;
 
-namespace Instructo.Domain.Entities;
+namespace Domain.Entities;
 
 public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
 {
@@ -31,9 +31,7 @@ public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
         websiteLink.Icon=icon;
         websiteLink.Id=WebsiteLinkId.CreateNew();
         if(errors.Count>0)
-        {
             return Result<WebsiteLink>.Failure([.. errors]);
-        }
         return websiteLink;
     }
 

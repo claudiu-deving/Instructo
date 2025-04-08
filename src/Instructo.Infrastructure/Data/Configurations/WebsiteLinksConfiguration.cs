@@ -1,10 +1,11 @@
-﻿using Instructo.Domain.Entities;
-using Instructo.Infrastructure.Data.Converters;
+﻿using Domain.Entities;
+
+using Infrastructure.Data.Converters;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Instructo.Infrastructure.Data.Configurations;
+namespace Infrastructure.Data.Configurations;
 internal class WebsiteLinksConfiguration : IEntityTypeConfiguration<WebsiteLink>
 {
     public void Configure(EntityTypeBuilder<WebsiteLink> builder)

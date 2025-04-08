@@ -1,8 +1,4 @@
-﻿using MediatR;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Instructo.Domain.Shared;
+﻿namespace Domain.Shared;
 
 public class Result<TValue> : IResult<TValue>
 {

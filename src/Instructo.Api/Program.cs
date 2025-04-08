@@ -1,8 +1,21 @@
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.ValueObjects;
-using Instructo.Infrastructure.Data.Repositories.Commands;
-using Instructo.Infrastructure.Data.Repositories.Queries;
+using Api.Endpoints;
+using Api.Middleware;
+
+using Application.Behaviors;
+using Application.Users.Commands.RegisterUser;
+
+using Domain.Entities;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
+using Domain.Interfaces;
+using Domain.Shared;
+using Domain.ValueObjects;
+
+using Infrastructure.Data;
+using Infrastructure.Data.Configurations;
+using Infrastructure.Data.Repositories.Commands;
+using Infrastructure.Data.Repositories.Queries;
+using Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 

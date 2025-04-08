@@ -1,6 +1,7 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Users.Queries.GetUserByEmail;
+using Domain.Dtos.User;
+using Domain.Shared;
+
+namespace Application.Users.Queries.GetUserByEmail;
 public record GetUserByEmailQuery(string Email) : ICommand<Result<UserReadDto>>;

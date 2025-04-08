@@ -1,14 +1,15 @@
-﻿using Instructo.Domain.Dtos.School;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Shared;
-using System.Reflection;
+﻿using System.Reflection;
 
-using Microsoft.Extensions.Logging;
-using AutoFixture.Xunit2;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using AutoFixture.Xunit2;
+
 using FluentAssertions;
-using Instructo.Domain.Entities.SchoolEntities;
+using Domain.Shared;
+using Microsoft.Extensions.Logging;
+using Domain.Entities;
+using Domain.Dtos.School;
+using Domain.Entities.SchoolEntities;
 
 namespace Instructo.Tests.Common;
 

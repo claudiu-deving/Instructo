@@ -1,10 +1,10 @@
-﻿using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+﻿using Domain.Dtos.User;
+using Domain.Interfaces;
+using Domain.Shared;
 
 using MediatR;
 
-namespace Instructo.Application.Users.Queries.GetUsersBySuper;
+namespace Application.Users.Queries.GetUsersBySuper;
 
 public class GetUsersBySuperQueryHandler : IRequestHandler<GetUsersBySuperQuery, Result<IEnumerable<UserReadSuperDto>>>
 {

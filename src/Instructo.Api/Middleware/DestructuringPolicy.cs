@@ -1,12 +1,12 @@
-﻿using Instructo.Domain.Shared;
+﻿using System.Collections;
+using System.Reflection;
+
+using Domain.Shared;
 
 using Serilog.Core;
 using Serilog.Events;
 
-using System.Collections;
-using System.Reflection;
-
-namespace Instructo.Api.Middleware;
+namespace Api.Middleware;
 
 public class SensitiveDataDestructuringPolicy : IDestructuringPolicy
 {
@@ -25,10 +25,8 @@ public class SensitiveDataDestructuringPolicy : IDestructuringPolicy
 
         // Handle collection types if needed
         if(value is IEnumerable enumerable&&!(value is string))
-        {
             // Handle collections differently if required
             return false;
-        }
 
         // Process complex objects
         var properties = type.GetProperties(BindingFlags.Public|BindingFlags.Instance);
@@ -42,9 +40,7 @@ public class SensitiveDataDestructuringPolicy : IDestructuringPolicy
             var sensitiveAttr = property.GetCustomAttribute<SensitiveDataAttribute>();
             var scalar = new ScalarValue(property.Name);
             if(sensitiveAttr!=null)
-            {
                 dictionary[scalar]=propertyValueFactory.CreatePropertyValue(sensitiveAttr.ReplacementValue);
-            }
             else
             {
                 // Recursively destructure non-sensitive properties

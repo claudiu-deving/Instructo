@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Instructo.Domain.Dtos.User;
+﻿namespace Domain.Dtos.User;
 
 public readonly record struct RegisterUserDto
 {

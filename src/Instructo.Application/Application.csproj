@@ -7,20 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Constants\" />
-    <Folder Include="Events\" />
-    <Folder Include="Exceptions\" />
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\Instructo.Domain\Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Instructo.Shared\Instructo.Shared.csproj" />
+    <Folder Include="Schools\Commands\UpdateSchool\" />
   </ItemGroup>
 
 </Project>

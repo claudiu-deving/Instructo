@@ -1,10 +1,9 @@
-﻿using Instructo.Domain.Dtos.Image;
-using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Dtos.PhoneNumbers;
-using Instructo.Domain.Entities;
-using Instructo.Domain.ValueObjects;
+﻿using Domain.Dtos.Image;
+using Domain.Dtos.Link;
+using Domain.Dtos.PhoneNumbers;
+using Domain.ValueObjects;
 
-namespace Instructo.Domain.Dtos.School;
+namespace Domain.Dtos.School;
 
 public readonly record struct SchoolReadDto(
     Guid Id,

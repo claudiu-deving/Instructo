@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Bogus;
 
-using Bogus;
-
-using Instructo.Domain.Entities;
-using Instructo.Domain.Enums;
+using Domain.Entities;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Instructo.Infrastructure.Data;
+namespace Infrastructure.Data;
 
 public static class DbInitializer
 {
@@ -45,7 +37,7 @@ public static class DbInitializer
         await userManager.AddToRoleAsync(ironMan, "IronMan");
 
 
-        int count = 0;
+        var count = 0;
         // Generate fake users with Bogus
         var faker = new Faker<ApplicationUser>()
             .RuleFor(u => u.FirstName, f => f.Name.FirstName())
@@ -60,7 +52,7 @@ public static class DbInitializer
 
         // Generate users
         var users = faker.Generate(count);
-        int created = 0;
+        var created = 0;
         var fakerGenerator = new Faker();
         foreach(var user in users)
         {
@@ -79,9 +71,7 @@ public static class DbInitializer
 
                 // Report progress every 100 users
                 if(created%100==0)
-                {
                     Console.WriteLine($"Created {created} users");
-                }
             }
         }
     }

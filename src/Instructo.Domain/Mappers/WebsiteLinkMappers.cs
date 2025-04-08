@@ -1,8 +1,8 @@
-﻿using Instructo.Domain.Dtos.Image;
-using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Entities;
+﻿using Domain.Dtos.Image;
+using Domain.Dtos.Link;
+using Domain.Entities;
 
-namespace Instructo.Domain.Mappers;
+namespace Domain.Mappers;
 
 public static class WebsiteLinkMappers
 {

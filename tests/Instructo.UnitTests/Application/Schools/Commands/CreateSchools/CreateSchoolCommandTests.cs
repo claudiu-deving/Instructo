@@ -1,13 +1,16 @@
-﻿using FluentAssertions;
+﻿using Application.Schools.Commands.CreateSchool;
+using Application.Users.Commands.RegisterUser;
+
+using Domain.Entities;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
+using Domain.Interfaces;
+using Domain.Shared;
+using Domain.ValueObjects;
+
+using FluentAssertions;
 
 using Instructo.Application.Schools.Commands.CreateSchool;
-using Instructo.Application.Users.Commands.RegisterUser;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
 
 using MediatR;
 

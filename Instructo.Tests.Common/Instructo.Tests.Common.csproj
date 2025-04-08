@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Instructo.Domain\Instructo.Domain.csproj" />
+    <ProjectReference Include="..\src\Instructo.Domain\Domain.csproj" />
   </ItemGroup>
 
 </Project>

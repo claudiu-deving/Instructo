@@ -1,7 +1,7 @@
-﻿using Instructo.Domain.Dtos.Image;
-using Instructo.Domain.Entities;
+﻿using Domain.Dtos.Image;
+using Domain.Entities;
 
-namespace Instructo.Domain.Mappers;
+namespace Domain.Mappers;
 
 public static class ImageMappers
 {

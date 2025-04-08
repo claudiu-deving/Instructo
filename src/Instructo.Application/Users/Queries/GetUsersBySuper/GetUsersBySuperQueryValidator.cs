@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Instructo.Application.Users.Queries.GetUsersBySuper;
+namespace Application.Users.Queries.GetUsersBySuper;
 
 public class GetUsersBySuperQueryValidator : AbstractValidator<GetUsersBySuperQuery>
 {

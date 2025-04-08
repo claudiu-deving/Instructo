@@ -2,17 +2,17 @@
 using System.Security.Claims;
 using System.Text;
 
-using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Entities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+using Domain.Dtos.User;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Shared;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 using Microsoft.IdentityModel.Tokens;
 
-namespace Instructo.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 public class IdentityService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
@@ -45,13 +45,9 @@ public class IdentityService(
         var userRoles = await userManager.GetRolesAsync(user);
 
         if(user.UserName is null)
-        {
             throw new ArgumentNullException(nameof(user.UserName));
-        }
         if(user.Email is null)
-        {
             throw new ArgumentNullException(nameof(user.Email));
-        }
 
         var claims = new List<Claim>
         {
@@ -84,9 +80,7 @@ public class IdentityService(
     {
         var registrationRequest = await userManager.CreateAsync(user, password);
         if(registrationRequest.Succeeded)
-        {
             return Result<string>.Success("User created");
-        }
         else
         {
             return Result<string>.Failure(registrationRequest.Errors.Select(x => new Error(x.Code, x.Description)).ToArray());
@@ -96,9 +90,7 @@ public class IdentityService(
     {
 
         if((await userManager.AddToRoleAsync(user, role)).Succeeded)
-        {
             return Result<string>.Success("Role added");
-        }
         else
         {
             return Result<string>.Failure([new Error("Add-Role", "Role addition failed")]);
@@ -107,9 +99,7 @@ public class IdentityService(
     public async Task<Result<string>> ChangePasswordAsync(ApplicationUser user, string currentPassword, string newPassword)
     {
         if((await userManager.ChangePasswordAsync(user, currentPassword, newPassword)).Succeeded)
-        {
             return Result<string>.Success("Password changed");
-        }
         else
         {
             return Result<string>.Failure([new Error("Change-Password", "Password change failed")]);
@@ -122,9 +112,7 @@ public class IdentityService(
     public async Task<Result<string>> UpdateAsync(ApplicationUser user)
     {
         if((await userManager.UpdateAsync(user)).Succeeded)
-        {
             return Result<string>.Success("User updated");
-        }
         else
         {
             return Result<string>.Failure([new Error("Update-User", "User update failed")]);
@@ -134,9 +122,7 @@ public class IdentityService(
     public async Task<Result<string>> DeleteAsync(ApplicationUser user)
     {
         if((await userManager.DeleteAsync(user)).Succeeded)
-        {
             return Result<string>.Success("User deleted");
-        }
         else
         {
             return Result<string>.Failure([new Error("Delete-User", "User deletion failed")]);

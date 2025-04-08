@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
 
-using Instructo.Domain.Entities;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Enums;
-using Instructo.Domain.ValueObjects;
-using Instructo.Infrastructure.Data.Configurations;
+using Infrastructure.Data.Configurations;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Instructo.Infrastructure.Data;
+namespace Infrastructure.Data;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {

@@ -1,4 +1,4 @@
-﻿namespace Instructo.Domain.Dtos.User;
+﻿namespace Domain.Dtos.User;
 
 public readonly record struct ChangePasswordDto
 {

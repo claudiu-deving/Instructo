@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Instructo.Application.Users.Commands.LoginUser;
+namespace Application.Users.Commands.LoginUser;
 
 public class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
 {

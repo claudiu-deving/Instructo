@@ -1,7 +1,7 @@
-﻿using Instructo.Domain.Common;
-using Instructo.Domain.Shared;
+﻿using Domain.Common;
+using Domain.Shared;
 
-namespace Instructo.Domain.Interfaces;
+namespace Domain.Interfaces;
 
 public interface ICommandRepository<TDomain, TDomainKey>
     where TDomain : IEntity<TDomainKey>

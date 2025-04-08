@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Instructo.Domain.Common;
+namespace Domain.Common;
 
 public abstract class BaseEntity<T> : IEntity<T> where T : notnull
 {

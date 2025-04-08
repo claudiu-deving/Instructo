@@ -1,21 +1,22 @@
-﻿using Instructo.Application.Schools.Commands.CreateSchool;
-using Instructo.Application.Schools.Commands.DeleteSchool;
-using Instructo.Application.Schools.Queries.GetSchoolById;
-using Instructo.Application.Schools.Queries.GetSchools;
-using Instructo.Domain.Dtos.School;
-using Instructo.Domain.ValueObjects;
+﻿using Application.Schools.Commands.DeleteSchool;
+using Application.Schools.Queries.GetSchoolById;
+using Application.Schools.Queries.GetSchools;
+
+using Domain.Dtos.School;
+using Domain.Shared;
+using Domain.ValueObjects;
+
+using Application.Schools.Commands.CreateSchool;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Instructo.Api.Endpoints;
+namespace Api.Endpoints;
 
 public static class SchoolEndpoints
 {
     public static WebApplication MapSchoolEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("api/schools").WithTags("Schools");
-
-
         group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
         group.MapGet("/{id}", GetSchoolById).WithName("Get a School By Id").AllowAnonymous();
         group.MapPost("/", CreateSchool).WithName("Create School");
@@ -31,14 +32,10 @@ public static class SchoolEndpoints
     {
         var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if(userId is null)
-        {
             return TypedResults.Unauthorized();
-        }
         var deletionRequest = await sender.Send(new DeleteSchoolCommand(SchoolId.CreateNew(id), userId));
         if(deletionRequest.IsError)
-        {
             return TypedResults.BadRequest(new { errors = deletionRequest.Errors.ToList() });
-        }
         else
         {
             return TypedResults.Ok();
@@ -54,9 +51,7 @@ public static class SchoolEndpoints
            .OnError(errors.AddRange);
 
         if(errors.Count>0||command is null)
-        {
             return TypedResults.BadRequest(new { errors = errors.ToList() });
-        }
 
         var userRequest = await sender.Send(command);
         return userRequest.Match<IResult>(
@@ -72,9 +67,7 @@ public static class SchoolEndpoints
             ok =>
             {
                 if(ok==new SchoolReadDto())
-                {
                     return TypedResults.NotFound();
-                }
                 else
                 {
                     return TypedResults.Ok(ok);

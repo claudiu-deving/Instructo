@@ -3,16 +3,16 @@ using System.Data.Common;
 
 using Dapper;
 
-using Instructo.Domain.Entities;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+using Domain.Entities;
+using Domain.Entities.SchoolEntities;
+using Domain.Interfaces;
+using Domain.Shared;
+using Domain.ValueObjects;
 
 using Microsoft.Data;
 using Microsoft.Data.SqlClient;
 
-namespace Instructo.Infrastructure.Data.Repositories.Queries;
+namespace Infrastructure.Data.Repositories.Queries;
 
 public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>
 {
@@ -49,9 +49,9 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>
             JOIN SchoolWebsiteLinks swl on swl.WebsiteLinksId = w.Id
             WHERE swl.SchoolsId = @Id
             ";
-            foreach(School school in queryResult)
+            foreach(var school in queryResult)
             {
-                var websiteLinks = await connection.QueryAsync<WebsiteLink>(getLinksSql, new { Id = school.Id.Id });
+                var websiteLinks = await connection.QueryAsync<WebsiteLink>(getLinksSql, new { school.Id.Id });
                 foreach(var link in websiteLinks)
                 {
                     school.AddLink(link);

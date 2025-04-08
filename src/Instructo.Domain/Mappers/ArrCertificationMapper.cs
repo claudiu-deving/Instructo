@@ -1,7 +1,7 @@
-﻿using Instructo.Domain.Dtos;
-using Instructo.Domain.Entities;
+﻿using Domain.Dtos;
+using Domain.Entities;
 
-namespace Instructo.Domain.Mappers;
+namespace Domain.Mappers;
 
 public static class ArrCertificationMapper
 {

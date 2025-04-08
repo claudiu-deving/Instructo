@@ -1,8 +1,8 @@
-﻿using Instructo.Domain.Dtos.Image;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+﻿using Domain.Dtos.Image;
+using Domain.Shared;
+using Domain.ValueObjects;
 
-namespace Instructo.Domain.Entities;
+namespace Domain.Entities;
 
 public class Image : BaseAuditableEntity<ImageId>
 {
@@ -31,9 +31,7 @@ public class Image : BaseAuditableEntity<ImageId>
         image.Description=description;
         image.Id=ImageId.CreateNew();
         if(errors.Count>0)
-        {
             return Result<Image>.Failure([.. errors]);
-        }
         return image;
     }
 

@@ -1,6 +1,4 @@
-﻿using MediatR;
-
-namespace Instructo.Domain.Shared;
+﻿namespace Domain.Shared;
 
 public sealed class ValidationResult :
     Result<string>, IValidationResult

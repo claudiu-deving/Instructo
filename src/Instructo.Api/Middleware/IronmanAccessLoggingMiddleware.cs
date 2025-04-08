@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-
-namespace Instructo.Api.Middleware;
+﻿namespace Api.Middleware;
 
 public class IronmanAccessLoggingMiddleware
 {
@@ -20,15 +18,15 @@ public class IronmanAccessLoggingMiddleware
         {
 
             var user = context.User;
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier); 
-            var userName = user.FindFirstValue(ClaimTypes.Name);  
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = user.FindFirstValue(ClaimTypes.Name);
             var ipAddress = context.Connection.RemoteIpAddress?.ToString();
 
-         
-                _logger.LogInformation(
-                    "SuperUser {UserId} ({UserName}) accessed {Method} {Path}. IP: {IpAddress}",
-                    userId, userName, context.Request.Method, context.Request.Path, ipAddress);
-            
+
+            _logger.LogInformation(
+                "SuperUser {UserId} ({UserName}) accessed {Method} {Path}. IP: {IpAddress}",
+                userId, userName, context.Request.Method, context.Request.Path, ipAddress);
+
         }
 
         await _next(context);

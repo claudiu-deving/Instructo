@@ -1,8 +1,8 @@
-﻿using Instructo.Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Instructo.Infrastructure.Data.Converters;
+namespace Infrastructure.Data.Converters;
 
 internal sealed class ContentTypeConverter(ConverterMappingHints? mappingHints = null) :
     ValueConverter<ContentType, string>(x => x.Value, x => ContentType.Wrap(x), mappingHints);

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Instructo.Application.Abstractions.Messaging;
+namespace Application.Abstractions.Messaging;
 
 public interface ICommand<T> : IRequest<T>
 {

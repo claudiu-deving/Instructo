@@ -31,9 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Instructo.Application\Instructo.Application.csproj" />
-    <ProjectReference Include="..\Instructo.Domain\Instructo.Domain.csproj" />
-    <ProjectReference Include="..\Instructo.Shared\Instructo.Shared.csproj" />
+    <ProjectReference Include="..\Instructo.Application\Application.csproj" />
+    <ProjectReference Include="..\Instructo.Domain\Domain.csproj" />
+    <ProjectReference Include="..\Instructo.Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

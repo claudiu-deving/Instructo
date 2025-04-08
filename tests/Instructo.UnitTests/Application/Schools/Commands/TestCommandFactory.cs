@@ -1,6 +1,7 @@
-﻿using Instructo.Application.Schools.Commands.CreateSchool;
-using Instructo.Domain.Dtos.Link;
-using Instructo.Domain.Dtos.School;
+﻿using Domain.Dtos.Link;
+using Domain.Dtos.School;
+
+using Instructo.Application.Schools.Commands.CreateSchool;
 
 namespace Instructo.UnitTests.Application.Schools.Commands
 {

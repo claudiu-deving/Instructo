@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Dapper;
 
-using Dapper;
-
-using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+using Domain.Dtos.User;
+using Domain.Interfaces;
 
 using Microsoft.Data.SqlClient;
 
-namespace Instructo.Infrastructure.Data.Repositories.Queries;
+namespace Infrastructure.Data.Repositories.Queries;
 
 public class UserQueryRepository : IUserQueries
 {

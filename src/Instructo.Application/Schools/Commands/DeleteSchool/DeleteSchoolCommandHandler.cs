@@ -1,14 +1,15 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
-using Instructo.Domain.ValueObjects;
+﻿using Application.Abstractions.Messaging;
+
+using Domain.Entities.SchoolEntities;
+using Domain.Interfaces;
+using Domain.Shared;
+using Domain.ValueObjects;
 
 using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-namespace Instructo.Application.Schools.Commands.DeleteSchool;
+namespace Application.Schools.Commands.DeleteSchool;
 
 public class DeleteSchoolCommandHandler(
     ICommandRepository<School, SchoolId> commandRepository,
@@ -18,7 +19,7 @@ public class DeleteSchoolCommandHandler(
 {
     public async Task<Result<Unit>> Handle(DeleteSchoolCommand request, CancellationToken cancellationToken)
     {
-        if(!Guid.TryParse(request.UserId, out Guid userId))
+        if(!Guid.TryParse(request.UserId, out var userId))
         {
             logger.LogError("Unauthentificated user should not reach this point, missing Authorization policies?");
             return Result<Unit>.WithErrors([new Error("InvalidInput", $"The input guid {request.UserId} of user is not valid")]);
@@ -52,9 +53,7 @@ public class DeleteSchoolCommandHandler(
         var deletionRequest = await commandRepository.DeleteAsync(existingSchool);
         deletionRequest.OnError(errors.AddRange);
         if(errors.Count!=0)
-        {
             return Result<Unit>.WithErrors([.. errors]);
-        }
         return Result<Unit>.Success(Unit.Value);
     }
 }

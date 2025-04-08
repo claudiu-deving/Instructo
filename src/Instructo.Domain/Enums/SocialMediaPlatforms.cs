@@ -1,8 +1,6 @@
 ﻿using System.Globalization;
 
-using Instructo.Domain.Entities;
-
-namespace Instructo.Domain.Enums;
+namespace Domain.Enums;
 
 public enum SocialMediaPlatforms
 {
@@ -35,7 +33,7 @@ public class SocialMediaPlatformImageProvider : ISocialMediaPlatformImageProvide
     {
         // Initialize any static resources if needed
         socialMediaPlatformImages= [];
-        foreach(SocialMediaPlatforms platform in Enum.GetValues<SocialMediaPlatforms>())
+        foreach(var platform in Enum.GetValues<SocialMediaPlatforms>())
         {
             switch(platform)
             {
@@ -141,9 +139,7 @@ public class SocialMediaPlatformImageProvider : ISocialMediaPlatformImageProvide
     public SocialMediatPlatform Get(string platform)
     {
         if(!socialMediaPlatformImages.TryGetValue(platform, out var value))
-        {
             throw new ArgumentException($"Platform {platform} not found in the dictionary.");
-        }
         return value;
     }
 }

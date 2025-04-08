@@ -1,6 +1,7 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Users.Commands.DeleteUser;
+using Domain.Shared;
+
+namespace Application.Users.Commands.DeleteUser;
 
 public record DeleteUserByIdCommand(Guid Id) : ICommand<Result<string>>;

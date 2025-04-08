@@ -1,7 +1,8 @@
-﻿using Instructo.Application.Abstractions.Messaging;
-using Instructo.Domain.Dtos.User;
-using Instructo.Domain.Shared;
+﻿using Application.Abstractions.Messaging;
 
-namespace Instructo.Application.Users.Commands.UpdateUser;
+using Domain.Dtos.User;
+using Domain.Shared;
+
+namespace Application.Users.Commands.UpdateUser;
 
 public record UpdateUserCommand(Guid Id, UserUpdateDto UserUpdate) : ICommand<Result<string>>;

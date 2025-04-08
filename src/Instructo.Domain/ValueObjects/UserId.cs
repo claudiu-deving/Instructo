@@ -1,4 +1,4 @@
-﻿namespace Instructo.Domain.ValueObjects;
+﻿namespace Domain.ValueObjects;
 
 
 public readonly record struct UserId(Guid Id)

@@ -33,9 +33,9 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Instructo.Tests.Common\Instructo.Tests.Common.csproj" />
-		<ProjectReference Include="..\..\src\Instructo.Application\Instructo.Application.csproj" />
-		<ProjectReference Include="..\..\src\Instructo.Domain\Instructo.Domain.csproj" />
-		<ProjectReference Include="..\..\src\Instructo.Infrastructure\Instructo.Infrastructure.csproj" />
+		<ProjectReference Include="..\..\src\Instructo.Application\Application.csproj" />
+		<ProjectReference Include="..\..\src\Instructo.Domain\Domain.csproj" />
+		<ProjectReference Include="..\..\src\Instructo.Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>

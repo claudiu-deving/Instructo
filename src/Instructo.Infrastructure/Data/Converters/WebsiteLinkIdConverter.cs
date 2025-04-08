@@ -1,8 +1,8 @@
-﻿using Instructo.Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Instructo.Infrastructure.Data.Converters;
+namespace Infrastructure.Data.Converters;
 
 internal sealed class WebsiteLinkIdConverter(ConverterMappingHints? mappingHints = null) :
     ValueConverter<WebsiteLinkId, Guid>(x => x.Id, x => WebsiteLinkId.CreateNew(), mappingHints);

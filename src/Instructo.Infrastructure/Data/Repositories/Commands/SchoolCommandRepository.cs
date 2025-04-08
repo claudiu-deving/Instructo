@@ -1,11 +1,11 @@
-﻿using Instructo.Domain.Entities.SchoolEntities;
-using Instructo.Domain.Interfaces;
-using Instructo.Domain.Shared;
+﻿using Domain.Entities.SchoolEntities;
+using Domain.Interfaces;
+using Domain.Shared;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Instructo.Infrastructure.Data.Repositories.Commands;
+namespace Infrastructure.Data.Repositories.Commands;
 
 public class SchoolCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<School, Domain.ValueObjects.SchoolId>
 {

@@ -1,6 +1,6 @@
-﻿using Instructo.Domain.Dtos.User;
+﻿using Domain.Dtos.User;
 
-namespace Instructo.Domain.Interfaces;
+namespace Domain.Interfaces;
 
 public interface IUserQueries
 {

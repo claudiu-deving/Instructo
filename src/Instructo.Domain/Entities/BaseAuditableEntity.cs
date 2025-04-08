@@ -1,6 +1,6 @@
-﻿using Instructo.Domain.Common;
+﻿using Domain.Common;
 
-namespace Instructo.Domain.Entities;
+namespace Domain.Entities;
 
 public abstract class BaseAuditableEntity<T> : BaseEntity<T> where T : struct
 {
