@@ -22,6 +22,7 @@ class SchoolsConfiguration : IEntityTypeConfiguration<School>
         builder.Property(x => x.Email).HasConversion(new EmailConverter());
         builder.Property(x => x.PhoneNumber).HasConversion(new PhoneNumberConverter());
         builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());
+        builder.Property(x=>x.PhoneNumbersGroups).HasConversion(new PhoneNumberConvertersGroupConverter());
         builder.Property(x => x.Name).IsRequired();
         builder.HasMany(x => x.VehicleCategories)
                .WithMany(c => c.Schools)
@@ -31,10 +32,7 @@ class SchoolsConfiguration : IEntityTypeConfiguration<School>
                .WithMany(c => c.Schools)
                .UsingEntity(j => j.ToTable("SchoolCertificates"));
 
-        builder.OwnsMany(x => x.PhoneNumbersGroups, pg =>
-        {
-            pg.OwnsMany(x => x.PhoneNumbers);
-        });
+      
         builder.HasMany(s => s.WebsiteLinks)
                  .WithMany(w => w.Schools)
                  .UsingEntity(j => j.ToTable("SchoolWebsiteLinks"));

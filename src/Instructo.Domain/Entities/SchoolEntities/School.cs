@@ -59,4 +59,33 @@ public class School : BaseAuditableEntity<SchoolId>
 
     public bool RemoveLink(WebsiteLink link) =>
         _websiteLinks.Remove(link);
+
+    public void AddVehicleCategory(VehicleCategory vehicleCategory)
+    {
+        if(VehicleCategories.Contains(vehicleCategory))
+            return;
+        VehicleCategories.Add(vehicleCategory);
+    }
+
+    public bool RemoveVehicleCategory(VehicleCategory vehicleCategory)
+    {
+        if(!VehicleCategories.Contains(vehicleCategory))
+            return false;
+        VehicleCategories.Remove(vehicleCategory);
+        return true;
+    }
+
+    public void AddCertificate(ArrCertificate certificate)
+    {
+        if(Certificates.Contains(certificate))
+            return;
+        Certificates.Add(certificate);
+    }
+    public bool RemoveCertificate(ArrCertificate certificate)
+    {
+        if(!Certificates.Contains(certificate))
+            return false;
+        Certificates.Remove(certificate);
+        return true;
+    }
 }

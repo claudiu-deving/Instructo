@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 using Application.Abstractions.Messaging;
+using Application.Users.Commands.RegisterUser;
 
 using Domain.Dtos.School;
 using Domain.Entities;
@@ -11,12 +12,9 @@ using Domain.Mappers;
 using Domain.Shared;
 using Domain.ValueObjects;
 
-using Application.Schools.Commands.CreateSchool;
-
 using MediatR;
 
 using Microsoft.Extensions.Logging;
-using Application.Users.Commands.RegisterUser;
 [assembly: InternalsVisibleTo("Instructo.UnitTests")]
 namespace Application.Schools.Commands.CreateSchool;
 

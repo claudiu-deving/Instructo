@@ -28,7 +28,7 @@ public class GetSchoolsQueryHandler(IQueryRepository<School, SchoolId> repositor
            IconData: s.Icon?.ToDto()??new ImageReadDto(),
             Links: [.. s.WebsiteLinks.Select(x => x.ToDto())],
             VehicleCategories: s.VehicleCategories.Select(x => x.ToDto()).ToList(),
-            BussinessHours: s.BussinessHours.BussinessHoursEntries,
+            BussinessHours: s.BussinessHours?.BussinessHoursEntries?? [],
             Certificates: s.Certificates.Select(x => x.ToDto()).ToList()
         ))?? []);
     }

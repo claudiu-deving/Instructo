@@ -1,4 +1,6 @@
-﻿using Domain.Dtos;
+﻿using System.Text.Json.Serialization;
+
+using Domain.Dtos;
 using Domain.Shared;
 
 namespace Domain.ValueObjects;
@@ -10,7 +12,11 @@ public record BussinessHours
     {
         BussinessHoursEntries=bussinessHoursEntries;
     }
+    [JsonConstructor]
+    private BussinessHours()
+    {
 
+    }
     public static BussinessHours Empty => new BussinessHours([]);
 
     public static Result<BussinessHours> Create(List<BussinessHoursEntryDto> bussinessHoursDto)
