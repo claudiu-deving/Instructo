@@ -3,6 +3,7 @@
 using Application.Abstractions.Messaging;
 using Application.Users.Commands.RegisterUser;
 
+using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
 using Domain.Entities.SchoolEntities;
@@ -13,19 +14,15 @@ using Domain.Shared;
 using Domain.ValueObjects;
 
 using MediatR;
-
-using Microsoft.Extensions.Logging;
 [assembly: InternalsVisibleTo("Instructo.UnitTests")]
 namespace Application.Schools.Commands.CreateSchool;
 
 public class CreateSchoolCommandHandler(
     ICommandRepository<School, SchoolId> repository,
     IQueryRepository<School, SchoolId> queryRepository,
-     IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
-      IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
-    ILogger<CreateSchoolCommandHandler> logger,
+    IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
+    IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
-    IIdentityService identityService,
     ISender sender)
     : ICommandHandler<CreateSchoolCommand, Result<SchoolReadDto>>
 {
@@ -33,139 +30,188 @@ public class CreateSchoolCommandHandler(
         CreateSchoolCommand request,
         CancellationToken cancellationToken)
     {
-        return await RegisterAndGetUser(request, cancellationToken)
-                   .ThenAsync(user => Task.FromResult(CreateSchoolWithIcon(user, request)))
-                   .ThenAsync(school => Task.FromResult(AddSchoolWebsiteLink(request, school)))
-                   .ThenAsync(school => Task.FromResult(AddSocialMediaLinks(request, school)))
-                   .ThenAsync(repository.AddAsync)
-                   .MapAsync(school => school.ToReadDto());
+        return await FlexContext.StartContextAsync(request)
+                    .Then(RegisterAndGetUser)
+                    .Then(CreateSchoolWithIcon)
+                    .Then(AddSchoolWebsiteLink)
+                    .Then(AddSocialMediaLinks)
+                    .Then(ctx => repository.AddAsync(ctx.Get<School>()))
+                    .MapAsync(ctx => ctx.Get<School>().ToReadDto());
     }
 
-
-    private Result<School> AddSocialMediaLinks(CreateSchoolCommand request, School school)
+    private Result<School> AddSocialMediaLinks(FlexContext context)
     {
+        var request = context.Get<CreateSchoolCommand>();
+        var school = context.Get<School>();
+        var errors = new List<Error>();
         foreach(var socialMediaLink in request.SocialMediaLinks)
         {
-            if(string.IsNullOrEmpty(socialMediaLink.Url))
-                continue;
-            try
-            {
-                var platform = socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName);
-                var platformImageCreationResult = Image.Create(
-              $"{request.LegalName}-{socialMediaLink.SocialPlatformName}-Icon",
-              platform.IconContentType,
-              platform.IconPath,
-              socialMediaLink.SocialPlatformName);
-                if(platformImageCreationResult.IsError)
-                    return Result<School>.Failure(platformImageCreationResult.Errors);
-                var platformImage = platformImageCreationResult.Value!;
-                var linkCreationResult = WebsiteLink.Create(
-                    socialMediaLink.Url,
-                    socialMediaLink.SocialPlatformName,
-                    $"{socialMediaLink.SocialPlatformName} {platform.Description}",
-                    platformImage);
-                if(linkCreationResult.IsError)
-                    return Result<School>.Failure(linkCreationResult.Errors);
-                var link = linkCreationResult.Value!;
-
-                school.AddLink(link);
-            }
-            catch(ArgumentException ex)
-            {
-                logger.LogError(
-                    ex,
-                    "Error creating social media link for {SchoolName}",
-                    request.Name);
-                return Result<School>.Failure(
-                    [new Error("Create-School", "Invalid social media platform")]);
-            }
-
+            FlexContext.StartContext(request, school, socialMediaLink)
+              .Then(ctx => socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName))
+              .Then(CreateImage)
+              .Then(CreateSocialMediaLink)
+              .MapContext(ctx => school.AddLink(ctx.Get<WebsiteLink>()));
         }
         return school;
-    }
 
-    private Result<School> AddSchoolWebsiteLink(CreateSchoolCommand request, School school)
-    {
-        var websiteLinkIconResult = Image.Create(
-              $"{request.LegalName.Value}-Website-Icon",
-              request.WebsiteLink.IconData.ContentType,
-              request.WebsiteLink.IconData.Url,
-              "Company Website Icon");
-        if(websiteLinkIconResult.IsError)
-            return Result<School>.Failure(websiteLinkIconResult.Errors);
-        var websiteLinkIcon = websiteLinkIconResult.Value!;
-
-        var websiteLinkCreationResult = WebsiteLink.Create(
-            request.WebsiteLink.Url,
-            request.WebsiteLink.Name,
-            request.WebsiteLink.Description,
-            websiteLinkIcon);
-        if(websiteLinkCreationResult.IsError)
-            return Result<School>.Failure(websiteLinkCreationResult.Errors);
-        var websiteLink = websiteLinkCreationResult.Value!;
-
-        school.AddLink(websiteLink);
-        return school;
-    }
-
-    private Result<School> CreateSchoolWithIcon(ApplicationUser user, CreateSchoolCommand request)
-    {
-        if(queryRepository.GetByIndexed(request.LegalName).Result.Value!.Any())
+        static Result<WebsiteLink> CreateSocialMediaLink(FlexContext flexContext)
         {
-            return Result<School>.Failure(
-                [new Error("Create-School", "Company name already exists")]);
+            var request = flexContext.Get<CreateSchoolCommand>();
+            var socialMediaLink = flexContext.Get<SocialMediaLinkDto>();
+            var platform = flexContext.Get<SocialMediatPlatform>();
+            var platformImage = flexContext.Get<Image>();
+            return WebsiteLink.Create(
+                socialMediaLink.Url,
+                socialMediaLink.SocialPlatformName,
+                $"{socialMediaLink.SocialPlatformName} {platform.Description}",
+                platformImage);
         }
-        var iconResult = Image.Create(
-                 $"{request.LegalName}-Icon",
-                 request.ImageContentType,
-                 request.ImagePath,
-                 $"Company logo");
-        if(iconResult.IsError)
-            return Result<School>.Failure(iconResult.Errors);
-        var icon = iconResult.Value!;
 
-        var vehiclesCategoryRetrievalErrors = new List<Error>();
-        List<VehicleCategory> selectedCategories = [];
-        request.VehicleCategories.ForEach(async x =>
+        static Result<Image> CreateImage(FlexContext flexContext)
         {
-            var categoryRequest = await vehicleQueryRepository.GetByIdAsync(x);
-            if(categoryRequest.IsError)
-                vehiclesCategoryRetrievalErrors.AddRange(categoryRequest.Errors);
-            selectedCategories.Add(categoryRequest.Value!);
+            var request = flexContext.Get<CreateSchoolCommand>();
+            var socialMediaLink = flexContext.Get<SocialMediaLinkDto>();
+            var platform = flexContext.Get<SocialMediatPlatform>();
+            return Image.Create(
+                             $"{request.LegalName}-{socialMediaLink.SocialPlatformName}-Icon",
+                             platform.IconContentType,
+                             platform.IconPath,
+                             socialMediaLink.SocialPlatformName);
         }
-        );
-        if(vehiclesCategoryRetrievalErrors.Count>0)
-            return Result<School>.WithErrors([.. vehiclesCategoryRetrievalErrors]);
-
-        var certificatesRetrievalErrors = new List<Error>();
-        var selectedCertificates = new List<ArrCertificate>();
-        request.Certificates.ForEach(async certificateType =>
-        {
-            var certificateRequest = await certificatesRepository.GetByIdAsync(certificateType);
-            if(certificateRequest.IsError)
-                certificatesRetrievalErrors.AddRange(certificateRequest.Errors);
-            selectedCertificates.Add(certificateRequest.Value!);
-        });
-
-        var school = new School(
-            user,
-            request.Name,
-            request.LegalName,
-            request.SchoolEmail,
-            request.PhoneNumber,
-            request.PhoneNumbersGroups,
-            request.BussinessHours,
-            selectedCategories,
-            selectedCertificates,
-            icon);
-
-        return Result<School>.Success(school);
     }
 
-    private async Task<Result<ApplicationUser>> RegisterAndGetUser(
-        CreateSchoolCommand request,
-        CancellationToken cancellationToken)
+    private static Result<School> AddSchoolWebsiteLink(FlexContext context)
     {
+        var request = context.Get<CreateSchoolCommand>();
+        var school = context.Get<School>();
+
+        return FlexContext.StartContext(request, school)
+             .Then(CreateImage)
+             .Then(CreateWebsiteLink)
+             .MapContext(ctx => school.AddLink(ctx.Get<WebsiteLink>()));
+
+        static Result<Image> CreateImage(FlexContext context)
+        {
+            var request = context.Get<CreateSchoolCommand>();
+            return Image.Create(
+                          $"{request.LegalName.Value}-Website-Icon",
+                          request.WebsiteLink.IconData.ContentType,
+                          request.WebsiteLink.IconData.Url,
+                          "Company Website Icon");
+        }
+
+        static Result<WebsiteLink> CreateWebsiteLink(FlexContext context)
+        {
+            var request = context.Get<CreateSchoolCommand>();
+            var websiteLinkIcon = context.Get<Image>();
+            return WebsiteLink.Create(
+                        request.WebsiteLink.Url,
+                        request.WebsiteLink.Name,
+                        request.WebsiteLink.Description,
+                        websiteLinkIcon);
+        }
+    }
+
+    private async Task<Result<School>> CreateSchoolWithIcon(FlexContext context)
+    {
+        var request = context.Get<CreateSchoolCommand>();
+        var user = context.Get<ApplicationUser>();
+        return await FlexContext.StartContextAsync(request, user)
+             .Then(CheckCompanyName)
+             .Then(CreateImage)
+             .Then(CreateVehicleCategories)
+             .Then(CreateCerfificates)
+             .MapAsync(CreateSchool);
+
+        async Task<Result<CreateSchoolCommand>> CheckCompanyName(FlexContext context)
+        {
+            var request = context.Get<CreateSchoolCommand>();
+            if((await queryRepository.GetByIndexed(request.LegalName)).Value!.Any())
+            {
+                return Result<CreateSchoolCommand>.Failure(
+                    [new Error("Create-School", "Company name already exists")]);
+            }
+            else
+            {
+                return Result<CreateSchoolCommand>.Success(request);
+            }
+        }
+
+        static Result<Image> CreateImage(FlexContext context)
+        {
+            var request = context.Get<CreateSchoolCommand>();
+            return Image.Create(
+                      $"{request.LegalName}-Icon",
+                      request.ImageContentType,
+                      request.ImagePath,
+                      $"Company logo");
+        }
+
+        Result<List<VehicleCategory>> CreateVehicleCategories(FlexContext context)
+        {
+            var request = context.Get<CreateSchoolCommand>();
+            var vehiclesCategoryRetrievalErrors = new List<Error>();
+            List<VehicleCategory> selectedCategories = [];
+            request.VehicleCategories.ForEach(async x =>
+            {
+                var categoryRequest = await vehicleQueryRepository.GetByIdAsync(x);
+                if(categoryRequest.IsError)
+                    vehiclesCategoryRetrievalErrors.AddRange(categoryRequest.Errors);
+                selectedCategories.Add(categoryRequest.Value!);
+            }
+            );
+            if(vehiclesCategoryRetrievalErrors.Count>0)
+            {
+                return Result<List<VehicleCategory>>.WithErrors([.. vehiclesCategoryRetrievalErrors]);
+            }
+            else
+            {
+                return Result<List<VehicleCategory>>.Success(selectedCategories);
+            }
+        }
+
+        Result<List<ArrCertificate>> CreateCerfificates(FlexContext context)
+        {
+            var request = context.Get<CreateSchoolCommand>();
+            var certificatesRetrievalErrors = new List<Error>();
+            var selectedCertificates = new List<ArrCertificate>();
+            request.Certificates.ForEach(async certificateType =>
+            {
+                await FlexContext.StartContextAsync()
+                  .Then(ctx => certificatesRepository.GetByIdAsync(certificateType))
+                  .FinalizeContext(ctx => selectedCertificates.Add(ctx.Get<ArrCertificate>()));
+            });
+            if(certificatesRetrievalErrors.Count!=0)
+            {
+                return Result<List<ArrCertificate>>.WithErrors([.. certificatesRetrievalErrors]);
+            }
+            return selectedCertificates;
+        }
+
+        static School CreateSchool(FlexContext flexContext)
+        {
+            var user = flexContext.Get<ApplicationUser>();
+            var request = flexContext.Get<CreateSchoolCommand>();
+            var selectedCategories = flexContext.Get<List<VehicleCategory>>();
+            var selectedCertificates = flexContext.Get<List<ArrCertificate>>();
+            var icon = flexContext.Get<Image>();
+            return new School(
+                user,
+                request.Name,
+                request.LegalName,
+                request.SchoolEmail,
+                request.PhoneNumber,
+                request.PhoneNumbersGroups,
+                request.BussinessHours,
+                selectedCategories,
+                selectedCertificates,
+                icon);
+        }
+    }
+
+    private async Task<Result<ApplicationUser>> RegisterAndGetUser(FlexContext context)
+    {
+        var request = context.Get<CreateSchoolCommand>();
         var registerUserCommand = new RegisterUserCommand(
          request.OwnerFirstName,
          request.OwnerLastName,
@@ -173,17 +219,7 @@ public class CreateSchoolCommandHandler(
          request.OwnerPassword,
          request.PhoneNumber,
          "Owner");
-        var userRegistrationRequest = await sender.Send(
-            registerUserCommand, cancellationToken);
-        if(userRegistrationRequest.IsError)
-            return Result<ApplicationUser>.Failure(userRegistrationRequest.Errors);
-        var user = await identityService.GetUserByEmailAsync(request.OwnerEmail);
-        if(user is null)
-        {
-            return Result<ApplicationUser>.Failure([new Error(
-                "Create-School",
-                "User retrieval failed after registration")]);
-        }
-        return user;
+
+        return await sender.Send(registerUserCommand);
     }
 }

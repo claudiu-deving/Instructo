@@ -1,25 +1,33 @@
 ﻿namespace Domain.Shared;
 
+
+
 public class Result<TValue> : IResult<TValue>
 {
     protected Result(TValue value)
     {
         IsError=false;
-        Value=value;
-        Errors= [Error.None];
+        _value=value;
+        _errors= [Error.None];
     }
     protected Result(Error[] errors)
     {
         IsError=true;
-        Errors=errors;
-        Value=default;
+        _errors=errors;
+        _value=default;
     }
 
 
 
     public bool IsError { get; protected set; }
-    public readonly Error[] Errors;
-    public readonly TValue? Value;
+
+    private readonly Error[] _errors;
+    public Error[] Errors => IsError ? _errors : throw new InvalidOperationException("You cannot retrieve the Errors of a Successful result");
+
+    private readonly TValue? _value;
+    public TValue? Value => IsError
+        ? throw new InvalidOperationException("You cannot retrieve the value of an Failure result")
+        : _value;
 
     public static implicit operator Result<TValue>(TValue value) => new Result<TValue>(value);
     public static implicit operator Result<TValue>(Error[] errors) => new Result<TValue>(errors);
@@ -34,7 +42,7 @@ public class Result<TValue> : IResult<TValue>
             failure: error => string.Join(Environment.NewLine, error.ToList())??string.Empty);
 
     public static Result<TValue> Success(TValue value) => new(value);
-    public static Result<TValue> Failure(Error[] errors) => new(errors);
+    public static Result<TValue> Failure(params Error[] errors) => new(errors);
     public static Result<TValue> WithErrors(Error[] errors) => new(errors);
 
     public Result<TOut> Map<TOut>(Func<TValue, TOut> mapper)
@@ -64,16 +72,6 @@ public static class ResultExtensions
         Func<TIn, Result<TOut>> next) =>
         result.IsError ? Result<TOut>.Failure(result.Errors) : next(result.Value!);
 
-    public static async Task<Result<TOut>> ThenAsync<TIn, TOut>(
-        this Task<Result<TIn>> resultTask,
-        Func<TIn, Task<Result<TOut>>> next)
-    {
-        var result = await resultTask;
-        if(result.IsError)
-            return Result<TOut>.Failure(result.Errors);
-
-        return await next(result.Value!);
-    }
 
     public static Result<TValue> OnSuccess<TValue>(
         this Result<TValue> result,

@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 
+using Domain.Shared;
+
 namespace Domain.Enums;
 
 public enum SocialMediaPlatforms
@@ -136,10 +138,12 @@ public class SocialMediaPlatformImageProvider : ISocialMediaPlatformImageProvide
         }
     }
 
-    public SocialMediatPlatform Get(string platform)
+    public Result<SocialMediatPlatform> Get(string platform)
     {
         if(!socialMediaPlatformImages.TryGetValue(platform, out var value))
-            throw new ArgumentException($"Platform {platform} not found in the dictionary.");
+        {
+            return Result<SocialMediatPlatform>.Failure(new Error("Invalid-Social_Media_Platform", $"Platform {platform} is not valid, use one of: {string.Join(", ", Enum.GetValues<SocialMediaPlatforms>())}"));
+        }
         return value;
     }
 }

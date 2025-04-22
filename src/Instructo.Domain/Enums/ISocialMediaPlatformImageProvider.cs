@@ -1,6 +1,8 @@
-﻿namespace Domain.Enums;
+﻿using Domain.Shared;
+
+namespace Domain.Enums;
 
 public interface ISocialMediaPlatformImageProvider
 {
-    SocialMediatPlatform Get(string platform);
+    Result<SocialMediatPlatform> Get(string platform);
 }

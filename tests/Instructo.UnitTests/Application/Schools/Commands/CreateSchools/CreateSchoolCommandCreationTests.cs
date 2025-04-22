@@ -2,7 +2,9 @@
 
 using FluentAssertions;
 
-using Instructo.Application.Schools.Commands.CreateSchool;
+using Application.Schools.Commands.CreateSchool;
+using Domain.Dtos.School;
+using Domain.Dtos.PhoneNumbers;
 
 namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 
@@ -12,41 +14,40 @@ public class CreateSchoolCommandCreationTests
     [Fact]
     public void ValidInputShouldCreateANewCommand()
     {
-        var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto()
-        {
-            Name="Test Driving School",
-            LegalName="Test Driving School LLC",
-            OwnerFirstName="Test",
-            OwnerLastName="Owner",
-            OwnerEmail="Owner@EMail.com",
-            SchoolEmail="Scgool@Email.com",
-            OwnerPassword="123xad21!~",
-            City="Test City",
-            Address="123 Test St",
-            PhoneNumber="123-456-7890",
-            ImagePath="/path/to/valid/image.png",
-            ImageContentType="image/png",
-            PhoneNumberGroups= [],
-            WebsiteLink=new WebsiteLinkReadDto
-            {
-                Url="https://example.com",
-                Name="Website",
-                Description="Official website",
-                IconData=new Domain.Dtos.Image.ImageReadDto
-                {
-                    Url="/path/to/valid/website-icon.png",
-                    ContentType="image/png"
-                }
-            },
-            SocialMediaLinks=new List<SocialMediaLinkDto>
-            {
+        var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
+             "Test Driving School",
+           "Test Driving School LLC",
+            "Owner@EMail.com",
+            "Scgool@Email.com",
+            "123xad21!~",
+            "Test",
+            "Owner",
+            "Test City",
+            "123 Test St",
+            "123-456-7890",
+            "/path/to/valid/image.png",
+            "image/png",
+            [],
+            new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+            new Domain.Dtos.Image.ImageReadDto
+                (
+                     "",
+                    "/path/to/valid/website-icon.png",
+                    "image/png",
+                    "Some description"
+                )
+            ),
+            [
                 new SocialMediaLinkDto
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            }
-        });
+                (
+                    "https://facebook.com/test-school",
+                    "Facebook"
+                )
+
+           ]
+            ,
+            [], ["B"], []
+        ));
         if(request.IsError)
         {
             throw new InvalidOperationException($"Failed to create valid command: {string.Join(", ", request.Errors.Select(e => e.Message))}");
@@ -62,41 +63,42 @@ public class CreateSchoolCommandCreationTests
     [Fact]
     public void LegalNameStartsWithNonCapitalLetter_InvalidatesInput()
     {
-        var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto()
-        {
-            Name="Test Driving School",
-            LegalName="test Driving School LLC",
-            OwnerFirstName="Test",
-            OwnerLastName="Owner",
-            OwnerEmail="Owner@EMail.com",
-            SchoolEmail="Scgool@Email.com",
-            OwnerPassword="123xad21!~",
-            City="Test City",
-            PhoneNumberGroups= [],
-            Address="123 Test St",
-            PhoneNumber="123-456-7890",
-            ImagePath="/path/to/valid/image.png",
-            ImageContentType="image/png",
-            WebsiteLink=new WebsiteLinkReadDto
-            {
-                Url="https://example.com",
-                Name="Website",
-                Description="Official website",
-                IconData=new Domain.Dtos.Image.ImageReadDto
-                {
-                    Url="/path/to/valid/website-icon.png",
-                    ContentType="image/png"
-                }
-            },
-            SocialMediaLinks=new List<SocialMediaLinkDto>
+        var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
+            "Test Driving School",
+            "test Driving School LLC",
+            "Test",
+             "Owner",
+             "Owner@EMail.com",
+             "Scgool@Email.com",
+             "123xad21!~",
+             "Test City",
+             "",
+             "123 Test St",
+             "123-456-7890",
+             "/path/to/valid/image.png",
+             [],
+             new WebsiteLinkReadDto
+             {
+                 Url="https://example.com",
+                 Name="Website",
+                 Description="Official website",
+                 IconData=new Domain.Dtos.Image.ImageReadDto
+                 {
+                     Url="/path/to/valid/website-icon.png",
+                     ContentType="image/png"
+                 }
+             },
+            SocialMediaLinks: new List<SocialMediaLinkDto>
             {
                 new SocialMediaLinkDto
                 {
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-            }
-        });
+            },
+            [],
+            [], []
+        ));
         request.IsError.Should().BeTrue();
     }
 
@@ -104,16 +106,15 @@ public class CreateSchoolCommandCreationTests
     public void WithNoPhoneNumber_ReturnError()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-
             "Test Driving School",
             "Test Driving School LLC",
-            "Test",
-            "Owner",
             "Owner@EMail.com",
             "School@EMail.com",
             "123xad21!~",
             "Test City",
             "123 Test St",
+            "",
+            "",
             "",
             "/path/to/valid/image.png",
             "image/png",
@@ -135,7 +136,10 @@ public class CreateSchoolCommandCreationTests
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-            ]
+            ],
+            [],
+            [],
+            []
         ));
         request.IsError.Should().BeTrue();
     }
@@ -175,7 +179,10 @@ public class CreateSchoolCommandCreationTests
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ]
+           ],
+            [],
+            ["B"],
+            []
        ));
         request.IsError.Should().BeFalse();
         var returnedValue = request.Value??throw new Exception("The returned value is null");
@@ -187,7 +194,6 @@ public class CreateSchoolCommandCreationTests
     public void WithOnePhoneNumberInGroup_SetAsMain_ClearGroup()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-
            "Test Driving School",
            "Test Driving School LLC",
            "Test",
@@ -218,7 +224,10 @@ public class CreateSchoolCommandCreationTests
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ]
+           ],
+            [],
+            ["B"],
+            []
        ));
         request.IsError.Should().BeFalse();
         var returnedValue = request.Value??throw new Exception("The returned value is null");
@@ -262,7 +271,10 @@ public class CreateSchoolCommandCreationTests
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ]
+           ],
+            [],
+            ["B"],
+            []
        ));
         request.IsError.Should().BeFalse();
         var returnedValue = request.Value??throw new Exception("The returned value is null");
@@ -309,7 +321,10 @@ public class CreateSchoolCommandCreationTests
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ]
+           ],
+            [],
+            ["B"],
+            []
        ));
         request.IsError.Should().BeFalse();
         var returnedValue = request.Value??throw new Exception("The returned value is null");

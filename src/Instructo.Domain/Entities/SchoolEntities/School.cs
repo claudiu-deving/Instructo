@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
+using Domain.Shared;
 using Domain.ValueObjects;
 
 namespace Domain.Entities.SchoolEntities;
@@ -54,8 +55,11 @@ public class School : BaseAuditableEntity<SchoolId>
     private readonly List<WebsiteLink> _websiteLinks = [];
     public virtual IReadOnlyCollection<WebsiteLink> WebsiteLinks => _websiteLinks.AsReadOnly();
 
-    public void AddLink(WebsiteLink link) =>
+    public Result<School> AddLink(WebsiteLink link)
+    {
         _websiteLinks.Add(link);
+        return this;
+    }
 
     public bool RemoveLink(WebsiteLink link) =>
         _websiteLinks.Remove(link);

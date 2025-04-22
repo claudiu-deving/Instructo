@@ -1,7 +1,7 @@
 ﻿using Domain.Dtos.Link;
 using Domain.Dtos.School;
 
-using Instructo.Application.Schools.Commands.CreateSchool;
+using Application.Schools.Commands.CreateSchool;
 
 namespace Instructo.UnitTests.Application.Schools.Commands
 {
@@ -29,24 +29,26 @@ namespace Instructo.UnitTests.Application.Schools.Commands
             List<SocialMediaLinkDto> socialMediaLinks = [new SocialMediaLinkDto
             {
                 Url="https://facebook.com/testschool",
-                SocialPlatformName="Facebook"
+                SocialPlatformName="Fcebook"
             }];
-            var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto()
-            {
-                Name=name,
-                LegalName=$"{name} LLC",
-                OwnerFirstName="Test",
-                OwnerLastName="Owner",
-                OwnerEmail=email,
-                City="Test City",
-                Address="123 Test St, Test City, TC 12345",
-                OwnerPassword="Password123!",
-                PhoneNumber="123-456-7890",
-                ImageContentType="image/png",
-                ImagePath="/path/to/valid/image.png",
-                WebsiteLink=websiteLink,
-                SocialMediaLinks=socialMediaLinks
-            });
+            var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
+                name,
+                $"{name} LLC",
+                    email,
+                "Test@test",
+                 "Password123!",
+                 "Name",
+                 "LastName",
+                "Test City",
+                "123 Test St, Test City, TC 12345",
+                "123-456-7890",
+                "image/png",
+                "/path/to/valid/image.png",
+                [],
+                websiteLink,
+                socialMediaLinks,
+                [], ["A1"], []
+            ));
             if(request.IsError)
             {
                 throw new InvalidOperationException($"Failed to create valid command: {string.Join(", ", request.Errors.Select(e => e.Message))}");

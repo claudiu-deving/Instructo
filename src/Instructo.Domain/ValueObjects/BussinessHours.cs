@@ -26,7 +26,13 @@ public record BussinessHours
         bussinessHoursDto.ForEach(entry =>
         {
             var daysOfTheWeek = new List<DayOfWeek>();
-            entry.DaysOfTheWeek.ForEach(day => daysOfTheWeek.Add(ToDayOfWeekEnum(day)));
+            try
+            {
+                entry.DaysOfTheWeek.ForEach(day => daysOfTheWeek.Add(ToDayOfWeekEnum(day)));
+            }catch(ArgumentException ex)
+            {
+               errors.Add(new Error("DayOfTheWeekFormat", ex.Message));
+            }
             List<TimeOfDayInterval> times = [];
             entry.Intervals.ForEach(interval =>
             {
