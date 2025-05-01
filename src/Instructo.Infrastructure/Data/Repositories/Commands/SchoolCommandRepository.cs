@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Repositories.Commands;
 
-public class SchoolCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<School, Domain.ValueObjects.SchoolId>
+public class SchoolCommandRepository(IAppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<School, Domain.ValueObjects.SchoolId>
 {
     public async Task<Result<School>> AddAsync(School entity)
     {

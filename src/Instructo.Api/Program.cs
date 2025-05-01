@@ -1,3 +1,4 @@
+using Api;
 using Api.Endpoints;
 using Api.Middleware;
 
@@ -82,7 +83,7 @@ builder.Services.AddOpenApi();
 var connectionString = builder.Configuration["DefaultConnection"]??
     throw new ArgumentException("{DefaultConnection} is null, provide a valid DB Connection");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<IAppDbContext,AppDbContext>(options =>
 {
     options.UseSqlServer(connectionString, sqlOptions =>
     {
@@ -176,16 +177,20 @@ builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 
-// Add authorization policies
+
+var ironManId = StartupHelpers.GetIronManId(args);
+
 builder.Services.AddAuthorizationBuilder()
-    // Add authorization policies
-    .AddPolicy("IronMan", policy => policy.RequireRole("IronMan")
+    .AddPolicy(ApplicationRole.IronMan.Name!, policy => policy.RequireRole(
+            ApplicationRole.IronMan.Name!)
     .RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-    "4651c07c-e1f7-48dc-bc83-f07bda50b96e"))
-    // Add authorization policies
-    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin", "Owner", "IronMan"))
-    // Add authorization policies
-    .AddPolicy("SchoolOwners", policy => policy.RequireRole("Owner"));
+        ironManId))
+    .AddPolicy("AdminOnly", policy => policy.RequireRole(
+        ApplicationRole.Admin.Name!, 
+        ApplicationRole.Owner.Name!, 
+        ApplicationRole.IronMan.Name!))
+    .AddPolicy("SchoolOwners", policy => policy.RequireRole( 
+        ApplicationRole.Owner.Name!));
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 builder.Services.AddSingleton<IDbConnectionProvider>(

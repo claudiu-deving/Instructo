@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IAppDbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -22,6 +22,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<Image> Images { get; set; }
     public DbSet<ArrCertificate> CertificateTypes { get; set; }
     public DbSet<VehicleCategory> Categories { get; set; }
+    public Task<int> SaveChangesAsync()
+    {
+        return base.SaveChangesAsync();
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 

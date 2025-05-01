@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 using Domain.Shared;
 using Domain.ValueObjects;
@@ -38,6 +39,9 @@ public class School : BaseAuditableEntity<SchoolId>
     }
 
     private School() { }
+    
+    [Timestamp] // EF Core concurrency token
+    public byte[] RowVersion { get; private set; }
 
     [ForeignKey("Owner")]
     public Guid OwnerId { get; private set; }
@@ -78,7 +82,7 @@ public class School : BaseAuditableEntity<SchoolId>
         VehicleCategories.Remove(vehicleCategory);
         return true;
     }
-
+    
     public void AddCertificate(ArrCertificate certificate)
     {
         if(Certificates.Contains(certificate))

@@ -1,4 +1,5 @@
-﻿using Domain.Entities.SchoolEntities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Entities.SchoolEntities;
 
 using Microsoft.AspNetCore.Identity;
 
@@ -9,6 +10,8 @@ public class ApplicationUser : IdentityUser<Guid>
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    [NotMapped]
+    public virtual ApplicationRole? Role { get; set; }
     public DateTime Created { get; set; }
     public DateTime? LastLogin { get; set; }
     public bool IsActive { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Domain.Dtos.User;
+using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Shared;
 
@@ -6,23 +7,12 @@ using MediatR;
 
 namespace Application.Users.Queries.GetUserByIdSuper;
 
-public class GetUserByIdBySuperQueryHandler : IRequestHandler<GetUserByIdBySuperQuery, Result<UserReadSuperDto>>
+public class GetUserByIdBySuperQueryHandler(IUserQueries instructorQueries)
+    : IRequestHandler<GetUserByIdBySuperQuery, Result<ApplicationUser>>
 {
-    private readonly IUserQueries _userQueries;
-
-    public GetUserByIdBySuperQueryHandler(IUserQueries instructorQueries)
+    public async Task<Result<ApplicationUser>> Handle(GetUserByIdBySuperQuery request, CancellationToken cancellationToken)
     {
-        _userQueries=instructorQueries;
-    }
-
-    public async Task<Result<UserReadSuperDto>> Handle(GetUserByIdBySuperQuery request, CancellationToken cancellationToken)
-    {
-        var user = await _userQueries.GetUsersByIdBySuperAsync(request.UserId);
-        if(user==null)
-            return Result<UserReadSuperDto>.Failure([new Error("Not found", "User not found")]);
-        else
-        {
-            return Result<UserReadSuperDto>.Success(user);
-        }
+        var user = await instructorQueries.GetUsersByIdBySuperAsync(request.UserId);
+        return user is null ? Result<ApplicationUser>.Failure([new Error("Not found", "User not found")]) : Result<ApplicationUser>.Success(user!);
     }
 }

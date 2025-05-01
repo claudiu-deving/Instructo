@@ -1,4 +1,5 @@
-﻿using Application.Users.Commands.DeleteUser;
+﻿using Application.Roles.Queries.GetRoles;
+using Application.Users.Commands.DeleteUser;
 using Application.Users.Commands.RegisterUser;
 using Application.Users.Commands.UpdateUser;
 using Application.Users.Queries.GetUserByEmail;
@@ -41,7 +42,7 @@ public static class UserEndpoint
                        if(!string.IsNullOrEmpty(parameters.SearchTerm))
                            ok= [.. ok.Where(x => x.Email.Contains(parameters.SearchTerm)||x.FirstName.Contains(parameters.SearchTerm)||x.LastName.Contains(parameters.SearchTerm))];
                        if(!string.IsNullOrEmpty(parameters.Role))
-                           ok= [.. ok.Where(x => x.Role==parameters.Role)];
+                           ok= [.. ok.Where(x => x.Role.Name==parameters.Role)];
                        if(parameters.IsActive.HasValue)
                            ok= [.. ok.Where(x => x.IsActive==parameters.IsActive.Value)];
                        ok= [.. ok.Skip((parameters.PageNumber-1)*parameters.PageSize).Take(parameters.PageSize)];

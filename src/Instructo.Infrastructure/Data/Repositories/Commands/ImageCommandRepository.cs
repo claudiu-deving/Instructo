@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Repositories.Commands;
 
-public class ImageCommandRepository(AppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<Image, Domain.ValueObjects.ImageId>
+public class ImageCommandRepository(IAppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<Image, Domain.ValueObjects.ImageId>
 {
     public async Task<Result<Image>> AddAsync(Image entity)
     {
