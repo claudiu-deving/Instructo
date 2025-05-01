@@ -4,3 +4,8 @@ public readonly record struct ImageReadDto(string FileName, string Url, string C
 {
     public static ImageReadDto Empty => new(string.Empty, string.Empty, string.Empty, string.Empty);
 }
+
+public readonly record struct ImageUpdateDto(string? FileName, string? Url, string? ContentType, string? Description)
+{
+    public static ImageReadDto Empty => new(string.Empty, string.Empty, string.Empty, string.Empty);
+}

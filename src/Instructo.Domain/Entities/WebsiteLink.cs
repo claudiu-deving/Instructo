@@ -17,6 +17,38 @@ public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
     public virtual Image? Icon { get; private set; }
     public virtual IReadOnlyCollection<School> Schools => _schools.AsReadOnly();
 
+    public Result<WebsiteLink> Update(string? url, string? name, string? description, Image? icon)
+    {
+        var errors = new List<Error>();
+        if (url is not null)
+        {
+            var urlResult = Url.Create(url)
+                .OnSuccess(lnk => this.Url = lnk)
+                .OnError(errors.AddRange);
+        }
+
+        if (name is not null)
+        {
+            var nameResult = WebsiteLinkName.Create(name)
+                .OnSuccess(n => this.Name = n)
+                .OnError(errors.AddRange);
+        }
+
+        if (description is not null)
+        {
+            this.Description = description;
+        }
+
+        if (icon is not null)
+        {
+            this.Icon = icon;
+        }
+
+        return errors.Count>0 
+            ? Result<WebsiteLink>.Failure([.. errors]) 
+            : this;
+    }
+
     public static Result<WebsiteLink> Create(string url, string name, string description, Image icon)
     {
         var websiteLink = new WebsiteLink();
@@ -30,9 +62,9 @@ public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
         websiteLink.Description=description;
         websiteLink.Icon=icon;
         websiteLink.Id=WebsiteLinkId.CreateNew();
-        if(errors.Count>0)
-            return Result<WebsiteLink>.Failure([.. errors]);
-        return websiteLink;
+        return errors.Count>0 
+            ? Result<WebsiteLink>.Failure([.. errors]) 
+            : websiteLink;
     }
 
     public WebsiteLinkReadDto ToDto()

@@ -19,7 +19,7 @@ public record BussinessHours
     }
     public static BussinessHours Empty => new BussinessHours([]);
 
-    public static Result<BussinessHours> Create(List<BussinessHoursEntryDto> bussinessHoursDto)
+    public static Result<BussinessHours> Create(List<BusinessHoursEntryDto> bussinessHoursDto)
     {
         List<BussinessHoursEntry> entries = [];
         List<Error> errors = [];

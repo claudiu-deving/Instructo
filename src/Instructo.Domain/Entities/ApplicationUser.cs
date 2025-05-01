@@ -9,6 +9,7 @@ public class ApplicationUser : IdentityUser<Guid>
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public virtual ApplicationRole? Role { get; set; }
     public DateTime Created { get; set; }
     public DateTime? LastLogin { get; set; }
     public bool IsActive { get; set; }

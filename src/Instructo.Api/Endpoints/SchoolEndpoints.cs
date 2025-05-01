@@ -9,6 +9,7 @@ using Domain.ValueObjects;
 using Application.Schools.Commands.CreateSchool;
 
 using Microsoft.AspNetCore.Mvc;
+using Application.Schools.Commands.UpdateSchool;
 
 namespace Api.Endpoints;
 
@@ -18,13 +19,23 @@ public static class SchoolEndpoints
     {
         var group = app.MapGroup("api/schools").WithTags("Schools");
         group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
-        group.MapGet("/{id}", GetSchoolById).WithName("Get a School By Id").AllowAnonymous();
+        group.MapGet("/{id:guid}", GetSchoolById).WithName("Get a School By Id").AllowAnonymous();
         group.MapPost("/", CreateSchool).WithName("Create School");
-        //group.MapPatch("/{id}", UpdateSchool).WithName("Update SchoolEntities");
-        group.MapDelete("/{id}", DeleteSchool);
+        group.MapPatch("/{id:guid}", UpdateSchool).WithName("Update SchoolEntities").RequireAuthorization("IronMan","Owner");
+        group.MapDelete("/{id:guid}", DeleteSchool);
         group.WithOpenApi();
         return app;
     }
+
+    private static async Task<IResult> UpdateSchool([FromServices] ISender sender, Guid id, [FromBody] UpdateSchoolCommandDto createSchoolCommand)
+    {
+        var updateRequest = await FlexContext.StartContextAsync()
+            .Then((ctx) => UpdateSchoolCommand.Create(createSchoolCommand, id))
+            .Then(flexContext => sender.Send(flexContext.Get<UpdateSchoolCommand>()));
+        if (!updateRequest.IsError) return Results.Ok(updateRequest.Value!.Get<SchoolReadDto>());
+        return updateRequest.Errors.Any(x => x.Code == "NotFound") ? TypedResults.NotFound() : Results.Ok();
+    }
+
     private static async Task<IResult> DeleteSchool(
         HttpContext context,
         [FromServices] ISender sender,
@@ -102,5 +113,4 @@ public static class SchoolEndpoints
                 return TypedResults.BadRequest(new { errors = nok.ToList() });
             });
     }
-
 }

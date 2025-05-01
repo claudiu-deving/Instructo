@@ -2,4 +2,4 @@
 
 namespace Domain.Dtos;
 
-public readonly record struct BussinessHoursEntryDto(List<string> DaysOfTheWeek, List<HourIntervals> Intervals);
+public readonly record struct BusinessHoursEntryDto(List<string> DaysOfTheWeek, List<HourIntervals> Intervals);

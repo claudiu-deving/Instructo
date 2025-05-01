@@ -19,6 +19,6 @@ public readonly record struct CreateSchoolCommandDto(
     List<PhoneNumberGroupDto> PhoneNumberGroups,
     WebsiteLinkReadDto WebsiteLink,
     List<SocialMediaLinkDto> SocialMediaLinks,
-    List<BussinessHoursEntryDto> BussinessHours,
+    List<BusinessHoursEntryDto> BussinessHours,
     List<string> VechiclesCategories,
     List<string> ArrCertifications);

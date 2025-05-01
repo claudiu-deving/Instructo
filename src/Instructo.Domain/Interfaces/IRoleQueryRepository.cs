@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Infrastructure.Data.Repositories.Queries;
+namespace Domain.Interfaces;
 
 public interface IRoleQueryRepository
 {
