@@ -96,4 +96,14 @@ public class School : BaseAuditableEntity<SchoolId>
         Certificates.Remove(certificate);
         return true;
     }
+
+    public void AddLogo(Image schoolLogo)
+    {
+        Icon=schoolLogo;
+    }
+
+    public void ChangeName(SchoolName newSchoolName)
+    {
+        Name=newSchoolName;
+    }
 }

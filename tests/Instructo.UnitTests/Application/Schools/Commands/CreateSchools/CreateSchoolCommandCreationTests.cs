@@ -5,9 +5,11 @@ using FluentAssertions;
 using Application.Schools.Commands.CreateSchool;
 using Domain.Dtos.School;
 using Domain.Dtos.PhoneNumbers;
+using JetBrains.Annotations;
 
 namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 
+[TestSubject(typeof(CreateSchoolCommand))]
 public class CreateSchoolCommandCreationTests
 {
 

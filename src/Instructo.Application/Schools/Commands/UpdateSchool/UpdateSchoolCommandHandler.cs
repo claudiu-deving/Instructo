@@ -1,6 +1,5 @@
 ﻿
 using Application.Abstractions.Messaging;
-using Application.Users.Queries.GetUserByEmail;
 using Application.Users.Queries.GetUserByIdSuper;
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
@@ -40,9 +39,9 @@ public class UpdateSchoolCommandHandler(
     {
         var request = context.Get<UpdateSchoolCommand>();
         var existingSchool = await queryRepository.GetByIdAsync(request.SchoolId);
-        return existingSchool.IsError
+        return !existingSchool.IsError
             ? existingSchool!
-            : Result<School>.Failure(new Error("Not-Found", "Unable to retrieve school"));
+            : Result<School>.Failure([..existingSchool.Errors,new Error("Not-Found", "Unable to retrieve school")]);
     }
     private async Task<Result<ApplicationUser>> GetOwner(FlexContext context)
     {
@@ -55,13 +54,32 @@ public class UpdateSchoolCommandHandler(
         var request = context.Get<UpdateSchoolCommand>();
         var user = context.Get<ApplicationUser>();
         var existingSchool = context.Get<School>();
-        return await FlexContext.StartContextAsync(request, user)
+        return await FlexContext.StartContextAsync(request, user,existingSchool)
+             .Then(ChangeSchoolName)
              .Then(CheckCompanyName)
              .Then(UpdateImage)
              .Then(UpdateVehicleCategories)
              .Then(UpdateCertificates)
              .MapAsync(ctx=>ctx.Get<School>());
+        Result<UpdateSchoolCommand> ChangeSchoolName(FlexContext localContext)
+        {
+            if (request.Name is null)
+            {
+                return Result<UpdateSchoolCommand>.Success(request);
+            }
+            else
+            {
+             return   SchoolName.Create(request.Name).Match(
+                    success: name =>
+                    {
+                         existingSchool.ChangeName(name);
+                         return Result<UpdateSchoolCommand>.Success(request);       
+                    },
+                    failure: (errors) => Result<UpdateSchoolCommand>.WithErrors([..errors]));
+            }
+        }
 
+        
         async Task<Result<UpdateSchoolCommand>> CheckCompanyName(FlexContext localContext)
         {
             if (request.LegalName is null)
@@ -113,7 +131,7 @@ public class UpdateSchoolCommandHandler(
                     try
                     {
                         await FlexContext.StartContextAsync()
-                            .Then(ctx=>vehicleQueryRepository.GetByIdAsync(x))
+                            .Then(_=>vehicleQueryRepository.GetByIdAsync(x))
                             .FinalizeContext(ctx=>selectedCategories.Add(ctx.Get<VehicleCategory>()));
                     }
                     catch (Exception e)
@@ -146,7 +164,7 @@ public class UpdateSchoolCommandHandler(
                 try
                 {
                     await FlexContext.StartContextAsync()
-                        .Then(ctx => certificatesRepository.GetByIdAsync(certificateType))
+                        .Then(_ => certificatesRepository.GetByIdAsync(certificateType))
                         .FinalizeContext(ctx => selectedCertificates.Add(ctx.Get<ArrCertificate>()));
                 }
                 catch (Exception e)
@@ -166,6 +184,9 @@ public class UpdateSchoolCommandHandler(
                 : selectedCertificates;
         }
     }
+
+  
+
     private Result<School> UpdateSocialMediaLinks(FlexContext context)
     {
         var request = context.Get<UpdateSchoolCommand>();
@@ -174,11 +195,10 @@ public class UpdateSchoolCommandHandler(
         {
             return school;
         }
-        var errors = new List<Error>();
         foreach(var socialMediaLink in request.SocialMediaLinks)
         {
             FlexContext.StartContext(request, school, socialMediaLink)
-              .Then(ctx => socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName))
+              .Then(_ => socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName))
               .Then(CreateImage)
               .Then(CreateSocialMediaLink)
               .MapContext(ctx => school.AddLink(ctx.Get<WebsiteLink>()));
@@ -187,7 +207,6 @@ public class UpdateSchoolCommandHandler(
 
         static Result<WebsiteLink> CreateSocialMediaLink(FlexContext flexContext)
         {
-            var request = flexContext.Get<UpdateSchoolCommand>();
             var socialMediaLink = flexContext.Get<SocialMediaLinkDto>();
             var platform = flexContext.Get<SocialMediatPlatform>();
             var platformImage = flexContext.Get<Image>();
