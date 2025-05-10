@@ -299,6 +299,9 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<Guid?>("IconId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("datetimeoffset");
 
@@ -319,6 +322,12 @@ namespace Instructo.Infrastructure.Migrations
                     b.Property<string>("PhoneNumbersGroups")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.HasKey("Id");
 

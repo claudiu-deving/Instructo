@@ -58,6 +58,12 @@ public class School : BaseAuditableEntity<SchoolId>
 
     private readonly List<WebsiteLink> _websiteLinks = [];
     public virtual IReadOnlyCollection<WebsiteLink> WebsiteLinks => _websiteLinks.AsReadOnly();
+    
+    public bool IsApproved { get; private set; } = false;
+    
+    public void Approve() => IsApproved=true;
+    
+    public void Reject() => IsApproved=false;
 
     public Result<School> AddLink(WebsiteLink link)
     {
