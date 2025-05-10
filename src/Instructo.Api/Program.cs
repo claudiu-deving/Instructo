@@ -31,7 +31,7 @@ builder.Host.UseSerilog((context, services, loggerConfiguration) =>
          .Destructure.With<SensitiveDataDestructuringPolicy>()
         .Enrich.WithThreadId()
         .WriteTo.Console()
-        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"]??
+        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"]?? //Make sure to run Docker beforehand
         throw new ArgumentException("Provide the url for the seq server"));
 });
 
@@ -69,7 +69,8 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter(options =>
             {
-                options.Endpoint=new Uri(builder.Configuration["OpenTelemetry:OtlpEndpoint"]);
+                options.Endpoint=new Uri(builder.Configuration["OpenTelemetry:OtlpEndpoint"]??
+                                         throw new ArgumentException("Provide the url for the OTLP endpoint"));
             });
     });
 
@@ -101,7 +102,7 @@ builder.Services.AddDbContext<IAppDbContext,AppDbContext>(options =>
         options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 });
-builder.Services.AddTransient<IUserQueries>(p => new UserQueryRepository(connectionString));
+builder.Services.AddTransient<IUserQueries>( _=> new UserQueryRepository(connectionString));
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -124,7 +125,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()??
+                  throw new ArgumentException("JwtSettings is null, provide a valid JwtSettings");
+
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -224,15 +227,15 @@ app.UseSerilogRequestLogging(options =>
 {
     options.EnrichDiagnosticContext=(diagnosticContext, httpContext) =>
     {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value??"");
         diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
         diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
 
-        if(httpContext.User?.Identity?.IsAuthenticated==true)
-        {
+        if (httpContext.User.Identity?.IsAuthenticated != true) return;
+        var value = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (value != null)
             diagnosticContext.Set("UserId",
-                httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        }
+                value);
     };
 });
 
