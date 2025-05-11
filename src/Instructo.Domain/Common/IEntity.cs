@@ -1,6 +1,6 @@
 ﻿namespace Domain.Common;
 
-public interface IEntity<T> where T : notnull
+public interface IEntity<T> : IEntity where T : notnull
 {
     IReadOnlyCollection<BaseEvent> DomainEvents { get; }
     T Id { get; }
@@ -8,4 +8,8 @@ public interface IEntity<T> where T : notnull
     void AddDomainEvent(BaseEvent domainEvent);
     void ClearDomainEvents();
     void RemoveDomainEvent(BaseEvent domainEvent);
+}
+
+public interface IEntity
+{
 }

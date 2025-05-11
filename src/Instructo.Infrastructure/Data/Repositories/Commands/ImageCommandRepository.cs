@@ -1,13 +1,14 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Shared;
-
+using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Repositories.Commands;
 
-public class ImageCommandRepository(IAppDbContext appDbContext, ILogger<SchoolCommandRepository> logger) : ICommandRepository<Image, Domain.ValueObjects.ImageId>
+public class ImageCommandRepository(AppDbContext appDbContext, ILogger<ImageCommandRepository> logger)
+    : ICommandRepository<Image, ImageId>
 {
     public async Task<Result<Image>> AddAsync(Image entity)
     {
@@ -16,22 +17,23 @@ public class ImageCommandRepository(IAppDbContext appDbContext, ILogger<SchoolCo
             await appDbContext.Images.AddAsync(entity);
             await appDbContext.SaveChangesAsync();
             var addedEntity = await appDbContext.Images.FindAsync(entity.Id);
-            if(addedEntity==null)
+            if (addedEntity == null)
             {
                 logger.LogError("Failed to add {image}", entity.FileName);
-                return Result<Image>.Failure([new Error("Image-Add", "Failed to add school")]);
+                return Result<Image>.Failure(new Error("Image-Add", "Failed to add school"));
             }
+
             return Result<Image>.Success(addedEntity);
         }
-        catch(DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException ex)
         {
             logger.LogError(ex, "Failed to add {image}", entity.FileName);
-            return Result<Image>.Failure([new Error("Image-Add-Update-Concurrency", ex.Message)]);
+            return Result<Image>.Failure(new Error("Image-Add-Update-Concurrency", ex.Message));
         }
-        catch(DbUpdateException ex)
+        catch (DbUpdateException ex)
         {
             logger.LogError(ex, "Failed to add {image}", entity.FileName);
-            return Result<Image>.Failure([new Error("Image-Add", ex.Message)]);
+            return Result<Image>.Failure(new Error("Image-Add", ex.Message));
         }
     }
 

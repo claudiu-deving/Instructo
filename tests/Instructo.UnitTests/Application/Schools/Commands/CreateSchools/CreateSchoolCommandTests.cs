@@ -20,14 +20,14 @@ namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 [TestSubject(typeof(CreateSchoolCommandHandler))]
 public class CreateSchoolCommandTests
 {
-    private readonly Mock<ICommandRepository<School, SchoolId>> _repositoryMock;
+    private readonly Mock<ISchoolCommandRepository> _repositoryMock;
     private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly Mock<ISender> _senderMock;
     private readonly CreateSchoolCommandHandler _handler;
 
     public CreateSchoolCommandTests()
     {
-        _repositoryMock=new Mock<ICommandRepository<School, SchoolId>>();
+        _repositoryMock=new Mock<ISchoolCommandRepository>();
         var queryRepositoryMock = new Mock<IQueryRepository<School, SchoolId>>();
         var certificatesRepositoryMock = new Mock<IQueryRepository<ArrCertificate, ARRCertificateType>>();
         var vehicleCategoriesRepositoryMock = new Mock<IQueryRepository<VehicleCategory, VehicleCategoryType>>();
