@@ -18,12 +18,12 @@ public class GetSchoolsQueryHandler(IQueryRepository<School, SchoolId> repositor
         var repositoryRequest = await repository.GetAllAsync();
         if (repositoryRequest.IsError)
             return Result<IEnumerable<SchoolReadDto>>.Failure(repositoryRequest.Errors);
-        return repositoryRequest.Map(x => Map(x));
+        return repositoryRequest.Map(x => Map(x, request.IsAdmin));
     }
 
-    private IEnumerable<SchoolReadDto> Map(IEnumerable<School> schools)
+    private IEnumerable<SchoolReadDto> Map(IEnumerable<School> schools, bool isAdmin)
     {
-        return schools.Select(s => new SchoolReadDto(
+        return schools.Where(s => s.IsApproved != isAdmin).Select(s => new SchoolReadDto(
             s.Id.Id,
             s.Name,
             s.CompanyName,

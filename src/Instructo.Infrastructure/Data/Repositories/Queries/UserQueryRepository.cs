@@ -13,7 +13,8 @@ public class UserQueryRepository(AppDbContext dbContext) : IUserQueries
 
     public async Task<IEnumerable<ApplicationUser>> GetUsers()
     {
-        return await dbContext.Users.ToListAsync();
+        var result = await dbContext.Users.ToListAsync();
+        return result;
     }
 
     public async Task<ApplicationUser> GetUserByIdAsync(Guid userId)

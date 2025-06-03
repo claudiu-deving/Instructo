@@ -12,7 +12,7 @@ using Domain.Shared;
 using Domain.ValueObjects;
 using MediatR;
 
-[assembly: InternalsVisibleTo("Instructo.UnitTests")]
+[assembly: InternalsVisibleTo("Instructo.IntegrationTests")]
 
 namespace Application.Schools.Commands.CreateSchool;
 

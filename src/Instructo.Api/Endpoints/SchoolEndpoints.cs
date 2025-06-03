@@ -100,10 +100,13 @@ public static class SchoolEndpoints
             nok => TypedResults.BadRequest(new { errors = nok.ToList() }));
     }
 
-    private static async Task<IResult> GetAllSchools([FromServices] ISender sender,
+    private static async Task<IResult> GetAllSchools(HttpContext context, [FromServices] ISender sender,
         [AsParameters] GetSchoolsQueryParameters parameters)
     {
-        var query = new GetSchoolsQuery();
+        var role = context.User.FindFirstValue(ClaimTypes.Role);
+        var isAdmin = role is "IronMan";
+
+        var query = new GetSchoolsQuery(isAdmin);
         var userRequest = await sender.Send(query);
         parameters = parameters with { PageNumber = parameters.PageNumber == 0 ? 1 : parameters.PageNumber };
         parameters = parameters with { PageSize = parameters.PageSize > 50 ? 50 : parameters.PageSize };

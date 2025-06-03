@@ -256,3 +256,7 @@ app.UseRoleBasedAuthorization();
 app.UseIpRateLimiting();
 
 app.Run();
+
+public partial class Program
+{
+}

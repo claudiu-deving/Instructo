@@ -1,5 +1,5 @@
 ﻿using Application.Schools.Commands.UpdateSchool;
-using Application.Users.Queries.GetUserByIdSuper;
+using Application.Users.Queries.GetUserById;
 using Domain.Dtos.School;
 using Domain.Entities;
 using Domain.Entities.SchoolEntities;
@@ -35,7 +35,7 @@ public class UpdateSchoolCommandHandlerTests
             .ReturnsAsync(Result<School?>.Success(existingSchool));
 
         var mockMediator = serviceProvider.GetRequiredService<Mock<ISender>>();
-        mockMediator.Setup(x => x.Send(It.IsAny<GetUserByIdBySuperQuery>(),
+        mockMediator.Setup(x => x.Send(It.IsAny<GetUserByIdQuery>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ApplicationUser>.Success(requestingUser));
 
@@ -49,7 +49,7 @@ public class UpdateSchoolCommandHandlerTests
         {
             Name = newSchoolName.Value
         };
-        var command = UpdateSchoolCommand.Create(commandDto, userId);
+        var command = UpdateSchoolCommand.Create(commandDto, SchoolId.CreateNew(), userId);
 
         // Act
         var result = await handler.Handle(command.Value!, CancellationToken.None);
@@ -57,7 +57,8 @@ public class UpdateSchoolCommandHandlerTests
         // Assert
         result.IsError.Should().BeFalse();
         result.Value.Should().NotBeNull();
-        mockSchoolCommandRepository.Verify(x => x.AddAsync(It.Is<School>(s => s.Name == newSchoolName)), Times.Once);
+        mockSchoolCommandRepository.Verify(x
+            => x.AddAsync(It.Is<School>(s => s.Name == newSchoolName)), Times.Once);
     }
 
     private static School CreateTestSchool(ApplicationUser requestingUser)
