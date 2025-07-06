@@ -26,12 +26,13 @@ public static class FlexContextResultExtensions
         this Result<FlexContext> contextResult,
         Func<FlexContext, Result<T>> operation)
     {
-        if (contextResult.IsError)
+        if(contextResult.IsError)
             return Result<FlexContext>.Failure(contextResult.Errors);
         var context = contextResult.Value!;
         var opResult = operation(context);
 
-        if (opResult.IsError) return Result<FlexContext>.Failure(opResult.Errors);
+        if(opResult.IsError)
+            return Result<FlexContext>.Failure(opResult.Errors);
 
         context.TryAdd(opResult.Value!);
         return Result<FlexContext>.Success(context);
@@ -41,13 +42,13 @@ public static class FlexContextResultExtensions
         this Task<Result<FlexContext>> contextResult,
         Func<FlexContext, Task<Result<T>>> operation)
     {
-        if ((await contextResult).IsError)
+        if((await contextResult).IsError)
             return Result<FlexContext>.Failure((await contextResult).Errors);
         var context = (await contextResult).Value!;
         var opResult = await operation(context);
 
-        if (opResult is null || opResult.IsError)
-            return Result<FlexContext>.Failure(opResult.Errors);
+        if(opResult is null||opResult.IsError)
+            throw new Exception($"opResult is null on:{context} - {operation}");
         context.TryAdd(opResult.Value!);
         return Result<FlexContext>.Success(context);
     }
@@ -56,12 +57,12 @@ public static class FlexContextResultExtensions
         this Task<Result<FlexContext>> contextResult,
         Func<FlexContext, Result<T>> operation)
     {
-        if ((await contextResult).IsError)
+        if((await contextResult).IsError)
             return Result<FlexContext>.Failure((await contextResult).Errors);
         var context = (await contextResult).Value!;
         var opResult = operation(context);
 
-        if (opResult.IsError)
+        if(opResult.IsError)
             return Result<FlexContext>.Failure(opResult.Errors);
         context.TryAdd(opResult.Value!);
         return Result<FlexContext>.Success(context);
@@ -71,7 +72,7 @@ public static class FlexContextResultExtensions
         this Result<FlexContext> contextResult,
         Func<FlexContext, Task<Result<T>>> operation)
     {
-        if (contextResult.IsError)
+        if(contextResult.IsError)
             return Task.FromResult(Result<FlexContext>.Failure(contextResult.Errors));
         return ThenInternal(contextResult.Value!, operation);
     }
@@ -82,7 +83,7 @@ public static class FlexContextResultExtensions
     {
         var opResult = await operation(context);
 
-        if (opResult.IsError)
+        if(opResult.IsError)
             return Result<FlexContext>.Failure(opResult.Errors);
         context.TryAdd(opResult.Value!);
         return Result<FlexContext>.Success(context);
@@ -92,7 +93,7 @@ public static class FlexContextResultExtensions
         this Task<Result<FlexContext>> contextResult,
         Action<FlexContext> operation)
     {
-        if ((await contextResult).IsError)
+        if((await contextResult).IsError)
             return Result<bool>.Failure((await contextResult).Errors);
 
         var context = (await contextResult).Value!;
@@ -105,13 +106,13 @@ public static class FlexContextResultExtensions
         this Task<Result<FlexContext>> contextResult,
         Func<FlexContext, Task<Result<T>>> operation)
     {
-        if ((await contextResult).IsError)
+        if((await contextResult).IsError)
             return Result<T>.Failure((await contextResult).Errors);
 
         var context = (await contextResult).Value!;
         var opResult = await operation(context);
 
-        if (opResult.IsError)
+        if(opResult.IsError)
             return Result<T>.Failure(opResult.Errors);
         return Result<T>.Success(opResult.Value!);
     }
@@ -120,13 +121,13 @@ public static class FlexContextResultExtensions
         this Result<FlexContext> contextResult,
         Func<FlexContext, Result<T>> operation)
     {
-        if (contextResult.IsError)
+        if(contextResult.IsError)
             return Result<T>.Failure(contextResult.Errors);
 
         var context = contextResult.Value!;
         var opResult = operation(context);
 
-        if (opResult.IsError)
+        if(opResult.IsError)
             return Result<T>.Failure(opResult.Errors);
         return Result<T>.Success(opResult.Value!);
     }

@@ -1,6 +1,8 @@
 ﻿using Domain.Entities.SchoolEntities;
 using Domain.ValueObjects;
+
 using Infrastructure.Data.Converters;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -14,9 +16,11 @@ internal class SchoolsConfiguration : IEntityTypeConfiguration<School>
         builder.ToTable("Schools");
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => x.CompanyName);
+        builder.HasIndex(x => x.Slug).IsUnique();
         builder.Property(x => x.Id).HasConversion(new SchoolIdConverter()).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasConversion(new SchoolNameConverter());
         builder.Property(x => x.CompanyName).HasConversion(new CompanyNameConverter());
+        builder.Property(x => x.Slug).HasConversion(new SlugConverter());
         builder.Property(x => x.Email).HasConversion(new EmailConverter());
         builder.Property(x => x.PhoneNumber).HasConversion(new PhoneNumberConverter());
         builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());

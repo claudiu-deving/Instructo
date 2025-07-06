@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Users.Queries.GetUserById;
+
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
@@ -9,13 +10,14 @@ using Domain.Interfaces;
 using Domain.Mappers;
 using Domain.Shared;
 using Domain.ValueObjects;
+
 using MediatR;
 
 namespace Application.Schools.Commands.UpdateSchool;
 
 public class UpdateSchoolCommandHandler(
     ISchoolCommandRepository repository,
-    IQueryRepository<School, SchoolId> queryRepository,
+   ISchoolQueriesRepository queryRepository,
     IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
     IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
@@ -39,7 +41,7 @@ public class UpdateSchoolCommandHandler(
         var existingSchool = await queryRepository.GetByIdAsync(request.SchoolId);
         return !existingSchool.IsError
             ? existingSchool!
-            : Result<School>.Failure([..existingSchool.Errors, new Error("Not-Found", "Unable to retrieve school")]);
+            : Result<School>.Failure([.. existingSchool.Errors, new Error("Not-Found", "Unable to retrieve school")]);
     }
 
     private async Task<Result<ApplicationUser>> GetOwner(FlexContext context)
@@ -64,7 +66,8 @@ public class UpdateSchoolCommandHandler(
 
         Result<UpdateSchoolCommand> ChangeSchoolName(FlexContext localContext)
         {
-            if (request.Name is null) return Result<UpdateSchoolCommand>.Success(request);
+            if(request.Name is null)
+                return Result<UpdateSchoolCommand>.Success(request);
 
             return SchoolName.Create(request.Name).Match(
                 name =>
@@ -72,14 +75,15 @@ public class UpdateSchoolCommandHandler(
                     existingSchool.ChangeName(name);
                     return Result<UpdateSchoolCommand>.Success(request);
                 },
-                errors => Result<UpdateSchoolCommand>.WithErrors([..errors]));
+                errors => Result<UpdateSchoolCommand>.WithErrors([.. errors]));
         }
 
 
         async Task<Result<UpdateSchoolCommand>> CheckCompanyName(FlexContext localContext)
         {
-            if (request.LegalName is null) return Result<UpdateSchoolCommand>.Success(request);
-            if ((await queryRepository.GetByIndexed(request.LegalName)).Value is not null)
+            if(request.LegalName is null)
+                return Result<UpdateSchoolCommand>.Success(request);
+            if((await queryRepository.GetByIndexed(request.LegalName)).Value is not null)
                 return Result<UpdateSchoolCommand>.Failure(new Error("Create-School", "Company name already exists"));
 
             return Result<UpdateSchoolCommand>.Success(request);
@@ -88,11 +92,11 @@ public class UpdateSchoolCommandHandler(
         Result<Image> UpdateImage(FlexContext localContext)
         {
             var existingImage = existingSchool.Icon;
-            if (existingImage is null)
+            if(existingImage is null)
                 throw new NullReferenceException($"The {existingSchool.Id} doesn't contain any image");
-            if (request.LegalName is null
-                || request.ImageContentType is null
-                || request.ImagePath is null)
+            if(request.LegalName is null
+                ||request.ImageContentType is null
+                ||request.ImagePath is null)
                 return Result<Image>.Success(existingImage);
             return Image.Create(
                 $"{request.LegalName}-Icon",
@@ -104,7 +108,7 @@ public class UpdateSchoolCommandHandler(
         Result<List<VehicleCategory>> UpdateVehicleCategories(FlexContext localContext)
         {
             var existingCategories = existingSchool.VehicleCategories;
-            if (request.VehicleCategories is null || request.VehicleCategories.Count == 0)
+            if(request.VehicleCategories is null||request.VehicleCategories.Count==0)
                 return Result<List<VehicleCategory>>.Success(existingCategories);
             var vehiclesCategoryRetrievalErrors = new List<Error>();
             List<VehicleCategory> selectedCategories = [];
@@ -116,19 +120,19 @@ public class UpdateSchoolCommandHandler(
                             .Then(_ => vehicleQueryRepository.GetByIdAsync(x))
                             .FinalizeContext(ctx => selectedCategories.Add(ctx.Get<VehicleCategory>()));
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         vehiclesCategoryRetrievalErrors.Add(new Error("VC-Retrieval-Update", e.Message));
                     }
                 }
             );
-            if (selectedCategories.Count != 0)
+            if(selectedCategories.Count!=0)
             {
                 existingCategories.ForEach(category => existingSchool.RemoveVehicleCategory(category));
                 selectedCategories.ForEach(category => existingSchool.AddVehicleCategory(category));
             }
 
-            return vehiclesCategoryRetrievalErrors.Count > 0
+            return vehiclesCategoryRetrievalErrors.Count>0
                 ? Result<List<VehicleCategory>>.WithErrors([.. vehiclesCategoryRetrievalErrors])
                 : Result<List<VehicleCategory>>.Success(selectedCategories);
         }
@@ -138,7 +142,7 @@ public class UpdateSchoolCommandHandler(
             var certificatesRetrievalErrors = new List<Error>();
             var selectedCertificates = new List<ArrCertificate>();
             var existingCertificates = existingSchool.Certificates;
-            if (request.Certificates is null || request.Certificates.Count == 0)
+            if(request.Certificates is null||request.Certificates.Count==0)
                 return Result<List<ArrCertificate>>.Success(existingCertificates);
             request.Certificates.ForEach(async void (certificateType) =>
             {
@@ -148,19 +152,19 @@ public class UpdateSchoolCommandHandler(
                         .Then(_ => certificatesRepository.GetByIdAsync(certificateType))
                         .FinalizeContext(ctx => selectedCertificates.Add(ctx.Get<ArrCertificate>()));
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
                     certificatesRetrievalErrors.Add(new Error("Cert-Retrieval-Update", e.Message));
                 }
             });
 
-            if (selectedCertificates.Count != 0)
+            if(selectedCertificates.Count!=0)
             {
                 existingCertificates.ForEach(certificate => existingSchool.RemoveCertificate(certificate));
                 selectedCertificates.ForEach(certificate => existingSchool.AddCertificate(certificate));
             }
 
-            return certificatesRetrievalErrors.Count != 0
+            return certificatesRetrievalErrors.Count!=0
                 ? Result<List<ArrCertificate>>.WithErrors([.. certificatesRetrievalErrors])
                 : selectedCertificates;
         }
@@ -171,8 +175,9 @@ public class UpdateSchoolCommandHandler(
     {
         var request = context.Get<UpdateSchoolCommand>();
         var school = context.Get<School>();
-        if (request.SocialMediaLinks is null) return school;
-        foreach (var socialMediaLink in request.SocialMediaLinks)
+        if(request.SocialMediaLinks is null)
+            return school;
+        foreach(var socialMediaLink in request.SocialMediaLinks)
             FlexContext.StartContext(request, school, socialMediaLink)
                 .Then(_ => socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName))
                 .Then(CreateImage)
@@ -210,8 +215,9 @@ public class UpdateSchoolCommandHandler(
         var request = context.Get<UpdateSchoolCommand>();
         var existingSchool = context.Get<School>();
         var existingWebsite =
-            existingSchool.WebsiteLinks.FirstOrDefault(link => link.Description == "Company Website Icon");
-        if (existingWebsite is null || request.WebsiteLink is null) return existingSchool;
+            existingSchool.WebsiteLinks.FirstOrDefault(link => link.Description=="Company Website Icon");
+        if(existingWebsite is null||request.WebsiteLink is null)
+            return existingSchool;
         return FlexContext.StartContext(request, existingSchool)
             .Then(UpdateImage)
             .Then(CreateWebsiteLink)
@@ -219,12 +225,13 @@ public class UpdateSchoolCommandHandler(
 
         Result<Image> UpdateImage(FlexContext localContext)
         {
-            string legalName = request.LegalName ?? existingSchool.CompanyName;
+            string legalName = request.LegalName??existingSchool.CompanyName;
             var existingImage = existingWebsite.Icon;
-            if (existingImage is null)
+            if(existingImage is null)
                 throw new NullReferenceException("Unable to find icon of existing school website");
 
-            if (request.WebsiteLink?.IconData is null) return existingImage;
+            if(request.WebsiteLink?.IconData is null)
+                return existingImage;
 
             return existingImage.Update($"{legalName}-Website-Icon",
                 request.WebsiteLink.Value.IconData.Value.ContentType,

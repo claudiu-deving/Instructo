@@ -11,6 +11,7 @@ public readonly record struct SchoolReadDto(
     string CompanyName,
     string Email,
     string PhoneNumber,
+    string Slug,
     IEnumerable<PhoneNumberGroupDto> PhoneNumberGroups,
     ImageReadDto IconData,
     WebsiteLinkReadDto[] Links,

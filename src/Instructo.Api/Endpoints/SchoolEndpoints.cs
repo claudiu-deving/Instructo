@@ -3,10 +3,12 @@ using Application.Schools.Commands.DeleteSchool;
 using Application.Schools.Commands.UpdateSchool;
 using Application.Schools.Queries.GetSchoolById;
 using Application.Schools.Queries.GetSchools;
+
 using Domain.Dtos.School;
 using Domain.Entities;
 using Domain.Shared;
 using Domain.ValueObjects;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Endpoints;
@@ -17,7 +19,7 @@ public static class SchoolEndpoints
     {
         var group = app.MapGroup("api/schools").WithTags("Schools");
         group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
-        group.MapGet("/{id:guid}", GetSchoolById).WithName("Get a School By Id").AllowAnonymous();
+        group.MapGet("/{slug}", GetSchoolById).WithName("Get a School By Slug").AllowAnonymous();
         group.MapPost("/", CreateSchool).WithName("Create School");
         group.MapPatch("/{id:guid}", UpdateSchool).WithName("Update SchoolEntities")
             .RequireAuthorization(ApplicationRole.IronMan.ToString());
@@ -33,7 +35,7 @@ public static class SchoolEndpoints
         var schoolId = SchoolId.CreateNew(id);
         var command = new UpdateSchoolApprovalStatusCommand(schoolId, createSchoolCommand.IsApproved);
         var updateRequest = await sender.Send(command);
-        if (updateRequest.IsError)
+        if(updateRequest.IsError)
             return TypedResults.BadRequest(new { errors = updateRequest.Errors.ToList() });
         return TypedResults.Ok();
     }
@@ -43,15 +45,16 @@ public static class SchoolEndpoints
         [FromBody] UpdateSchoolCommandDto createSchoolCommand)
     {
         var schoolId = SchoolId.CreateNew(id);
-        if (context.User.FindFirstValue(ClaimTypes.NameIdentifier) is not { } guidValue ||
+        if(context.User.FindFirstValue(ClaimTypes.NameIdentifier) is not { } guidValue||
             !Guid.TryParse(guidValue, out var guid))
             return TypedResults.Unauthorized();
 
         var updateRequest = await FlexContext.StartContextAsync()
             .Then(ctx => UpdateSchoolCommand.Create(createSchoolCommand, schoolId, guid))
             .Then(flexContext => sender.Send(flexContext.Get<UpdateSchoolCommand>()));
-        if (!updateRequest.IsError) return Results.Ok(updateRequest.Value!.Get<SchoolReadDto>());
-        return updateRequest.Errors.Any(x => x.Code == "NotFound") ? TypedResults.NotFound() : Results.Ok();
+        if(!updateRequest.IsError)
+            return Results.Ok(updateRequest.Value!.Get<SchoolReadDto>());
+        return updateRequest.Errors.Any(x => x.Code=="NotFound") ? TypedResults.NotFound() : Results.Ok();
     }
 
     private static async Task<IResult> DeleteSchool(
@@ -60,10 +63,10 @@ public static class SchoolEndpoints
         Guid id)
     {
         var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
+        if(userId is null)
             return TypedResults.Unauthorized();
         var deletionRequest = await sender.Send(new DeleteSchoolCommand(SchoolId.CreateNew(id), userId));
-        if (deletionRequest.IsError)
+        if(deletionRequest.IsError)
             return TypedResults.BadRequest(new { errors = deletionRequest.Errors.ToList() });
         return TypedResults.Ok();
     }
@@ -74,10 +77,10 @@ public static class SchoolEndpoints
         var errors = new List<Error>();
         CreateSchoolCommand? command = null;
         CreateSchoolCommand.Create(createSchoolCommand)
-            .OnSuccess(value => command = value)
+            .OnSuccess(value => command=value)
             .OnError(errors.AddRange);
 
-        if (errors.Count > 0 || command is null)
+        if(errors.Count>0||command is null)
             return TypedResults.BadRequest(new { errors = errors.ToList() });
 
         var userRequest = await sender.Send(command);
@@ -86,14 +89,14 @@ public static class SchoolEndpoints
             nok => TypedResults.BadRequest(new { errors = nok.ToList() }));
     }
 
-    private static async Task<IResult> GetSchoolById([FromServices] ISender sender, Guid id)
+    private static async Task<IResult> GetSchoolById([FromServices] ISender sender, string slug)
     {
-        var query = new GetSchoolByIdQuery(id);
+        var query = new GetSchoolByIdQuery(slug);
         var userRequest = await sender.Send(query);
         return userRequest.Match<IResult>(
             ok =>
             {
-                if (ok == new SchoolReadDto())
+                if(ok==new SchoolReadDto())
                     return TypedResults.NotFound();
                 return TypedResults.Ok(ok);
             },
@@ -108,13 +111,13 @@ public static class SchoolEndpoints
 
         var query = new GetSchoolsQuery(isAdmin);
         var userRequest = await sender.Send(query);
-        parameters = parameters with { PageNumber = parameters.PageNumber == 0 ? 1 : parameters.PageNumber };
-        parameters = parameters with { PageSize = parameters.PageSize > 50 ? 50 : parameters.PageSize };
+        parameters=parameters with { PageNumber=parameters.PageNumber==0 ? 1 : parameters.PageNumber };
+        parameters=parameters with { PageSize=parameters.PageSize>50 ? 50 : parameters.PageSize };
         return userRequest.Match<IResult>(
             ok =>
             {
-                if (!string.IsNullOrEmpty(parameters.SearchTerm))
-                    ok =
+                if(!string.IsNullOrEmpty(parameters.SearchTerm))
+                    ok=
                     [
                         .. ok.Where(x =>
                             x.CompanyName.Contains(parameters.SearchTerm) ||
@@ -122,7 +125,7 @@ public static class SchoolEndpoints
                             x.Email.Contains(parameters.SearchTerm) ||
                             x.PhoneNumber.Contains(parameters.SearchTerm))
                     ];
-                ok = [.. ok.Skip((parameters.PageNumber - 1) * parameters.PageSize).Take(parameters.PageSize)];
+                ok= [.. ok.Skip((parameters.PageNumber-1)*parameters.PageSize).Take(parameters.PageSize)];
 
                 return TypedResults.Ok(ok);
             },

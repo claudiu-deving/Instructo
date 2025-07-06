@@ -15,6 +15,7 @@ public static class SchoolMappers
             school.CompanyName.Value,
             school.Email,
             school.PhoneNumber,
+            school.Slug,
             school.PhoneNumbersGroups.Select(x => x.ToDto()),
             school.Icon?.ToReadDto()??ImageReadDto.Empty,
            [.. school.WebsiteLinks.Select(x => x.ToReadDto())],

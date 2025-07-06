@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 using Domain.Shared;
 using Domain.ValueObjects;
 
@@ -27,17 +28,18 @@ public class School : BaseAuditableEntity<SchoolId>
         List<ArrCertificate> certificates,
         Image? icon)
     {
-        Id = SchoolId.CreateNew();
-        Owner = owner;
-        Name = name;
-        CompanyName = companyName;
-        Icon = icon;
-        Email = email;
-        PhoneNumber = phoneNumber;
-        PhoneNumbersGroups = phoneNumberGroups;
-        BussinessHours = bussinessHours;
-        VehicleCategories = vehicleCategories;
-        Certificates = certificates;
+        Id=SchoolId.CreateNew();
+        Owner=owner;
+        Name=name;
+        CompanyName=companyName;
+        Icon=icon;
+        Email=email;
+        PhoneNumber=phoneNumber;
+        PhoneNumbersGroups=phoneNumberGroups;
+        BussinessHours=bussinessHours;
+        VehicleCategories=vehicleCategories;
+        Certificates=certificates;
+        Slug=Slug.Create(CompanyName);
     }
 
     private School()
@@ -53,6 +55,7 @@ public class School : BaseAuditableEntity<SchoolId>
     public SchoolName Name { get; private set; }
     public LegalName CompanyName { get; private set; }
     public Email Email { get; private set; }
+    public Slug Slug { get; }
     public PhoneNumber PhoneNumber { get; private set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; private set; } = [];
     public BussinessHours BussinessHours { get; private set; } = BussinessHours.Empty;
@@ -65,12 +68,12 @@ public class School : BaseAuditableEntity<SchoolId>
 
     public void Approve()
     {
-        IsApproved = true;
+        IsApproved=true;
     }
 
     public void Reject()
     {
-        IsApproved = false;
+        IsApproved=false;
     }
 
     public Result<School> AddLink(WebsiteLink link)
@@ -86,14 +89,14 @@ public class School : BaseAuditableEntity<SchoolId>
 
     public void AddVehicleCategory(VehicleCategory vehicleCategory)
     {
-        if (VehicleCategories.Contains(vehicleCategory))
+        if(VehicleCategories.Contains(vehicleCategory))
             return;
         VehicleCategories.Add(vehicleCategory);
     }
 
     public bool RemoveVehicleCategory(VehicleCategory vehicleCategory)
     {
-        if (!VehicleCategories.Contains(vehicleCategory))
+        if(!VehicleCategories.Contains(vehicleCategory))
             return false;
         VehicleCategories.Remove(vehicleCategory);
         return true;
@@ -101,14 +104,14 @@ public class School : BaseAuditableEntity<SchoolId>
 
     public void AddCertificate(ArrCertificate certificate)
     {
-        if (Certificates.Contains(certificate))
+        if(Certificates.Contains(certificate))
             return;
         Certificates.Add(certificate);
     }
 
     public bool RemoveCertificate(ArrCertificate certificate)
     {
-        if (!Certificates.Contains(certificate))
+        if(!Certificates.Contains(certificate))
             return false;
         Certificates.Remove(certificate);
         return true;
@@ -116,30 +119,30 @@ public class School : BaseAuditableEntity<SchoolId>
 
     public void AddLogo(Image schoolLogo)
     {
-        Icon = schoolLogo;
+        Icon=schoolLogo;
     }
 
     public void ChangeName(SchoolName newSchoolName)
     {
-        Name = newSchoolName;
+        Name=newSchoolName;
     }
 
     public void Update(School newData)
     {
-        Name = newData.Name;
-        CompanyName = newData.CompanyName;
-        Email = newData.Email;
-        PhoneNumber = newData.PhoneNumber;
-        PhoneNumbersGroups = newData.PhoneNumbersGroups;
-        BussinessHours = newData.BussinessHours;
-        Icon = newData.Icon;
-        foreach (var link in newData.WebsiteLinks)
-            if (!WebsiteLinks.Contains(link))
+        Name=newData.Name;
+        CompanyName=newData.CompanyName;
+        Email=newData.Email;
+        PhoneNumber=newData.PhoneNumber;
+        PhoneNumbersGroups=newData.PhoneNumbersGroups;
+        BussinessHours=newData.BussinessHours;
+        Icon=newData.Icon;
+        foreach(var link in newData.WebsiteLinks)
+            if(!WebsiteLinks.Contains(link))
                 AddLink(link);
-        foreach (var link in newData.Certificates.Where(link => !Certificates.Contains(link)))
+        foreach(var link in newData.Certificates.Where(link => !Certificates.Contains(link)))
             AddCertificate(link);
 
-        foreach (var vehicleCategory in newData.VehicleCategories.Where(vehicleCategory =>
+        foreach(var vehicleCategory in newData.VehicleCategories.Where(vehicleCategory =>
                      !VehicleCategories.Contains(vehicleCategory)))
             AddVehicleCategory(vehicleCategory);
     }

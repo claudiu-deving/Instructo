@@ -41,6 +41,7 @@
     <ProjectReference Include="..\Instructo.Application\Application.csproj" />
     <ProjectReference Include="..\Instructo.Domain\Domain.csproj" />
     <ProjectReference Include="..\Instructo.Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Instructo.ServiceDefaults\Instructo.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

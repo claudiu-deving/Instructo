@@ -1,6 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
+
 using Application.Abstractions.Messaging;
 using Application.Users.Commands.RegisterUser;
+
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
@@ -10,6 +12,7 @@ using Domain.Interfaces;
 using Domain.Mappers;
 using Domain.Shared;
 using Domain.ValueObjects;
+
 using MediatR;
 
 [assembly: InternalsVisibleTo("Instructo.IntegrationTests")]
@@ -18,7 +21,7 @@ namespace Application.Schools.Commands.CreateSchool;
 
 public class CreateSchoolCommandHandler(
     ISchoolCommandRepository repository,
-    IQueryRepository<School, SchoolId> queryRepository,
+    ISchoolQueriesRepository queryRepository,
     IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
     IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
@@ -43,7 +46,7 @@ public class CreateSchoolCommandHandler(
         var request = context.Get<CreateSchoolCommand>();
         var school = context.Get<School>();
         var errors = new List<Error>();
-        foreach (var socialMediaLink in request.SocialMediaLinks)
+        foreach(var socialMediaLink in request.SocialMediaLinks)
             FlexContext.StartContext(request, school, socialMediaLink)
                 .Then(ctx => socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName))
                 .Then(CreateImage)
@@ -146,12 +149,12 @@ public class CreateSchoolCommandHandler(
             request.VehicleCategories.ForEach(async x =>
                 {
                     var categoryRequest = await vehicleQueryRepository.GetByIdAsync(x);
-                    if (categoryRequest.IsError)
+                    if(categoryRequest.IsError)
                         vehiclesCategoryRetrievalErrors.AddRange(categoryRequest.Errors);
                     selectedCategories.Add(categoryRequest.Value!);
                 }
             );
-            if (vehiclesCategoryRetrievalErrors.Count > 0)
+            if(vehiclesCategoryRetrievalErrors.Count>0)
                 return Result<List<VehicleCategory>>.WithErrors([.. vehiclesCategoryRetrievalErrors]);
 
             return Result<List<VehicleCategory>>.Success(selectedCategories);
@@ -168,7 +171,7 @@ public class CreateSchoolCommandHandler(
                     .Then(ctx => certificatesRepository.GetByIdAsync(certificateType))
                     .FinalizeContext(ctx => selectedCertificates.Add(ctx.Get<ArrCertificate>()));
             });
-            if (certificatesRetrievalErrors.Count != 0)
+            if(certificatesRetrievalErrors.Count!=0)
                 return Result<List<ArrCertificate>>.WithErrors([.. certificatesRetrievalErrors]);
             return selectedCertificates;
         }

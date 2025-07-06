@@ -1,10 +1,13 @@
 ﻿using Application.Schools.Commands.UpdateSchool;
+
 using Domain.Dtos.School;
 using Domain.ValueObjects;
+
 using FluentAssertions;
+
 using JetBrains.Annotations;
 
-namespace Instructo.IntegrationTests.Schools.Commands.UpdateSchool;
+namespace Instructo.IntegrationTests.Schools.Commands.CreateSchool;
 
 [TestSubject(typeof(UpdateSchoolCommand))]
 public class UpdateSchoolCommandCreationTest

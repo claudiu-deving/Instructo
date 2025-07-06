@@ -5,4 +5,4 @@ using Domain.Shared;
 
 namespace Application.Schools.Queries.GetSchoolById;
 
-public record GetSchoolByIdQuery(Guid Id) : ICommand<Result<SchoolReadDto>>;
+public record GetSchoolByIdQuery(string Slug) : ICommand<Result<SchoolReadDto>>;

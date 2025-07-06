@@ -1,6 +1,10 @@
-﻿using Application.Schools.Commands.UpdateSchool;
+﻿using Application.Abstractions.Messaging;
+using Application.Schools.Commands.CreateSchool;
+using Application.Schools.Commands.UpdateSchool;
+using Application.Users.Commands.RegisterUser;
 using Application.Users.Queries.GetUserById;
 
+using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
 using Domain.Entities.SchoolEntities;
@@ -21,30 +25,33 @@ using Moq;
 
 namespace Instructo.IntegrationTests.Schools.Commands.CreateSchool;
 
-[TestSubject(typeof(UpdateSchoolCommandHandler))]
-public class UpdateSchoolCommandHandlerTests
+[TestSubject(typeof(CreateSchoolCommandHandler))]
+public class CreateSchoolCommandHandlerTests
 {
     [Fact]
-    public async Task Handle_ShouldUpdateSchoolName_WhenCommandIsValid()
+    public async Task Handle_ShouldCreateSchoolName_WhenCommandIsValid()
     {
         // Arrange
         var serviceProvider = ConfigureServices();
-        var handler = serviceProvider.GetRequiredService<IRequestHandler<UpdateSchoolCommand, Result<SchoolReadDto>>>();
+        var handler = serviceProvider.GetRequiredService<IRequestHandler<CreateSchoolCommand, Result<SchoolReadDto>>>();
         var requestingUser = CreateTestUser();
         var existingSchool = CreateTestSchool(requestingUser);
 
-        var schoolId = SchoolId.CreateNew();
-        var userId = UserId.CreateNew();
+        //  var mockCreateUserCommandHandler = new Mock<ICommandHandler<RegisterUserCommand, Result<ApplicationUser>>>();
+        //   mockCreateUserCommandHandler.Setup(x => x.Handle(It.IsAny<RegisterUserCommand>(), CancellationToken.None)).ReturnsAsync(requestingUser);
+
+        var mockVehiclesCategoriesRepository = serviceProvider.GetRequiredService<Mock<IQueryRepository<VehicleCategory, VehicleCategoryType>>>()
+            .Setup(x => x.GetByIdAsync(VehicleCategoryType.B));
 
         var mockSchoolQueryRepository = serviceProvider.GetRequiredService<Mock<IQueryRepository<School, SchoolId>>>();
         mockSchoolQueryRepository.Setup(x => x.GetByIdAsync(It.IsAny<SchoolId>()))
             .ReturnsAsync(Result<School?>.Success(existingSchool));
-
         var mockMediator = serviceProvider.GetRequiredService<Mock<ISender>>();
+
         mockMediator.Setup(x => x.Send(It.IsAny<GetUserByIdQuery>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ApplicationUser>.Success(requestingUser));
-
+        mockMediator.Setup(x => x.Send(It.IsAny<RegisterUserCommand>(), CancellationToken.None)).ReturnsAsync(requestingUser);
         var mockSchoolCommandRepository =
             serviceProvider.GetRequiredService<Mock<ISchoolCommandRepository>>();
         mockSchoolCommandRepository.Setup(x => x.AddAsync(It.IsAny<School>()))
@@ -53,20 +60,42 @@ public class UpdateSchoolCommandHandlerTests
             .ReturnsAsync(Result<School>.Success(existingSchool));
 
         var newSchoolName = SchoolName.Wrap("Updated School Name");
-        var commandDto = new UpdateSchoolCommandDto
-        {
-            Name = newSchoolName.Value
-        };
-        var command = UpdateSchoolCommand.Create(commandDto, SchoolId.CreateNew(), userId);
+        var commandDto = new CreateSchoolCommandDto(
+            "Test",
+            "Test Company SRL",
+            "Owner@email.com",
+            "contact@schoo.ro",
+            "somePass123!",
+            "John",
+            "Doe",
+            "London",
+            "123 Street",
+            "0758455151",
+            "src/image",
+            "png.image",
+            [],
+            WebsiteLink.Create("url.com", "Some name", "description", Image.Create("name", "png/image", "some-url", "desc").Value!).Value!.ToDto(),
+            [],
+            [],
+            ["B"],
+            []);
+        var command = CreateSchoolCommand.Create(commandDto);
 
         // Act
         var result = await handler.Handle(command.Value!, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeFalse();
-        result.Value.Should().NotBeNull();
+        if(result.IsError)
+        {
+            result.IsError.Should()
+                .BeFalse($"{string.Join(Environment.NewLine, result.Errors.ToList())}");
+        }
+        else
+        {
+            result.Value.Should().NotBeNull();
+        }
         mockSchoolCommandRepository.Verify(x
-            => x.UpdateAsync(It.Is<School>(s => s.Name == newSchoolName)), Times.Once);
+            => x.UpdateAsync(It.Is<School>(s => s.Name==newSchoolName)), Times.Once);
     }
 
     private static School CreateTestSchool(ApplicationUser requestingUser)
@@ -116,10 +145,10 @@ public class UpdateSchoolCommandHandlerTests
     {
         return new ApplicationUser
         {
-            Id = Guid.NewGuid(),
-            Email = "user@example.com",
-            FirstName = "John",
-            LastName = "Doe"
+            Id=Guid.NewGuid(),
+            Email="user@example.com",
+            FirstName="John",
+            LastName="Doe"
         };
     }
 
@@ -147,7 +176,7 @@ public class UpdateSchoolCommandHandlerTests
         services.AddScoped(_ => mockMediator);
         services.AddScoped(_ => mockMediator.Object);
 
-        services.AddScoped<IRequestHandler<UpdateSchoolCommand, Result<SchoolReadDto>>, UpdateSchoolCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateSchoolCommand, Result<SchoolReadDto>>, CreateSchoolCommandHandler>();
 
         return services.BuildServiceProvider();
     }
