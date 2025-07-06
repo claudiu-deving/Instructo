@@ -4,7 +4,7 @@ using Domain.ValueObjects;
 using FluentAssertions;
 using JetBrains.Annotations;
 
-namespace Instructo.UnitTests.Schools.Commands.UpdateSchool;
+namespace Instructo.IntegrationTests.Schools.Commands.UpdateSchool;
 
 [TestSubject(typeof(UpdateSchoolCommand))]
 public class UpdateSchoolCommandCreationTest

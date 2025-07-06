@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Data;
 
-namespace Instructo.UnitTests.Data.Repositories.Queries;
+namespace Instructo.IntegrationTests.Data.Repositories.Queries;
 
 public abstract class IntegrationTestBase : IClassFixture<IntegrationTestFixture>
 {

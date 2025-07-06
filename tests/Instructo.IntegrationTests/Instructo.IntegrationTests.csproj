@@ -5,7 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-        <RootNamespace>Instructo.UnitTests</RootNamespace>
+        <IsTestProject>true</IsTestProject>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
+        <PreserveCompilationReferences>true</PreserveCompilationReferences>
     </PropertyGroup>
 
     <ItemGroup>
@@ -37,9 +39,14 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Instructo.Tests.Common\Instructo.Tests.Common.csproj"/>
+        <ProjectReference Include="..\..\src\Instructo.Api\Api.csproj"/>
         <ProjectReference Include="..\..\src\Instructo.Application\Application.csproj"/>
         <ProjectReference Include="..\..\src\Instructo.Domain\Domain.csproj"/>
         <ProjectReference Include="..\..\src\Instructo.Infrastructure\Infrastructure.csproj"/>
     </ItemGroup>
+    <ItemGroup>
+        <None Include="appsettings.Testing.json" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
 
 </Project>

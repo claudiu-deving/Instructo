@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 
-namespace Instructo.UnitTests.Data.Repositories.Queries;
+namespace Instructo.IntegrationTests.Data.Repositories.Queries;
 
 public class InMemoryTestFixture : WebApplicationFactory<Program>
 {
@@ -22,7 +22,7 @@ public class InMemoryTestFixture : WebApplicationFactory<Program>
             // Add in-memory database
             services.AddDbContext<AppDbContext>(options =>
             {
-                InMemoryDbContextOptionsExtensions.UseInMemoryDatabase(options, databaseName: Guid.NewGuid().ToString());
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString());
                 options.EnableSensitiveDataLogging();
             });
 

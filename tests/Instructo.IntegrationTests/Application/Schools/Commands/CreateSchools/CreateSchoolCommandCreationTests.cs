@@ -1,10 +1,9 @@
-﻿using Domain.Dtos.Link;
-
-using FluentAssertions;
-
-using Application.Schools.Commands.CreateSchool;
-using Domain.Dtos.School;
+﻿using Application.Schools.Commands.CreateSchool;
+using Domain.Dtos.Image;
+using Domain.Dtos.Link;
 using Domain.Dtos.PhoneNumbers;
+using Domain.Dtos.School;
+using FluentAssertions;
 using JetBrains.Annotations;
 
 namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
@@ -12,13 +11,12 @@ namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 [TestSubject(typeof(CreateSchoolCommand))]
 public class CreateSchoolCommandCreationTests
 {
-
     [Fact]
     public void ValidInputShouldCreateANewCommand()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-             "Test Driving School",
-           "Test Driving School LLC",
+            "Test Driving School",
+            "Test Driving School LLC",
             "Owner@EMail.com",
             "Scgool@Email.com",
             "123xad21!~",
@@ -31,9 +29,9 @@ public class CreateSchoolCommandCreationTests
             "image/png",
             [],
             new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
-            new Domain.Dtos.Image.ImageReadDto
+                new ImageReadDto
                 (
-                     "",
+                    "",
                     "/path/to/valid/website-icon.png",
                     "image/png",
                     "Some description"
@@ -45,21 +43,18 @@ public class CreateSchoolCommandCreationTests
                     "https://facebook.com/test-school",
                     "Facebook"
                 )
-
-           ]
+            ]
             ,
             [], ["B"], []
         ));
-        if(request.IsError)
-        {
-            throw new InvalidOperationException($"Failed to create valid command: {string.Join(", ", request.Errors.Select(e => e.Message))}");
-        }
+        if (request.IsError)
+            throw new InvalidOperationException(
+                $"Failed to create valid command: {string.Join(", ", request.Errors.Select(e => e.Message))}");
         var command = request.Value!;
         Assert.NotNull(command);
         Assert.Equal("Test Driving School", command.Name);
         Assert.Equal("Test Driving School LLC", command.LegalName);
         Assert.Equal("Test", command.OwnerFirstName);
-
     }
 
     [Fact]
@@ -69,30 +64,30 @@ public class CreateSchoolCommandCreationTests
             "Test Driving School",
             "test Driving School LLC",
             "Test",
-             "Owner",
-             "Owner@EMail.com",
-             "Scgool@Email.com",
-             "123xad21!~",
-             "Test City",
-             "",
-             "123 Test St",
-             "123-456-7890",
-             "/path/to/valid/image.png",
-             [],
-             new WebsiteLinkReadDto
-             {
-                 Url="https://example.com",
-                 Name="Website",
-                 Description="Official website",
-                 IconData=new Domain.Dtos.Image.ImageReadDto
-                 {
-                     Url="/path/to/valid/website-icon.png",
-                     ContentType="image/png"
-                 }
-             },
-            SocialMediaLinks: new List<SocialMediaLinkDto>
+            "Owner",
+            "Owner@EMail.com",
+            "Scgool@Email.com",
+            "123xad21!~",
+            "Test City",
+            "",
+            "123 Test St",
+            "123-456-7890",
+            "/path/to/valid/image.png",
+            [],
+            new WebsiteLinkReadDto
             {
-                new SocialMediaLinkDto
+                Url = "https://example.com",
+                Name = "Website",
+                Description = "Official website",
+                IconData = new ImageReadDto
+                {
+                    Url = "/path/to/valid/website-icon.png",
+                    ContentType = "image/png"
+                }
+            },
+            new List<SocialMediaLinkDto>
+            {
+                new()
                 {
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
@@ -123,13 +118,13 @@ public class CreateSchoolCommandCreationTests
             [],
             new WebsiteLinkReadDto
             {
-                Url="https://example.com",
-                Name="Website",
-                Description="Official website",
-                IconData=new Domain.Dtos.Image.ImageReadDto
+                Url = "https://example.com",
+                Name = "Website",
+                Description = "Official website",
+                IconData = new ImageReadDto
                 {
-                    Url="/path/to/valid/website-icon.png",
-                    ContentType="image/png"
+                    Url = "/path/to/valid/website-icon.png",
+                    ContentType = "image/png"
                 }
             },
             [
@@ -150,44 +145,43 @@ public class CreateSchoolCommandCreationTests
     public void WithOnlyOnePhoneNumber_IsSetAsMain()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-
-           "Test Driving School",
-           "Test Driving School LLC",
-           "Test",
-           "Owner",
-           "Owner@EMail.com",
-           "School@EMail.com",
-           "123xad21!~",
-           "Test City",
-           "123 Test St",
-           "123213",
-           "/path/to/valid/image.png",
-           "image/png",
-           [],
-           new WebsiteLinkReadDto
-           {
-               Url="https://example.com",
-               Name="Website",
-               Description="Official website",
-               IconData=new Domain.Dtos.Image.ImageReadDto
-               {
-                   Url="/path/to/valid/website-icon.png",
-                   ContentType="image/png"
-               }
-           },
-           [
-               new SocialMediaLinkDto
+            "Test Driving School",
+            "Test Driving School LLC",
+            "Test",
+            "Owner",
+            "Owner@EMail.com",
+            "School@EMail.com",
+            "123xad21!~",
+            "Test City",
+            "123 Test St",
+            "123213",
+            "/path/to/valid/image.png",
+            "image/png",
+            [],
+            new WebsiteLinkReadDto
+            {
+                Url = "https://example.com",
+                Name = "Website",
+                Description = "Official website",
+                IconData = new ImageReadDto
+                {
+                    Url = "/path/to/valid/website-icon.png",
+                    ContentType = "image/png"
+                }
+            },
+            [
+                new SocialMediaLinkDto
                 {
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ],
+            ],
             [],
             ["B"],
             []
-       ));
+        ));
         request.IsError.Should().BeFalse();
-        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
         returnedValue.PhoneNumber.Should().NotBeNull();
         returnedValue.PhoneNumbersGroups.Should().BeEmpty();
     }
@@ -196,43 +190,43 @@ public class CreateSchoolCommandCreationTests
     public void WithOnePhoneNumberInGroup_SetAsMain_ClearGroup()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-           "Test Driving School",
-           "Test Driving School LLC",
-           "Test",
-           "Owner",
-           "Owner@EMail.com",
-           "School@EMail.com",
-           "123xad21!~",
-           "Test City",
-           "123 Test St",
-           "",
-           "/path/to/valid/image.png",
-           "image/png",
-           [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("123213")])],
-           new WebsiteLinkReadDto
-           {
-               Url="https://example.com",
-               Name="Website",
-               Description="Official website",
-               IconData=new Domain.Dtos.Image.ImageReadDto
-               {
-                   Url="/path/to/valid/website-icon.png",
-                   ContentType="image/png"
-               }
-           },
-           [
-               new SocialMediaLinkDto
+            "Test Driving School",
+            "Test Driving School LLC",
+            "Test",
+            "Owner",
+            "Owner@EMail.com",
+            "School@EMail.com",
+            "123xad21!~",
+            "Test City",
+            "123 Test St",
+            "",
+            "/path/to/valid/image.png",
+            "image/png",
+            [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("123213")])],
+            new WebsiteLinkReadDto
+            {
+                Url = "https://example.com",
+                Name = "Website",
+                Description = "Official website",
+                IconData = new ImageReadDto
+                {
+                    Url = "/path/to/valid/website-icon.png",
+                    ContentType = "image/png"
+                }
+            },
+            [
+                new SocialMediaLinkDto
                 {
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ],
+            ],
             [],
             ["B"],
             []
-       ));
+        ));
         request.IsError.Should().BeFalse();
-        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
         returnedValue.PhoneNumber.Should().NotBeNull();
         returnedValue.PhoneNumber.Value.Should().Be("123213");
         returnedValue.PhoneNumbersGroups.Count.Should().Be(0);
@@ -242,44 +236,43 @@ public class CreateSchoolCommandCreationTests
     public void WithTwoPhoneNumbers_FirstIsSetAsMain()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-
-           "Test Driving School",
-           "Test Driving School LLC",
-           "Test",
-           "Owner",
-           "Owner@EMail.com",
-           "School@EMail.com",
-           "123xad21!~",
-           "Test City",
-           "123 Test St",
-           "",
-           "/path/to/valid/image.png",
-           "image/png",
-           [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("123213"), new PhoneNumberDto("455656")])],
-           new WebsiteLinkReadDto
-           {
-               Url="https://example.com",
-               Name="Website",
-               Description="Official website",
-               IconData=new Domain.Dtos.Image.ImageReadDto
-               {
-                   Url="/path/to/valid/website-icon.png",
-                   ContentType="image/png"
-               }
-           },
-           [
-               new SocialMediaLinkDto
+            "Test Driving School",
+            "Test Driving School LLC",
+            "Test",
+            "Owner",
+            "Owner@EMail.com",
+            "School@EMail.com",
+            "123xad21!~",
+            "Test City",
+            "123 Test St",
+            "",
+            "/path/to/valid/image.png",
+            "image/png",
+            [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("123213"), new PhoneNumberDto("455656")])],
+            new WebsiteLinkReadDto
+            {
+                Url = "https://example.com",
+                Name = "Website",
+                Description = "Official website",
+                IconData = new ImageReadDto
+                {
+                    Url = "/path/to/valid/website-icon.png",
+                    ContentType = "image/png"
+                }
+            },
+            [
+                new SocialMediaLinkDto
                 {
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ],
+            ],
             [],
             ["B"],
             []
-       ));
+        ));
         request.IsError.Should().BeFalse();
-        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
         returnedValue.PhoneNumber.Should().NotBeNull();
         returnedValue.PhoneNumber.Value.Should().Be("123213");
         returnedValue.PhoneNumbersGroups.Count.Should().Be(1);
@@ -292,44 +285,43 @@ public class CreateSchoolCommandCreationTests
     public void WithTwoPhoneNumbers_OneInGroupAndOneInMain_KeepBoth()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-
-           "Test Driving School",
-           "Test Driving School LLC",
-           "Test",
-           "Owner",
-           "Owner@EMail.com",
-           "School@EMail.com",
-           "123xad21!~",
-           "Test City",
-           "123 Test St",
-           "123213",
-           "/path/to/valid/image.png",
-           "image/png",
-           [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("455656")])],
-           new WebsiteLinkReadDto
-           {
-               Url="https://example.com",
-               Name="Website",
-               Description="Official website",
-               IconData=new Domain.Dtos.Image.ImageReadDto
-               {
-                   Url="/path/to/valid/website-icon.png",
-                   ContentType="image/png"
-               }
-           },
-           [
-               new SocialMediaLinkDto
+            "Test Driving School",
+            "Test Driving School LLC",
+            "Test",
+            "Owner",
+            "Owner@EMail.com",
+            "School@EMail.com",
+            "123xad21!~",
+            "Test City",
+            "123 Test St",
+            "123213",
+            "/path/to/valid/image.png",
+            "image/png",
+            [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("455656")])],
+            new WebsiteLinkReadDto
+            {
+                Url = "https://example.com",
+                Name = "Website",
+                Description = "Official website",
+                IconData = new ImageReadDto
+                {
+                    Url = "/path/to/valid/website-icon.png",
+                    ContentType = "image/png"
+                }
+            },
+            [
+                new SocialMediaLinkDto
                 {
                     Url = "https://facebook.com/test-school",
                     SocialPlatformName = "Facebook"
                 }
-           ],
+            ],
             [],
             ["B"],
             []
-       ));
+        ));
         request.IsError.Should().BeFalse();
-        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
         returnedValue.PhoneNumber.Should().NotBeNull();
         returnedValue.PhoneNumber.Value.Should().Be("123213");
         returnedValue.PhoneNumbersGroups.Count.Should().Be(1);

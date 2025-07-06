@@ -7,10 +7,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Testcontainers.MsSql;
 
-namespace Instructo.UnitTests.Data.Repositories.Queries;
+namespace Instructo.IntegrationTests.Data.Repositories.Queries;
 
 public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
@@ -37,9 +36,6 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
 
         // Ensure database is created and migrations are applied
         await context.Database.EnsureCreatedAsync();
-
-        // Apply any pending migrations
-        if ((await context.Database.GetPendingMigrationsAsync()).Any()) await context.Database.MigrateAsync();
 
         // Seed test data
         await SeedTestDataAsync(scope.ServiceProvider);

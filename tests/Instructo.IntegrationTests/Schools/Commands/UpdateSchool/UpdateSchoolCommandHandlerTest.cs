@@ -13,7 +13,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace Instructo.UnitTests.Schools.Commands.UpdateSchool;
+namespace Instructo.IntegrationTests.Schools.Commands.UpdateSchool;
 
 [TestSubject(typeof(UpdateSchoolCommandHandler))]
 public class UpdateSchoolCommandHandlerTests
@@ -43,6 +43,8 @@ public class UpdateSchoolCommandHandlerTests
             serviceProvider.GetRequiredService<Mock<ISchoolCommandRepository>>();
         mockSchoolCommandRepository.Setup(x => x.AddAsync(It.IsAny<School>()))
             .ReturnsAsync(existingSchool);
+        mockSchoolCommandRepository.Setup(x => x.UpdateAsync(It.IsAny<School>()))
+            .ReturnsAsync(Result<School>.Success(existingSchool));
 
         var newSchoolName = SchoolName.Wrap("Updated School Name");
         var commandDto = new UpdateSchoolCommandDto
@@ -58,7 +60,7 @@ public class UpdateSchoolCommandHandlerTests
         result.IsError.Should().BeFalse();
         result.Value.Should().NotBeNull();
         mockSchoolCommandRepository.Verify(x
-            => x.AddAsync(It.Is<School>(s => s.Name == newSchoolName)), Times.Once);
+            => x.UpdateAsync(It.Is<School>(s => s.Name == newSchoolName)), Times.Once);
     }
 
     private static School CreateTestSchool(ApplicationUser requestingUser)
