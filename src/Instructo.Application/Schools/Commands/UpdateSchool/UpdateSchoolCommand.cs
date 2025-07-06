@@ -1,5 +1,4 @@
 ﻿using Application.Abstractions.Messaging;
-
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities.SchoolEntities;
@@ -11,9 +10,12 @@ namespace Application.Schools.Commands.UpdateSchool;
 
 public partial record UpdateSchoolCommand : ICommand<Result<SchoolReadDto>>
 {
-    private UpdateSchoolCommand() { }
+    private UpdateSchoolCommand()
+    {
+    }
+
     public SchoolId SchoolId { get; internal set; }
-    public UserId RequestingUserId { get; internal set; }
+    public Guid RequestingUserId { get; internal set; }
     public SchoolName? Name { get; internal set; }
     public LegalName? LegalName { get; internal set; }
     public Email? SchoolEmail { get; internal set; }

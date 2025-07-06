@@ -1,76 +1,59 @@
 ﻿using System.Data.Common;
-
-using Dapper;
-
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Shared;
-
 using Microsoft.Data;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories.Queries;
 
 public class ArrCertificateQueriesRepository : IQueryRepository<ArrCertificate, ARRCertificateType>
 {
-    private readonly IDbConnectionProvider _dbConnectionProvider;
+    private readonly AppDbContext _dbContext;
 
-    public ArrCertificateQueriesRepository(IDbConnectionProvider dbConnectionProvider)
+    public ArrCertificateQueriesRepository(AppDbContext dbContext)
     {
-        _dbConnectionProvider=dbConnectionProvider;
+        _dbContext = dbContext;
     }
+
     public async Task<Result<IEnumerable<ArrCertificate>?>> GetAllAsync()
     {
         try
         {
-            using var connection = new SqlConnection(_dbConnectionProvider.ConnectionString);
-            await connection.OpenAsync();
-            var sql = @" SELECT
-                        ac.Id,
-                        ac.Name,
-                        FROM ARRCertificates ac
-                        ";
-            return Result<IEnumerable<ArrCertificate>?>.Success(await connection.QueryAsync<ArrCertificate>(sql));
+            return Result<IEnumerable<ArrCertificate>?>.Success(await _dbContext.CertificateTypes.ToListAsync());
         }
-        catch(OperationAbortedException ex)
+        catch (OperationAbortedException ex)
         {
-            return Result<IEnumerable<ArrCertificate>?>.Failure([new Error("GetAllArrCertificates-Aborted", ex.Message)]);
+            return Result<IEnumerable<ArrCertificate>?>.Failure(new Error("GetAllArrCertificates-Aborted", ex.Message));
         }
-        catch(DbException ex)
+        catch (DbException ex)
         {
-            return Result<IEnumerable<ArrCertificate>?>.Failure([new Error("GetAllArrCertificates-Db", ex.Message)]);
+            return Result<IEnumerable<ArrCertificate>?>.Failure(new Error("GetAllArrCertificates-Db", ex.Message));
         }
     }
+
     public async Task<Result<ArrCertificate?>> GetByIdAsync(ARRCertificateType id)
     {
-
         try
         {
-            using var connection = new SqlConnection(_dbConnectionProvider.ConnectionString);
-            var sql = @"
-            SELECT ac.Id,
-            ac.Name
-            FROM ARRCertificates ac
-            WHERE ac.Id=@Id";
-            var queryResult = await connection.QuerySingleAsync<ArrCertificate>(sql, new { Id = (int)id });
-            return Result<ArrCertificate?>.Success(queryResult);
+            return Result<ArrCertificate?>.Success(await _dbContext.CertificateTypes.FindAsync(id));
         }
-        catch(InvalidOperationException ex)
+        catch (InvalidOperationException ex)
         {
-            return Result<ArrCertificate?>.Failure([new Error("GetArrCertificateById-Empty", ex.Message)]);
+            return Result<ArrCertificate?>.Failure(new Error("GetArrCertificateById-Empty", ex.Message));
         }
-        catch(OperationAbortedException ex)
+        catch (OperationAbortedException ex)
         {
-            return Result<ArrCertificate?>.Failure([new Error("GetArrCertificateById-Aborted", ex.Message)]);
+            return Result<ArrCertificate?>.Failure(new Error("GetArrCertificateById-Aborted", ex.Message));
         }
-        catch(DbException ex)
+        catch (DbException ex)
         {
-            return Result<ArrCertificate?>.Failure([new Error("GetArrCertificateById-Db", ex.Message)]);
+            return Result<ArrCertificate?>.Failure(new Error("GetArrCertificateById-Db", ex.Message));
         }
     }
 
-    public Task<Result<IEnumerable<ArrCertificate>?>> GetByIndexed(string indexValue)
+    public Task<Result<ArrCertificate>?> GetByIndexed(string companyName)
     {
         throw new NotImplementedException();
     }

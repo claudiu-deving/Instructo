@@ -1,14 +1,11 @@
-﻿using Domain.Dtos.User;
-using Domain.Entities;
+﻿using Domain.Entities;
 
 namespace Domain.Interfaces;
 
 public interface IUserQueries
 {
-    Task<ApplicationUser> GetUsersByIdAsync(Guid userId);
+    Task<ApplicationUser> GetUserByIdAsync(Guid userId);
     Task<IEnumerable<ApplicationUser>> GetUsers();
-    Task<ApplicationUser?> GetUsersByIdBySuperAsync(Guid userId);
-    Task<IEnumerable<ApplicationUser>> GetUsersBySuper();
-    Task<ApplicationUser> GetUserByEmailAsync(string email);
     Task<bool> IsEmailUnique(string email);
+    Task<ApplicationUser?> GetUserByEmailAsync(string email);
 }
