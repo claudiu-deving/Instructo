@@ -1,0 +1,362 @@
+{
+  "id": "academia-rutiera-cluj",
+  "slug": "academia-rutiera-cluj-srl",
+  "name": "Academia Rutieră",
+  "legalName": "Academia Rutieră Cluj SRL",
+  "slogan": "Condus sigur, viitor asigurat",
+  "description": "Academia Rutieră Cluj este o școală de șoferi cu tradiție în formarea șoferilor responsabili și siguri. Cu peste 15 ani de experiență și o echipă de instructori calificați, oferim cursuri complete pentru toate categoriile de vehicule. Abordarea noastră personalizată și flota modernă de vehicule garantează o pregătire de calitate superioară pentru examenul de conducere.",
+  "schoolEmail": "office@academiarutieracluj.ro",
+  "ownerFirstName": "Cristian",
+  "ownerLastName": "Moldovan",
+  "city": "Cluj-Napoca",
+  "address": "Strada Memorandumului 28, Cluj-Napoca",
+  "phoneNumber": "+40742567890",
+  "imagePath": "https://res.cloudinary.com/dxjtaqxhr/image/upload/v1751551097/drive_3_dbgsrl.jpg",
+  "logoSvg": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><text x='50' y='60' font-family='Inter, Arial, sans-serif' font-size='45' font-weight='700' fill='#fff' text-anchor='middle'>AR</text></svg>",
+  "coverPhoto": "https://res.cloudinary.com/dxjtaqxhr/image/upload/v1751551097/drive_3_dbgsrl.jpg",
+  "numberStudents": 1200,
+  "imageContentType": "image/jpeg",
+  "phoneNumberGroups": [
+    {
+      "name": "Secretariat",
+      "phoneNumbers": [
+        {
+          "value": "+40264567890",
+          "name": "Birou"
+        },
+        {
+          "value": "+40742567890",
+          "name": "WhatsApp"
+        }
+      ]
+    }
+  ],
+  "websiteLink": {
+    "url": "https://www.academiarutieracluj.ro",
+    "name": "Website oficial",
+    "description": "Școala de șoferi cu tradiție din Cluj",
+    "iconData": {
+      "fileName": "web-icon.png",
+      "url": "https://res.cloudinary.com/dxjtaqxhr/image/upload/v1751551097/drive_3_dbgsrl.jpg",
+      "contentType": "image/png",
+      "description": "Website icon"
+    }
+  },
+  "socialMediaLinks": [
+    {
+      "url": "https://facebook.com/academiarutieracluj",
+      "socialPlatformName": "Facebook"
+    }
+  ],
+  "bussinessHours": [
+    {
+      "daysOfTheWeek": [
+        "Luni",
+        "Marți",
+        "Miercuri",
+        "Joi",
+        "Vineri"
+      ],
+      "intervals": [
+        {
+          "startingHourAndMinute": "08:30",
+          "endingHourAndMinute": "18:30"
+        }
+      ]
+    },
+    {
+      "daysOfTheWeek": [
+        "Sâmbătă"
+      ],
+      "intervals": [
+        {
+          "startingHourAndMinute": "09:00",
+          "endingHourAndMinute": "15:00"
+        }
+      ]
+    }
+  ],
+  "vechiclesCategories": [
+    "B",
+    "C",
+    "D"
+  ],
+  "arrCertifications": [
+    "Atestat pentru instructor auto",
+    "Atestat pentru transport persoane"
+  ],
+  "ratings": [
+    {
+      "score": 5,
+      "comment": "Cea mai bună școală din Cluj! Instructorii sunt foarte profesioniști.",
+      "reviewerName": "Andrei Mureșan",
+      "date": "2024-04-18"
+    },
+    {
+      "score": 4,
+      "comment": "Foarte mulțumit de cursuri. Recomand cu încredere!",
+      "reviewerName": "Elena Petru",
+      "date": "2024-03-25"
+    }
+  ],
+  "averageRating": 4.5,
+  "successMetrics": {
+    "yearsOfExperience": 15,
+    "passedStudents": 7650
+  },
+  "gallery": {
+    "groups": [
+      {
+        "id": "facilities",
+        "name": "Facilități",
+        "description": "Spațiile noastre moderne de învățare și relaxare",
+        "images": [
+          {
+            "id": "facility-1",
+            "url": "/images/gallery/facilities/classroom_modern.jpg",
+            "alt": "Sala de curs modernă",
+            "caption": "Sala de curs echipată cu tehnologie modernă"
+          },
+          {
+            "id": "facility-2",
+            "url": "/images/gallery/facilities/reception_area.jpg", 
+            "alt": "Zona de recepție",
+            "caption": "Recepția prietenoasă și profesională"
+          },
+          {
+            "id": "facility-3",
+            "url": "/images/gallery/facilities/waiting_room.jpg",
+            "alt": "Sala de așteptare",
+            "caption": "Spațiu confortabil pentru așteptare"
+          }
+        ]
+      },
+      {
+        "id": "promotions",
+        "name": "Promoții și evenimente",
+        "description": "Ofertele speciale și evenimentele organizate de școala noastră",
+        "images": [
+          {
+            "id": "promo-1",
+            "url": "/images/gallery/promotions/summer_discount_2024.jpg",
+            "alt": "Oferta de vară 2024",
+            "caption": "Reducere 20% pentru înscrierea în sezonul de vară"
+          },
+          {
+            "id": "promo-2", 
+            "url": "/images/gallery/promotions/student_graduation.jpg",
+            "alt": "Ceremonia de absolvire",
+            "caption": "Festivitatea de încheiere a cursurilor - promoția martie 2024"
+          },
+          {
+            "id": "promo-3",
+            "url": "/images/gallery/promotions/safety_workshop.jpg",
+            "alt": "Workshop siguranță rutieră", 
+            "caption": "Sesiune specială despre condusul defensiv"
+          }
+        ]
+      },
+      {
+        "id": "achievements",
+        "name": "Realizări",
+        "description": "Certificările și premiile obținute de școala noastră",
+        "images": [
+          {
+            "id": "achievement-1",
+            "url": "/images/gallery/achievements/award_best_school_2023.jpg",
+            "alt": "Premiul cea mai bună școală 2023",
+            "caption": "Școala anului 2023 - Județul Cluj"
+          },
+          {
+            "id": "achievement-2",
+            "url": "/images/gallery/achievements/instructor_certification.jpg",
+            "alt": "Certificări instructori",
+            "caption": "Echipa de instructori certificați și experimentați"
+          },
+          {
+            "id": "achievement-3",
+            "url": "/images/gallery/achievements/safety_certificate.jpg",
+            "alt": "Certificat siguranță",
+            "caption": "Certificat de excelență în educația rutieră"
+          }
+        ]
+      }
+    ]
+  },
+  "pricing": [
+    {
+      "category": "B",
+      "packages": {
+        "manualPrice": 2500,
+        "manualInstallmentPrice": 525,
+        "automaticPrice": 2900,
+        "automaticInstallmentPrice": 610,
+        "premiumPrice": 3400,
+        "individualLessonPrice": 95
+      }
+    },
+    {
+      "category": "C",
+      "packages": {
+        "manualPrice": 3200,
+        "manualInstallmentPrice": 675,
+        "automaticPrice": 3500,
+        "automaticInstallmentPrice": 735,
+        "premiumPrice": 4500,
+        "individualLessonPrice": 150
+      }
+    },
+    {
+      "category": "D",
+      "packages": {
+        "manualPrice": 3500,
+        "manualInstallmentPrice": 735,
+        "automaticPrice": 3800,
+        "automaticInstallmentPrice": 800,
+        "premiumPrice": 5000,
+        "individualLessonPrice": 160
+      }
+    }
+  ],
+  "echipa": {
+    "totalInstructors": 7,
+    "instructorsByGender": {
+      "barbati": 2,
+      "femei": 2
+    },
+    "instructors": [
+      {
+        "firstName": "Adrian",
+        "lastName": "Moldovan",
+        "age": 45,
+        "yearsExperience": 22,
+        "categories": [
+          "B",
+          "C",
+          "D"
+        ],
+        "specialization": "Instructor șef, Transport persoane",
+        "description": "Cu peste 22 de ani de experiență în domeniul auto, Adrian este instructorul șef al echipei noastre. Specializat în toate categoriile (B, C, D), are o abordare metodică și răbdătoare, fiind recunoscut pentru capacitatea sa de a forma șoferi responsabili și siguri. Experiența sa vastă în transportul de persoane îl face un mentor excelent pentru cei care doresc să obțină categoriile superioare.",
+        "contact": {
+          "phone": "+40742567891",
+          "email": "adrian.moldovan@academiarutieracluj.ro"
+        },
+        "profileImage": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face"
+      },
+      {
+        "firstName": "Anca",
+        "lastName": "Popescu",
+        "age": 32,
+        "yearsExperience": 8,
+        "categories": [
+          "B"
+        ],
+        "specialization": "Instructor categoria B",
+        "description": "Anca este cunoscută pentru stilul său calm și încurajator, fiind preferata elevilor anxioși sau la prima experiență de condus. Cu 8 ani de experiență, a dezvoltat tehnici eficiente pentru a ajuta elevii să depășească frica de volan și să câștige încredere rapid. Abordarea sa prietenoasă și profesională face ca lecțiile să fie relaxante și productive.",
+        "contact": {
+          "phone": "+40742567892",
+          "email": "anca.popescu@academiarutieracluj.ro"
+        },
+        "profileImage": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face"
+      },
+      {
+        "firstName": "Florin",
+        "lastName": "Iacob",
+        "age": 38,
+        "yearsExperience": 12,
+        "categories": [
+          "B",
+          "C"
+        ],
+        "specialization": "Instructor categoria B și C",
+        "description": "Florin combină experiența de 12 ani cu o pasiune reală pentru educația rutieră. Specializat în categoriile B și C, este apreciat pentru explicațiile clare și demonstrațiile practice. Stilul său de predare se bazează pe repetare și consolidare, asigurându-se că fiecare elev înțelege perfect regulile de circulație înainte de a trece la practică.",
+        "contact": {
+          "phone": "+40742567893",
+          "email": "florin.iacob@academiarutieracluj.ro"
+        },
+        "profileImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
+      },
+      {
+        "firstName": "Maria",
+        "lastName": "Vasilescu",
+        "age": 35,
+        "yearsExperience": 9,
+        "categories": [
+          "B"
+        ],
+        "specialization": "Instructor categoria B",
+        "description": "Maria aduce o perspectivă unică în instruirea auto, combinând tehnicile moderne cu o abordare personalizată pentru fiecare elev. Cu 9 ani de experiență, este expertă în adaptarea stilului de predare în funcție de personalitatea și nevoile fiecărui cursant. Elevii o apreciază pentru răbdarea și atenția la detalii, garantând o pregătire solidă pentru examen.",
+        "contact": {
+          "phone": "+40742567894",
+          "email": "maria.vasilescu@academiarutieracluj.ro"
+        },
+        "profileImage": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face"
+      }
+    ]
+  },
+  "testimonials": [
+    {
+      "id": "1",
+      "reviewerName": "Maria Popescu",
+      "reviewerInitials": "MP",
+      "rating": 5,
+      "reviewText": "Instructori foarte răbdători și profesioniști! Am reușit să iau permisul din prima încercare. Mașinile sunt în stare excelentă și programul este foarte flexibil.",
+      "reviewDate": "15 Mai 2024",
+      "platform": "google",
+      "verified": true
+    },
+    {
+      "id": "2",
+      "reviewerName": "Alexandru Ionescu",
+      "reviewerInitials": "AI",
+      "rating": 5,
+      "reviewText": "Recomand cu încredere Academia Rutieră! Instructorul Adrian a fost fantastic, explicații clare și multă răbdare. Am învățat foarte multe despre condusul defensiv.",
+      "reviewDate": "8 Mai 2024",
+      "platform": "facebook",
+      "verified": true
+    },
+    {
+      "id": "3",
+      "reviewerName": "Elena Stoica",
+      "reviewerInitials": "ES",
+      "rating": 4,
+      "reviewText": "Foarte mulțumită de servicii! Instructoarea Anca m-a ajutat să îmi câștig încrederea la volan. Singurul minus ar fi că programările se fac cu ceva întârziere.",
+      "reviewDate": "2 Mai 2024",
+      "platform": "google",
+      "verified": false
+    },
+    {
+      "id": "4",
+      "reviewerName": "Radu Marinescu",
+      "reviewerInitials": "RM",
+      "rating": 5,
+      "reviewText": "Experiență excelentă! Am făcut cursul pentru categoria C și instructorul Florin a fost foarte profesionist. Recomand cu încredere!",
+      "reviewDate": "28 Aprilie 2024",
+      "platform": "facebook",
+      "verified": true
+    },
+    {
+      "id": "5",
+      "reviewerName": "Andreea Mihail",
+      "reviewerInitials": "AM",
+      "rating": 5,
+      "reviewText": "Cea mai bună școală de șoferi din Cluj! Personal foarte amabil, mașini noi și curate. Am trecut examenul teoretic și practic fără probleme.",
+      "reviewDate": "20 Aprilie 2024",
+      "platform": "google",
+      "verified": true
+    }
+  ],
+  "extraLocations": [
+    {
+      "name": "Parcare Expo Transilvania",
+      "address": "strada Dambovitei 63, Cluj-Napoca"
+    },
+  {
+      "name": "Parcare Kaufland",
+      "address": "Parcare Kaufland IRA, Cluj-Napoca",
+      "coordinates": {
+        "lat": 46.781041,
+        "lng": 23.636321
+      }
+    }]
+}

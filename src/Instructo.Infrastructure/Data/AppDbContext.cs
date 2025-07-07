@@ -1,10 +1,15 @@
 ﻿using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
+using NetTopologySuite;
 using Infrastructure.Data.Configurations;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using NetTopologySuite.Algorithm;
+using System.Threading;
 
 namespace Infrastructure.Data;
 
@@ -20,10 +25,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<Image> Images { get; set; }
     public DbSet<ArrCertificate> CertificateTypes { get; set; }
     public DbSet<VehicleCategory> Categories { get; set; }
+    public DbSet<City> Cities { get; set; }
+    public DbSet<County> Counties { get; set; }
+    public DbSet<Address> Addresses { get; set; }
 
     public Task<int> SaveChangesAsync()
     {
         return base.SaveChangesAsync();
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlServer(x => x.UseNetTopologySuite());
+        base.OnConfiguring(optionsBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +47,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         modelBuilder.ApplyConfiguration(new SchoolsConfiguration());
         modelBuilder.ApplyConfiguration(new WebsiteLinksConfiguration());
         modelBuilder.ApplyConfiguration(new ImagesConfiguration());
+        modelBuilder.ApplyConfiguration(new AddressConfiguration());
 
         modelBuilder.Entity<ApplicationUser>().ToTable("Users").HasIndex(u => u.Email).IsUnique();
         //modelBuilder.Entity<ApplicationUser>().HasOne(x => x.School).WithOne(s => s.Owner);
@@ -43,36 +58,38 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
 
+
         ConfigCertificates(modelBuilder);
 
         ConfigCategories(modelBuilder);
+
+        var counties = GenerateCounties();
+        modelBuilder.Entity<County>().HasData(counties);
+
+        var cities = GenerateCities();
+
+        modelBuilder.Entity<City>().HasData(cities);
+    }
+
+    private static List<County> GenerateCounties()
+    {
+        return CsvDataReader.ReadCountiesFromCsv(File.ReadAllText(@"C:\Users\claud\source\repos\Instructo\src\Instructo.Infrastructure\Data\Hardcoded\counties.csv"));
+    }
+
+
+
+    private static List<City> GenerateCities()
+    {
+        return CsvDataReader.ReadCitiesFromCsv((File.ReadAllText(@"C:\Users\claud\source\repos\Instructo\src\Instructo.Infrastructure\Data\Hardcoded\orase.csv")));
     }
 
     public override int SaveChanges()
     {
-        SetToUnchanged();
-
         return base.SaveChanges();
-    }
-
-    /// <summary>
-    ///     We retrieve these hard coded entities with Dapper, EF doesn't know about them
-    /// </summary>
-    private void SetToUnchanged()
-    {
-        foreach (var entry in ChangeTracker.Entries<VehicleCategory>()
-                     .Where(e => e.State == EntityState.Added))
-            entry.State = EntityState.Unchanged;
-
-        foreach (var entry in ChangeTracker.Entries<ArrCertificate>()
-                     .Where(e => e.State == EntityState.Added))
-            entry.State = EntityState.Unchanged;
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        SetToUnchanged();
-
         return base.SaveChangesAsync(cancellationToken);
     }
 

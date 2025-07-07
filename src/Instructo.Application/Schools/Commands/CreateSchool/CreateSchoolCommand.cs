@@ -16,13 +16,15 @@ public partial record CreateSchoolCommand : ICommand<Result<SchoolReadDto>>
     }
     public SchoolName Name { get; internal set; }
     public LegalName LegalName { get; internal set; }
+    public Slogan Slogan { get; internal set; }
+    public Description Description { get; internal set; }
     public Email SchoolEmail { get; internal set; }
     public Email OwnerEmail { get; internal set; }
     public Password OwnerPassword { get; internal set; }
     public Name OwnerFirstName { get; internal set; }
     public Name OwnerLastName { get; internal set; }
-    public City City { get; internal set; }
-    public Address Address { get; internal set; }
+    public CityDto City { get; internal set; }
+    public AddressDto Address { get; internal set; }
     public PhoneNumber PhoneNumber { get; internal set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; internal set; } = [];
     public FilePath ImagePath { get; internal set; }

@@ -154,10 +154,10 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SchoolOwners", policy => policy.RequireRole(
         ApplicationRole.Owner.Name!));
 
-builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 builder.Services.AddScoped<ISchoolQueriesRepository, SchoolQueriesRepository>();
 builder.Services.AddScoped<IQueryRepository<VehicleCategory, VehicleCategoryType>, VehicleCategoryQueriesRepository>();
 builder.Services.AddScoped<IQueryRepository<ArrCertificate, ARRCertificateType>, ArrCertificateQueriesRepository>();
+builder.Services.AddScoped<IQueryRepository<City, int>, CityQueryRepository>();
 builder.Services.AddScoped<ISchoolCommandRepository, SchoolCommandRepository>();
 builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
 builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();

@@ -19,7 +19,7 @@ public static class SchoolEndpoints
     {
         var group = app.MapGroup("api/schools").WithTags("Schools");
         group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
-        group.MapGet("/{slug}", GetSchoolById).WithName("Get a School By Slug").AllowAnonymous();
+        group.MapGet("/{slug}", GetSchoolBySlug).WithName("Get a School By Slug").AllowAnonymous();
         group.MapPost("/", CreateSchool).WithName("Create School");
         group.MapPatch("/{id:guid}", UpdateSchool).WithName("Update SchoolEntities")
             .RequireAuthorization(ApplicationRole.IronMan.ToString());
@@ -89,15 +89,17 @@ public static class SchoolEndpoints
             nok => TypedResults.BadRequest(new { errors = nok.ToList() }));
     }
 
-    private static async Task<IResult> GetSchoolById([FromServices] ISender sender, string slug)
+    private static async Task<IResult> GetSchoolBySlug([FromServices] ISender sender, string slug)
     {
-        var query = new GetSchoolByIdQuery(slug);
+        var query = new GetSchoolBySlugQuery(slug);
         var userRequest = await sender.Send(query);
         return userRequest.Match<IResult>(
             ok =>
             {
                 if(ok==new SchoolReadDto())
+                {
                     return TypedResults.NotFound();
+                }
                 return TypedResults.Ok(ok);
             },
             nok => TypedResults.BadRequest(new { errors = nok.ToList() }));

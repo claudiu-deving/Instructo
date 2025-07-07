@@ -10,7 +10,7 @@ public class Result<TValue> : IResult<TValue>
         _value=value;
         _errors= [Error.None];
     }
-    protected Result(Error[] errors)
+    protected Result(params Error[] errors)
     {
         IsError=true;
         _errors=errors;
@@ -31,7 +31,7 @@ public class Result<TValue> : IResult<TValue>
 
     public static implicit operator Result<TValue>(TValue value) => new Result<TValue>(value);
     public static implicit operator Result<TValue>(Error[] errors) => new Result<TValue>(errors);
-
+    public static implicit operator Result<TValue>(Error error) => new Result<TValue>(error);
     public TResult Match<TResult>(
         Func<TValue, TResult> success,
         Func<Error[], TResult> failure) =>

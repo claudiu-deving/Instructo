@@ -21,6 +21,9 @@ internal class SchoolsConfiguration : IEntityTypeConfiguration<School>
         builder.Property(x => x.Name).HasConversion(new SchoolNameConverter());
         builder.Property(x => x.CompanyName).HasConversion(new CompanyNameConverter());
         builder.Property(x => x.Slug).HasConversion(new SlugConverter());
+        builder.Property(x => x.Description).HasConversion(x => x.Value, x => new Description(x));
+        builder.Property(x => x.Slogan).HasConversion(x => x.Value, x => new Slogan(x));
+        builder.Property(x => x.CountyId);
         builder.Property(x => x.Email).HasConversion(new EmailConverter());
         builder.Property(x => x.PhoneNumber).HasConversion(new PhoneNumberConverter());
         builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());

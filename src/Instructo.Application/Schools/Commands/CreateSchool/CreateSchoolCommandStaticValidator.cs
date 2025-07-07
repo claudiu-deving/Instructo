@@ -16,6 +16,8 @@ public partial record CreateSchoolCommand
         LegalName.Create(createSchoolCommandDto.LegalName)
                  .OnSuccess(value => createSchoolCommand.LegalName=value)
                  .OnError(errors.AddRange);
+        createSchoolCommand.Slogan=new Slogan(createSchoolCommandDto.Slogan??"");
+        createSchoolCommand.Description=new Description(createSchoolCommandDto.Description);
 
         SchoolName.Create(createSchoolCommandDto.Name)
                   .OnSuccess(value => createSchoolCommand.Name=value)
@@ -41,11 +43,11 @@ public partial record CreateSchoolCommand
             .OnSuccess(value => createSchoolCommand.OwnerLastName=value)
             .OnError(errors.AddRange);
 
-        City.Create(createSchoolCommandDto.City)
+        CityDto.Create(createSchoolCommandDto.City)
             .OnSuccess(value => createSchoolCommand.City=value)
             .OnError(errors.AddRange);
 
-        Address.Create(createSchoolCommandDto.Address)
+        AddressDto.Create(createSchoolCommandDto.Address, createSchoolCommandDto.X, createSchoolCommandDto.Y)
             .OnSuccess(value => createSchoolCommand.Address=value)
             .OnError(errors.AddRange);
 

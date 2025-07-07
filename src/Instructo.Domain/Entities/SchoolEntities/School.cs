@@ -1,16 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 
 using Domain.Shared;
 using Domain.ValueObjects;
 
 namespace Domain.Entities.SchoolEntities;
-
+[DebuggerDisplay("School: {Name.Value}, Company: {CompanyName.Value}, Owner: {Owner.FirstName} {Owner.LastName}, Email: {Email.Value}")]
 /// <summary>
-///     The school
+/// The school
 /// </summary>
 /// <remarks>
-///     One School Entity can have only one Owner and vice-versa.
+/// One School Entity can have only one Owner and vice-versa.
 /// </remarks>
 public class School : BaseAuditableEntity<SchoolId>
 {
@@ -26,7 +27,11 @@ public class School : BaseAuditableEntity<SchoolId>
         BussinessHours bussinessHours,
         List<VehicleCategory> vehicleCategories,
         List<ArrCertificate> certificates,
-        Image? icon)
+        Image? icon,
+        City city,
+        Slogan slogan,
+        Description description,
+        Address address)
     {
         Id=SchoolId.CreateNew();
         Owner=owner;
@@ -40,22 +45,35 @@ public class School : BaseAuditableEntity<SchoolId>
         VehicleCategories=vehicleCategories;
         Certificates=certificates;
         Slug=Slug.Create(CompanyName);
+        City=city;
+        County=city.County;
+        Slogan=slogan;
+        Description=description;
+        Address=address;
     }
 
     private School()
     {
+        Address=Address.Empty;
     }
 
     [Timestamp] // EF Core concurrency token
-    public byte[] RowVersion { get; private set; }
+    public byte[] RowVersion { get; private set; } = [];
 
-    [ForeignKey("Owner")] public Guid OwnerId { get; private set; }
+    [ForeignKey("Owner")] 
+    public Guid OwnerId { get; private set; }
 
     public ApplicationUser Owner { get; private set; } = null!;
     public SchoolName Name { get; private set; }
     public LegalName CompanyName { get; private set; }
     public Email Email { get; private set; }
     public Slug Slug { get; }
+    public int CountyId { get; }
+    public virtual County? County { get; private set; }
+    public virtual City? City { get; private set; }
+    public virtual Address Address { get; private set; }
+    public Slogan Slogan { get; }
+    public Description Description { get; }
     public PhoneNumber PhoneNumber { get; private set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; private set; } = [];
     public BussinessHours BussinessHours { get; private set; } = BussinessHours.Empty;
@@ -145,5 +163,24 @@ public class School : BaseAuditableEntity<SchoolId>
         foreach(var vehicleCategory in newData.VehicleCategories.Where(vehicleCategory =>
                      !VehicleCategories.Contains(vehicleCategory)))
             AddVehicleCategory(vehicleCategory);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if(obj is not School otherSchool)
+        {
+            return false;
+        }
+        return otherSchool.CompanyName.Value.Equals(this.CompanyName.Value);
+    }
+
+    public override int GetHashCode()
+    {
+        return CompanyName.Value.GetHashCode()*13;
+    }
+
+    public override string ToString()
+    {
+        return CompanyName.Value;
     }
 }

@@ -11,7 +11,6 @@ using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Mappers;
 using Domain.Shared;
-using Domain.ValueObjects;
 
 using MediatR;
 
@@ -21,7 +20,8 @@ namespace Application.Schools.Commands.CreateSchool;
 
 public class CreateSchoolCommandHandler(
     ISchoolCommandRepository repository,
-    ISchoolQueriesRepository queryRepository,
+    ISchoolQueriesRepository schoolQueryRepository,
+    IQueryRepository<Domain.Entities.City, int> citiesRepository,
     IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
     IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
@@ -119,17 +119,37 @@ public class CreateSchoolCommandHandler(
         return await FlexContext.StartContextAsync(request, user)
             .Then(CheckCompanyName)
             .Then(CreateImage)
+            .Then(GetCity)
+            .Then(CreateAddress)
             .Then(CreateVehicleCategories)
             .Then(CreateCerfificates)
             .MapAsync(CreateSchool);
 
+
         async Task<Result<CreateSchoolCommand>> CheckCompanyName(FlexContext _)
         {
-            return (await queryRepository.GetByIndexed(request.LegalName))?.Value is not null
+            return (await schoolQueryRepository.GetByIndexed(request.LegalName))?.Value is not null
                 ? Result<CreateSchoolCommand>.Failure(
                     new Error("Create-School", "Company name already exists"))
                 : Result<CreateSchoolCommand>.Success(request);
         }
+
+
+        async Task<Result<City>> GetCity(FlexContext _)
+        {
+            return (await citiesRepository.GetByIndexed(request.City.Value))?.Value is not City fromDb
+                ? Result<City>.Failure(
+                    new Error("Create-School", $"City {request.City.Value} cannot be found"))
+                : Result<City>.Success(fromDb);
+        }
+        Result<Address> CreateAddress(FlexContext _)
+        {
+            return Address.Create(
+                request.Address.Street,
+                request.Address.Longitude,
+                request.Address.Latitude);
+        }
+
 
         static Result<Image> CreateImage(FlexContext context)
         {
@@ -182,7 +202,9 @@ public class CreateSchoolCommandHandler(
             var request = flexContext.Get<CreateSchoolCommand>();
             var selectedCategories = flexContext.Get<List<VehicleCategory>>();
             var selectedCertificates = flexContext.Get<List<ArrCertificate>>();
+            var city = flexContext.Get<Domain.Entities.City>();
             var icon = flexContext.Get<Image>();
+            var address = flexContext.Get<Address>();
             return new School(
                 user,
                 request.Name,
@@ -193,7 +215,12 @@ public class CreateSchoolCommandHandler(
                 request.BussinessHours,
                 selectedCategories,
                 selectedCertificates,
-                icon);
+                icon,
+                city,
+                request.Slogan,
+                request.Description,
+                address
+               );
         }
     }
 

@@ -9,5 +9,5 @@ public interface IQueryRepository<TDomain, TDomainKey>
 {
     Task<Result<TDomain?>> GetByIdAsync(TDomainKey id);
     Task<Result<IEnumerable<TDomain>>> GetAllAsync();
-    Task<Result<TDomain?>> GetByIndexed(string companyName);
+    Task<Result<TDomain?>> GetByIndexed(string indexedValue);
 }

@@ -22,8 +22,8 @@ public partial record UpdateSchoolCommand : ICommand<Result<SchoolReadDto>>
     public Email? OwnerEmail { get; internal set; }
     public Name? OwnerFirstName { get; internal set; }
     public Name? OwnerLastName { get; internal set; }
-    public City? City { get; internal set; }
-    public Address? Address { get; internal set; }
+    public CityDto? City { get; internal set; }
+    public AddressDto? Address { get; internal set; }
     public PhoneNumber? PhoneNumber { get; internal set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup>? PhoneNumbersGroups { get; internal set; } = [];
     public FilePath? ImagePath { get; internal set; }

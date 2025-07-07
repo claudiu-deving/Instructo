@@ -1,7 +1,7 @@
 ﻿using Domain.Shared;
 namespace Domain.ValueObjects;
 
-public readonly record struct Slug
+public readonly partial record struct Slug
 {
     public string Value { get; }
     private Slug(string value) =>
@@ -27,14 +27,19 @@ public readonly record struct Slug
         var slug = input.Trim().ToLowerInvariant();
 
         // Replace spaces and non-alphanumeric characters with hyphens
-        slug=System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9]", "-");
+        slug=ReplaceWithHyphens().Replace(slug, "-");
 
         // Remove multiple consecutive hyphens
-        slug=System.Text.RegularExpressions.Regex.Replace(slug, ",", "-");
+        slug=MultipleConsecutiveHyphens().Replace(slug, "-");
 
         // Remove leading and trailing hyphens
         slug=slug.Trim('-');
 
         return slug;
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"[^a-z0-9]")]
+    private static partial System.Text.RegularExpressions.Regex ReplaceWithHyphens();
+    [System.Text.RegularExpressions.GeneratedRegex(",")]
+    private static partial System.Text.RegularExpressions.Regex MultipleConsecutiveHyphens();
 }

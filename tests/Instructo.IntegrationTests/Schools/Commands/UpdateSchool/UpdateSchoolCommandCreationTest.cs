@@ -26,7 +26,7 @@ public class UpdateSchoolCommandCreationTest
             updateSchoolCommand.IsError.Should()
                 .BeFalse($"{string.Join(Environment.NewLine, updateSchoolCommand.Errors.ToList())}");
         updateSchoolCommand.Value.Should().NotBeNull();
-        updateSchoolCommand.Value!.Address?.Value.Should().Be("Address");
+        updateSchoolCommand.Value!.Address?.Street.Should().Be("Address");
         updateSchoolCommand.Value!.Name.Should().BeNull();
     }
 }

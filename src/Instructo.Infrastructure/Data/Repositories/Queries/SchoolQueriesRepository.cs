@@ -29,6 +29,7 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>, IScho
                     .Include(x => x.WebsiteLinks)
                     .Include(x => x.VehicleCategories)
                     .Include(x => x.Certificates)
+                    .Include(x => x.County)
                     .AsNoTracking()
                     .AsSplitQuery()
                     .Take(10)
@@ -48,26 +49,29 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>, IScho
     {
         try
         {
-            return Result<School?>.Success(await
+            return await
                 _dbContext.Schools
                     .Include(x => x.Owner)
                     .Include(x => x.WebsiteLinks)
                     .Include(x => x.VehicleCategories)
                     .Include(x => x.Certificates)
+                    .Include(x => x.City)
+                    .ThenInclude(city => city.County)
+                    .Include(x=>x.Address)
                     .AsSplitQuery()
-                    .FirstOrDefaultAsync(x => x.Slug==slug));
+                    .FirstOrDefaultAsync(x => x.Slug==slug);
         }
         catch(InvalidOperationException ex)
         {
-            return Result<School?>.Failure(new Error("GetSchoolBySlug-Empty", ex.Message));
+            return new Error("GetSchoolBySlug-Empty", ex.Message);
         }
         catch(OperationAbortedException ex)
         {
-            return Result<School?>.Failure(new Error("GetSchoolBySlug-Aborted", ex.Message));
+            return new Error("GetSchoolBySlug-Aborted", ex.Message);
         }
         catch(DbException ex)
         {
-            return Result<School?>.Failure(new Error("GetSchoolBySlug-Db", ex.Message));
+            return new Error("GetSchoolBySlug-Db", ex.Message);
         }
     }
 
