@@ -226,9 +226,7 @@ public class UpdateSchoolCommandHandler(
         Result<Image> UpdateImage(FlexContext localContext)
         {
             string legalName = request.LegalName??existingSchool.CompanyName;
-            var existingImage = existingWebsite.Icon;
-            if(existingImage is null)
-                throw new NullReferenceException("Unable to find icon of existing school website");
+            var existingImage = existingWebsite.Icon??throw new NullReferenceException("Unable to find icon of existing school website");
 
             if(request.WebsiteLink?.IconData is null)
                 return existingImage;

@@ -1,15 +1,12 @@
 ﻿using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
-using NetTopologySuite;
+
 using Infrastructure.Data.Configurations;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using FluentValidation;
-using NetTopologySuite.Algorithm;
-using System.Threading;
 
 namespace Infrastructure.Data;
 
@@ -17,6 +14,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
+        // Remove Database.Migrate() from here - migrations should be applied elsewhere
     }
 
     // DbSets for your entity models

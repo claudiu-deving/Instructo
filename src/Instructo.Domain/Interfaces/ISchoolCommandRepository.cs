@@ -6,5 +6,5 @@ namespace Domain.Interfaces;
 
 public interface ISchoolCommandRepository : ICommandRepository<School, SchoolId>
 {
-    Task<Result<School>> SetApprovalState(SchoolId id,bool isApproved);
+    Task<Result<School>> SetApprovalState(SchoolId id, bool isApproved);
 }

@@ -45,10 +45,11 @@ public static class FlexContextResultExtensions
         if((await contextResult).IsError)
             return Result<FlexContext>.Failure((await contextResult).Errors);
         var context = (await contextResult).Value!;
-        var opResult = await operation(context);
-
-        if(opResult is null||opResult.IsError)
-            throw new Exception($"opResult is null on:{context} - {operation}");
+        var opResult = await operation(context)??throw new Exception($"opResult is null on:{context} - {operation}");
+        if(opResult.IsError)
+        {
+            return Result<FlexContext>.Failure(opResult.Errors);
+        }
         context.TryAdd(opResult.Value!);
         return Result<FlexContext>.Success(context);
     }
@@ -130,5 +131,17 @@ public static class FlexContextResultExtensions
         if(opResult.IsError)
             return Result<T>.Failure(opResult.Errors);
         return Result<T>.Success(opResult.Value!);
+    }
+
+    public static async Task<Result<T>> MapAsync<T>(
+        this Task<Result<FlexContext>> contextResult,
+        Func<FlexContext, T> operation)
+    {
+        if((await contextResult).IsError)
+            return Result<T>.Failure((await contextResult).Errors);
+
+        var context = (await contextResult).Value!;
+        var result = operation(context);
+        return Result<T>.Success(result);
     }
 }

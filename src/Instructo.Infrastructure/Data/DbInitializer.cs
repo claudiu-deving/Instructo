@@ -3,12 +3,67 @@
 using Domain.Entities;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data;
 
 public static class DbInitializer
 {
+    /// <summary>
+    /// Applies pending migrations and seeds initial data
+    /// </summary>
+    public static async Task InitializeDatabaseAsync(IServiceProvider serviceProvider, ILogger logger)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        try
+        {
+            // Apply any pending migrations
+            logger.LogInformation("Applying database migrations...");
+            await context.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied successfully.");
+
+            // Seed roles and users
+            await SeedRolesAndAdminUser(serviceProvider);
+            logger.LogInformation("Database seeding completed successfully.");
+        }
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while initializing the database.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Alternative method for development/testing - ensures database is created
+    /// </summary>
+    public static async Task EnsureDatabaseCreatedAsync(IServiceProvider serviceProvider, ILogger logger)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        try
+        {
+            // This creates the database if it doesn't exist (useful for testing)
+            logger.LogInformation("Ensuring database is created...");
+            await context.Database.EnsureCreatedAsync();
+            logger.LogInformation("Database creation ensured.");
+
+            // Seed roles and users
+            await SeedRolesAndAdminUser(serviceProvider);
+            logger.LogInformation("Database seeding completed successfully.");
+        }
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while ensuring database creation.");
+            throw;
+        }
+    }
+
     public static async Task SeedRolesAndAdminUser(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
@@ -17,7 +72,6 @@ public static class DbInitializer
 
         // Create roles
         string[] roleNames = ["Admin", "Owner", "Instructor", "Student"];
-
 
         await roleManager.CreateAsync(new ApplicationRole() { Name="IronMan", Description="I am Ironman" });
         await roleManager.CreateAsync(new ApplicationRole() { Name="Admin", Description="Can manage a school, cannot delete it" });
@@ -36,43 +90,6 @@ public static class DbInitializer
         await userManager.CreateAsync(ironMan, "Password123!");
         await userManager.AddToRoleAsync(ironMan, "IronMan");
 
-
-        var count = 0;
-        // Generate fake users with Bogus
-        var faker = new Faker<ApplicationUser>()
-            .RuleFor(u => u.FirstName, f => f.Name.FirstName())
-            .RuleFor(u => u.LastName, f => f.Name.LastName())
-            .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.FirstName, u.LastName).ToLowerInvariant())
-            .RuleFor(u => u.UserName, (f, u) => u.Email)
-            .RuleFor(u => u.EmailConfirmed, f => f.Random.Bool(0.9f))  // 90% have confirmed emails
-            .RuleFor(u => u.Created, f => f.Date.Past(2))
-            .RuleFor(u => u.LastLogin, f => f.Random.Bool(0.7f) ? f.Date.Recent(30) : null)  // 70% have logged in recently
-            .RuleFor(u => u.IsActive, f => f.Random.Bool(0.85f));  // 85% are active
-
-
-        // Generate users
-        var users = faker.Generate(count);
-        var created = 0;
-        var fakerGenerator = new Faker();
-        foreach(var user in users)
-        {
-            // Skip if email already exists
-            if(await userManager.FindByEmailAsync(user.Email)!=null)
-                continue;
-
-            var result = await userManager.CreateAsync(user, "Password123!");
-            if(result.Succeeded)
-            {
-                created++;
-
-                // Assign a random role
-                var role = fakerGenerator.Random.ArrayElement(roleNames);
-                await userManager.AddToRoleAsync(user, role);
-
-                // Report progress every 100 users
-                if(created%100==0)
-                    Console.WriteLine($"Created {created} users");
-            }
-        }
     }
 }
+

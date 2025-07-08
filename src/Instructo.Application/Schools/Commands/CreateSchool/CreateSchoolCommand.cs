@@ -20,9 +20,6 @@ public partial record CreateSchoolCommand : ICommand<Result<SchoolReadDto>>
     public Description Description { get; internal set; }
     public Email SchoolEmail { get; internal set; }
     public Email OwnerEmail { get; internal set; }
-    public Password OwnerPassword { get; internal set; }
-    public Name OwnerFirstName { get; internal set; }
-    public Name OwnerLastName { get; internal set; }
     public CityDto City { get; internal set; }
     public AddressDto Address { get; internal set; }
     public PhoneNumber PhoneNumber { get; internal set; } = PhoneNumber.Empty;

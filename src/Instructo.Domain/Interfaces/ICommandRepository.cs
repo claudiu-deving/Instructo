@@ -1,4 +1,6 @@
-﻿using Domain.Common;
+﻿using System.Data;
+
+using Domain.Common;
 using Domain.Shared;
 
 namespace Domain.Interfaces;

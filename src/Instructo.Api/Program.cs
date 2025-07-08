@@ -16,6 +16,7 @@ using Infrastructure.Data;
 using Infrastructure.Data.Configurations;
 using Infrastructure.Data.Repositories.Commands;
 using Infrastructure.Data.Repositories.Queries;
+using Infrastructure.Data.Repositories.Directories;
 using Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -160,7 +161,9 @@ builder.Services.AddScoped<IQueryRepository<ArrCertificate, ARRCertificateType>,
 builder.Services.AddScoped<IQueryRepository<City, int>, CityQueryRepository>();
 builder.Services.AddScoped<ISchoolCommandRepository, SchoolCommandRepository>();
 builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
+builder.Services.AddScoped<ISchoolManagementDirectory, SchoolManagementDirectory>();
 builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -173,8 +176,38 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
+// Initialize database with proper migration handling
+using(var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
+    try
+    {
+        if(app.Environment.IsDevelopment())
+        {
+            // In development, you might want to ensure database is created
+            await DbInitializer.EnsureDatabaseCreatedAsync(scope.ServiceProvider, logger);
+        }
+        else
+        {
+            // In production, apply migrations
+            await DbInitializer.InitializeDatabaseAsync(scope.ServiceProvider, logger);
+        }
+    }
+    catch(Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while initializing the database.");
+        // Decide whether to continue or stop the application
+        if(!app.Environment.IsDevelopment())
+        {
+            throw; // Stop the application in production if database initialization fails
+        }
+    }
+}
+
+// Commented out old approach
 //await DbInitializer.SeedRolesAndAdminUser(app.Services);
+
 app.MapUserEndpoints();
 app.MapSchoolEndpoints();
 app.MapAuthEndpoints();

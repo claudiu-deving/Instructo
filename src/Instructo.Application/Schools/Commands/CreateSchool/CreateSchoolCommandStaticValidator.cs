@@ -31,18 +31,6 @@ public partial record CreateSchoolCommand
             .OnSuccess(value => createSchoolCommand.SchoolEmail=value)
             .OnError(errors.AddRange);
 
-        Password.Create(createSchoolCommandDto.OwnerPassword)
-            .OnSuccess(value => createSchoolCommand.OwnerPassword=value)
-            .OnError(errors.AddRange);
-
-        Domain.ValueObjects.Name.Create(createSchoolCommandDto.OwnerFirstName)
-            .OnSuccess(value => createSchoolCommand.OwnerFirstName=value)
-            .OnError(errors.AddRange);
-
-        Domain.ValueObjects.Name.Create(createSchoolCommandDto.OwnerLastName)
-            .OnSuccess(value => createSchoolCommand.OwnerLastName=value)
-            .OnError(errors.AddRange);
-
         CityDto.Create(createSchoolCommandDto.City)
             .OnSuccess(value => createSchoolCommand.City=value)
             .OnError(errors.AddRange);

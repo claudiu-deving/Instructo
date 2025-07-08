@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories.Queries;
 
-public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>, ISchoolQueriesRepository
+public class SchoolQueriesRepository :  ISchoolQueriesRepository
 {
     private readonly AppDbContext _dbContext;
 
@@ -19,11 +19,11 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>, IScho
         _dbContext=dbContext;
     }
 
-    public async Task<Result<IEnumerable<School>?>> GetAllAsync()
+    public async Task<Result<IEnumerable<School>>> GetAllAsync()
     {
         try
         {
-            return Result<IEnumerable<School>?>.Success(
+            return Result<IEnumerable<School>>.Success(
                 await _dbContext.Schools
                     .Include(x => x.Owner)
                     .Include(x => x.WebsiteLinks)
@@ -37,11 +37,11 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>, IScho
         }
         catch(OperationAbortedException ex)
         {
-            return Result<IEnumerable<School>?>.Failure(new Error("GetAllSchools-Aborted", ex.Message));
+            return new Error("GetAllSchools-Aborted", ex.Message);
         }
         catch(DbException ex)
         {
-            return Result<IEnumerable<School>?>.Failure(new Error("GetAllSchools-Db", ex.Message));
+            return new Error("GetAllSchools-Db", ex.Message);
         }
     }
 
@@ -57,7 +57,7 @@ public class SchoolQueriesRepository : IQueryRepository<School, SchoolId>, IScho
                     .Include(x => x.Certificates)
                     .Include(x => x.City)
                     .ThenInclude(city => city.County)
-                    .Include(x=>x.Address)
+                    .Include(x => x.Address)
                     .AsSplitQuery()
                     .FirstOrDefaultAsync(x => x.Slug==slug);
         }

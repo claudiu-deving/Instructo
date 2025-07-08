@@ -1,14 +1,15 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories.Queries;
 
 public class UserQueryRepository(AppDbContext dbContext) : IUserQueries
 {
-    public async Task<ApplicationUser> GetUserByEmailAsync(string email)
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
     {
-        return await dbContext.Users.FindAsync(email);
+        return await dbContext.Users.Include(x => x.School).FirstOrDefaultAsync(user => user.Email==email);
     }
 
     public async Task<IEnumerable<ApplicationUser>> GetUsers()
@@ -17,14 +18,14 @@ public class UserQueryRepository(AppDbContext dbContext) : IUserQueries
         return result;
     }
 
-    public async Task<ApplicationUser> GetUserByIdAsync(Guid userId)
+    public async Task<ApplicationUser?> GetUserByIdAsync(Guid userId)
     {
-        return await dbContext.Users.FindAsync(userId);
+        return await dbContext.Users.Include(x => x.School).FirstOrDefaultAsync(user => userId==user.Id);
     }
 
 
     public async Task<bool> IsEmailUnique(string email)
     {
-        return dbContext.Users.Any(x => x.Email == email);
+        return await dbContext.Users.AnyAsync(x => x.Email==email);
     }
 }

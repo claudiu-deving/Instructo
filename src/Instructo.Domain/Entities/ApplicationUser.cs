@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+
 using Domain.Entities.SchoolEntities;
 
 using Microsoft.AspNetCore.Identity;

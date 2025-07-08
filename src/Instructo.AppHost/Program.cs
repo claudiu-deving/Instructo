@@ -2,9 +2,9 @@ using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var connectionString = builder.AddConnectionString("DefaultConnection");
-
+var db = builder.AddSqlServer("sql").AddDatabase("db");
 builder.AddProject<Projects.Api>("api")
-                      .WithReference(connectionString);
+                      .WaitFor(db)
+                      .WithReference(db);
 
 builder.Build().Run();

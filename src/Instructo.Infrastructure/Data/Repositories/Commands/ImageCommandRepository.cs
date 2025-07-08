@@ -1,7 +1,10 @@
-﻿using Domain.Entities;
+﻿using System.Data;
+
+using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -15,9 +18,8 @@ public class ImageCommandRepository(AppDbContext appDbContext, ILogger<ImageComm
         try
         {
             await appDbContext.Images.AddAsync(entity);
-            await appDbContext.SaveChangesAsync();
             var addedEntity = await appDbContext.Images.FindAsync(entity.Id);
-            if (addedEntity == null)
+            if(addedEntity==null)
             {
                 logger.LogError("Failed to add {image}", entity.FileName);
                 return Result<Image>.Failure(new Error("Image-Add", "Failed to add school"));
@@ -25,12 +27,12 @@ public class ImageCommandRepository(AppDbContext appDbContext, ILogger<ImageComm
 
             return Result<Image>.Success(addedEntity);
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch(DbUpdateConcurrencyException ex)
         {
             logger.LogError(ex, "Failed to add {image}", entity.FileName);
             return Result<Image>.Failure(new Error("Image-Add-Update-Concurrency", ex.Message));
         }
-        catch (DbUpdateException ex)
+        catch(DbUpdateException ex)
         {
             logger.LogError(ex, "Failed to add {image}", entity.FileName);
             return Result<Image>.Failure(new Error("Image-Add", ex.Message));
