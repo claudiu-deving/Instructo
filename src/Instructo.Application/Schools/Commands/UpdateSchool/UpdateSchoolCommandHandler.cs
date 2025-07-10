@@ -11,7 +11,7 @@ using Domain.Mappers;
 using Domain.Shared;
 using Domain.ValueObjects;
 
-using MediatR;
+using Messager;
 
 namespace Application.Schools.Commands.UpdateSchool;
 

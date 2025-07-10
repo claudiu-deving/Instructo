@@ -1,12 +1,15 @@
 ﻿using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.ValueObjects;
+
 using Infrastructure.Data;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Testcontainers.MsSql;
 
 namespace Instructo.IntegrationTests.Data.Repositories.Queries;
@@ -18,7 +21,7 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
 
     public IntegrationTestFixture()
     {
-        _dbContainer = new MsSqlBuilder()
+        _dbContainer=new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPassword("YourStrong@Passw0rd")
             .WithCleanUp(true)
@@ -28,7 +31,7 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
-        _connectionString = _dbContainer.GetConnectionString();
+        _connectionString=_dbContainer.GetConnectionString();
 
         // Create a scope to set up the database
         using var scope = Services.CreateScope();
@@ -52,8 +55,8 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
         builder.ConfigureServices(services =>
         {
             // Remove the existing DbContext registration
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            if (descriptor != null)
+            var descriptor = services.SingleOrDefault(d => d.ServiceType==typeof(DbContextOptions<AppDbContext>));
+            if(descriptor!=null)
                 services.Remove(descriptor);
 
             // Add the test database context
@@ -90,7 +93,7 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         // Add some test schools if they don't exist
-        if (!await context.Schools.AnyAsync())
+        if(!await context.Schools.AnyAsync())
         {
             var testSchools = new[]
             {
@@ -100,14 +103,14 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
                     Email.Create("<EMAIL>").Value!,
                     PhoneNumber.Create("555-123-4567").Value!,
                     [], BussinessHours.Empty,
-                    [], [], null),
+                    [], [], null,new City(){Name = "Cluj-Napoca"},new Slogan(""),new Description(""),new Address("test",new NetTopologySuite.Geometries.Point(new NetTopologySuite.Geometries.Coordinate(0,0)))),
                 new School(new ApplicationUser(),
                     SchoolName.Wrap("Test Driving School 2"),
                     LegalName.Wrap("Name2"),
                     Email.Create("<EMAIL>").Value!,
                     PhoneNumber.Create("555-123-4567").Value!,
                     [], BussinessHours.Empty,
-                    [], [], null)
+                    [], [], null,new City(){Name = "Cluj-Napoca"},new Slogan(""),new Description(""),new Address("test",new NetTopologySuite.Geometries.Point(new NetTopologySuite.Geometries.Coordinate(0,0))))
             };
 
             context.Schools.AddRange(testSchools);

@@ -47,7 +47,8 @@ builder.Services.AddSingleton<IDiagnosticContext>(sp =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration["DefaultConnection"]??
+var connectionString = builder.Configuration.GetConnectionString("sql")??
+                         builder.Configuration["DefaultConnection"]??
                        throw new ArgumentException("{DefaultConnection} is null, provide a valid DB Connection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -112,7 +113,7 @@ builder.Services.AddAuthentication(options =>
     });
 
 
-builder.Services.AddMediatR(configuration =>
+builder.Services.AddMediator(configuration =>
 {
     configuration.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
 });

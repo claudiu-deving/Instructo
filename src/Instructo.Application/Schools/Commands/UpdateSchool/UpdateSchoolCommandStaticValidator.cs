@@ -25,21 +25,9 @@ public partial record UpdateSchoolCommand
             SchoolName.Create(updateSchoolCommandDto.Name)
                 .OnSuccess(value => updateSchoolCommand.Name=value)
                 .OnError(errors.AddRange);
-        if(updateSchoolCommandDto.OwnerEmail is not null)
-            Email.Create(updateSchoolCommandDto.OwnerEmail)
-                .OnSuccess(value => updateSchoolCommand.OwnerEmail=value)
-                .OnError(errors.AddRange);
         if(updateSchoolCommandDto.SchoolEmail is not null)
             Email.Create(updateSchoolCommandDto.SchoolEmail)
                 .OnSuccess(value => updateSchoolCommand.SchoolEmail=value)
-                .OnError(errors.AddRange);
-        if(updateSchoolCommandDto.OwnerFirstName is not null)
-            Domain.ValueObjects.Name.Create(updateSchoolCommandDto.OwnerFirstName)
-                .OnSuccess(value => updateSchoolCommand.OwnerFirstName=value)
-                .OnError(errors.AddRange);
-        if(updateSchoolCommandDto.OwnerLastName is not null)
-            Domain.ValueObjects.Name.Create(updateSchoolCommandDto.OwnerLastName)
-                .OnSuccess(value => updateSchoolCommand.OwnerLastName=value)
                 .OnError(errors.AddRange);
         if(updateSchoolCommandDto.City is not null)
             Domain.ValueObjects.CityDto.Create(updateSchoolCommandDto.City)

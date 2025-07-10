@@ -6,10 +6,7 @@ namespace Domain.Dtos.School;
 public readonly record struct UpdateSchoolCommandDto(
     string? Name,
     string? LegalName,
-    string? OwnerEmail,
     string? SchoolEmail,
-    string? OwnerFirstName,
-    string? OwnerLastName,
     string? City,
     string? Address,
     string? Slogan,

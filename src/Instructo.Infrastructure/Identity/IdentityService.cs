@@ -14,6 +14,7 @@ namespace Infrastructure.Identity;
 public class IdentityService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
+
     IOptions<JwtSettings> jwtSettings) : IIdentityService
 {
     public async Task<ApplicationUser?> GetUserByEmailAsync(string email)

@@ -9,19 +9,15 @@ using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;
 
-using FluentAssertions;
 
-using JetBrains.Annotations;
 
-using MediatR;
-
+using Messager;
 using Microsoft.Extensions.DependencyInjection;
-
 using Moq;
+
 
 namespace Instructo.IntegrationTests.Schools.Commands.CreateSchool;
 
-[TestSubject(typeof(UpdateSchoolCommandHandler))]
 public class UpdateSchoolCommandHandlerTests
 {
     [Fact]
@@ -53,24 +49,52 @@ public class UpdateSchoolCommandHandlerTests
             .ReturnsAsync(Result<School>.Success(existingSchool));
 
         var newSchoolName = SchoolName.Wrap("Updated School Name");
-        var commandDto = new UpdateSchoolCommandDto
-        {
-            Name = newSchoolName.Value
-        };
+        var commandDto = new UpdateSchoolCommandDto(
+            Name: newSchoolName.Value,
+            LegalName: "Test Driving School LLC",
+            SchoolEmail: "school@example.com",
+            City: "Test City",
+            Address: "123 Test St",
+            Slogan: "slogan",
+            Description: "description",
+            PhoneNumber: "123-456-7890",
+            ImagePath: "/path/to/valid/image.png",
+            ImageContentType: "image/png",
+            Street: "Test Street",
+            Longitude: "25.251",
+            Latitude: "42.81",
+            PhoneNumberGroups: [],
+            WebsiteLink: new Domain.Dtos.Link.WebsiteLinkUpdateDto("https://example.com", "Website", "Official website",
+                new Domain.Dtos.Image.ImageUpdateDto
+                (
+                    "",
+                    "/path/to/valid/website-icon.png",
+                    "image/png",
+                    "Some description"
+                )
+            ),
+            SocialMediaLinks: [new Domain.Dtos.Link.SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+            BusinessHours: [new Domain.Dtos.BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new Domain.ValueObjects.HourIntervals("08:00", "17:00")])],
+            VehiclesCategories: ["B"],
+            ArrCertifications: []
+        );
         var command = UpdateSchoolCommand.Create(commandDto, SchoolId.CreateNew(), userId);
 
         // Act
         var result = await handler.Handle(command.Value!, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeFalse();
-        result.Value.Should().NotBeNull();
+        Assert.False(result.IsError);
+        Assert.NotNull(result.Value);
         mockSchoolCommandRepository.Verify(x
-            => x.UpdateAsync(It.Is<School>(s => s.Name == newSchoolName)), Times.Once);
+            => x.UpdateAsync(It.Is<School>(s => s.Name==newSchoolName)), Times.Once);
     }
 
     private static School CreateTestSchool(ApplicationUser requestingUser)
     {
+        var testCounty = new County { Id=1, Name="Test County", Code="TC" };
+        var testCity = new City { Id=1, Name="Test City", CountyId=1, County=testCounty };
+
         var school = new School(
             requestingUser,
             SchoolName.Wrap("Test School"),
@@ -81,7 +105,11 @@ public class UpdateSchoolCommandHandlerTests
             BussinessHours.Empty,
             [],
             [],
-            null
+            null,
+            testCity,
+            new Slogan("Test Slogan"),
+            new Description("Test Description"),
+            Address.Create("123 Test St", "45.1234", "12.5678")
         );
 
         var websiteImage = Image.Create(
@@ -116,10 +144,10 @@ public class UpdateSchoolCommandHandlerTests
     {
         return new ApplicationUser
         {
-            Id = Guid.NewGuid(),
-            Email = "user@example.com",
-            FirstName = "John",
-            LastName = "Doe"
+            Id=Guid.NewGuid(),
+            Email="user@example.com",
+            FirstName="John",
+            LastName="Doe"
         };
     }
 

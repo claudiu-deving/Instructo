@@ -1,34 +1,37 @@
 ﻿using Application.Schools.Commands.CreateSchool;
+
+using Domain.Dtos;
 using Domain.Dtos.Image;
 using Domain.Dtos.Link;
 using Domain.Dtos.PhoneNumbers;
 using Domain.Dtos.School;
-using FluentAssertions;
+using Domain.ValueObjects;
+
 using JetBrains.Annotations;
 
 namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 
-[TestSubject(typeof(CreateSchoolCommand))]
 public class CreateSchoolCommandCreationTests
 {
     [Fact]
     public void ValidInputShouldCreateANewCommand()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "Test Driving School LLC",
-            "Owner@EMail.com",
-            "Scgool@Email.com",
-            "123xad21!~",
-            "Test",
-            "Owner",
-            "Test City",
-            "123 Test St",
-            "123-456-7890",
-            "/path/to/valid/image.png",
-            "image/png",
-            [],
-            new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+           Name: "Test Driving School",
+           LegalName: "Test Driving School LLC",
+           OwnerEmail: "Owner@EMail.com",
+           SchoolEmail: "Scgool@Email.com",
+           City: "Test City",
+           Address: "123 Test St",
+           PhoneNumber: "123-456-7890",
+           ImagePath: "/path/to/valid/image.png",
+           ImageContentType: "image/png",
+           Slogan: "slogan",
+           Description: "description",
+           X: "25,251",
+           Y: "42.81",
+           PhoneNumberGroups: [],
+           WebsiteLink: new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
                 new ImageReadDto
                 (
                     "",
@@ -37,247 +40,173 @@ public class CreateSchoolCommandCreationTests
                     "Some description"
                 )
             ),
-            [
-                new SocialMediaLinkDto
-                (
-                    "https://facebook.com/test-school",
-                    "Facebook"
-                )
-            ]
-            ,
-            [], ["B"], []
+           SocialMediaLinks: [new SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+           BussinessHours: [new BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new HourIntervals("08:00", "17:00")])],
+           VechiclesCategories: ["B"],
+           ArrCertifications: []
         ));
-        if (request.IsError)
+        if(request.IsError)
             throw new InvalidOperationException(
                 $"Failed to create valid command: {string.Join(", ", request.Errors.Select(e => e.Message))}");
         var command = request.Value!;
         Assert.NotNull(command);
         Assert.Equal("Test Driving School", command.Name);
         Assert.Equal("Test Driving School LLC", command.LegalName);
-        Assert.Equal("Test", command.OwnerFirstName);
     }
 
     [Fact]
     public void LegalNameStartsWithNonCapitalLetter_InvalidatesInput()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "test Driving School LLC",
-            "Test",
-            "Owner",
-            "Owner@EMail.com",
-            "Scgool@Email.com",
-            "123xad21!~",
-            "Test City",
-            "",
-            "123 Test St",
-            "123-456-7890",
-            "/path/to/valid/image.png",
-            [],
-            new WebsiteLinkReadDto
-            {
-                Url = "https://example.com",
-                Name = "Website",
-                Description = "Official website",
-                IconData = new ImageReadDto
-                {
-                    Url = "/path/to/valid/website-icon.png",
-                    ContentType = "image/png"
-                }
-            },
-            new List<SocialMediaLinkDto>
-            {
-                new()
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            },
-            [],
-            [], []
-        ));
-        request.IsError.Should().BeTrue();
+          Name: "Test Driving School",
+          LegalName: "test Driving School LLC",
+          OwnerEmail: "Owner@EMail.com",
+          SchoolEmail: "Scgool@Email.com",
+          City: "Test City",
+          Address: "123 Test St",
+          PhoneNumber: "123-456-7890",
+          ImagePath: "/path/to/valid/image.png",
+          ImageContentType: "image/png",
+          Slogan: "slogan",
+          Description: "description",
+          X: "25,251",
+          Y: "42.81",
+          PhoneNumberGroups: [],
+          WebsiteLink: new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+               new ImageReadDto
+               (
+                   "",
+                   "/path/to/valid/website-icon.png",
+                   "image/png",
+                   "Some description"
+               )
+           ),
+          SocialMediaLinks: [new SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+          BussinessHours: [new BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new HourIntervals("08:00", "17:00")])],
+          VechiclesCategories: ["B"],
+          ArrCertifications: []
+       ));
+        Assert.True(request.IsError);
+        Assert.Contains("Legal name must start with a capital letter", request.Errors.Select(e => e.Message));
     }
 
     [Fact]
     public void WithNoPhoneNumber_ReturnError()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "Test Driving School LLC",
-            "Owner@EMail.com",
-            "School@EMail.com",
-            "123xad21!~",
-            "Test City",
-            "123 Test St",
-            "",
-            "",
-            "",
-            "/path/to/valid/image.png",
-            "image/png",
-            [],
-            new WebsiteLinkReadDto
-            {
-                Url = "https://example.com",
-                Name = "Website",
-                Description = "Official website",
-                IconData = new ImageReadDto
-                {
-                    Url = "/path/to/valid/website-icon.png",
-                    ContentType = "image/png"
-                }
-            },
-            [
-                new SocialMediaLinkDto
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            ],
-            [],
-            [],
-            []
-        ));
-        request.IsError.Should().BeTrue();
+          Name: "Test Driving School",
+          LegalName: "Test Driving School LLC",
+          OwnerEmail: "Owner@EMail.com",
+          SchoolEmail: "Scgool@Email.com",
+          City: "Test City",
+          Address: "123 Test St",
+          PhoneNumber: null,
+          ImagePath: "/path/to/valid/image.png",
+          ImageContentType: "image/png",
+          Slogan: "slogan",
+          Description: "description",
+          X: "25,251",
+          Y: "42.81",
+          PhoneNumberGroups: [],
+          WebsiteLink: new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+               new ImageReadDto
+               (
+                   "",
+                   "/path/to/valid/website-icon.png",
+                   "image/png",
+                   "Some description"
+               )
+           ),
+          SocialMediaLinks: [new SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+          BussinessHours: [new BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new HourIntervals("08:00", "17:00")])],
+          VechiclesCategories: ["B"],
+          ArrCertifications: []
+       ));
+        Assert.True(request.IsError);
+        Assert.Contains("At least one phone number is required", request.Errors.Select(e => e.Message));
     }
 
     [Fact]
     public void WithOnlyOnePhoneNumber_IsSetAsMain()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "Test Driving School LLC",
-            "Test",
-            "Owner",
-            "Owner@EMail.com",
-            "School@EMail.com",
-            "123xad21!~",
-            "Test City",
-            "123 Test St",
-            "123213",
-            "/path/to/valid/image.png",
-            "image/png",
-            [],
-            new WebsiteLinkReadDto
-            {
-                Url = "https://example.com",
-                Name = "Website",
-                Description = "Official website",
-                IconData = new ImageReadDto
-                {
-                    Url = "/path/to/valid/website-icon.png",
-                    ContentType = "image/png"
-                }
-            },
-            [
-                new SocialMediaLinkDto
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            ],
-            [],
-            ["B"],
-            []
-        ));
-        request.IsError.Should().BeFalse();
-        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
-        returnedValue.PhoneNumber.Should().NotBeNull();
-        returnedValue.PhoneNumbersGroups.Should().BeEmpty();
+          Name: "Test Driving School",
+          LegalName: "Test Driving School LLC",
+          OwnerEmail: "Owner@EMail.com",
+          SchoolEmail: "Scgool@Email.com",
+          City: "Test City",
+          Address: "123 Test St",
+          PhoneNumber: null,
+          ImagePath: "/path/to/valid/image.png",
+          ImageContentType: "image/png",
+          Slogan: "slogan",
+          Description: "description",
+          X: "25,251",
+          Y: "42.81",
+          PhoneNumberGroups: [new PhoneNumberGroupDto("Test", [new PhoneNumberDto("0758154581")])],
+          WebsiteLink: new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+               new ImageReadDto
+               (
+                   "",
+                   "/path/to/valid/website-icon.png",
+                   "image/png",
+                   "Some description"
+               )
+           ),
+          SocialMediaLinks: [new SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+          BussinessHours: [new BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new HourIntervals("08:00", "17:00")])],
+          VechiclesCategories: ["B"],
+          ArrCertifications: []
+       ));
+        Assert.False(request.IsError);
+        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        Assert.NotNull(returnedValue.PhoneNumber);
+        Assert.Empty(returnedValue.PhoneNumbersGroups);
     }
 
-    [Fact]
-    public void WithOnePhoneNumberInGroup_SetAsMain_ClearGroup()
-    {
-        var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "Test Driving School LLC",
-            "Test",
-            "Owner",
-            "Owner@EMail.com",
-            "School@EMail.com",
-            "123xad21!~",
-            "Test City",
-            "123 Test St",
-            "",
-            "/path/to/valid/image.png",
-            "image/png",
-            [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("123213")])],
-            new WebsiteLinkReadDto
-            {
-                Url = "https://example.com",
-                Name = "Website",
-                Description = "Official website",
-                IconData = new ImageReadDto
-                {
-                    Url = "/path/to/valid/website-icon.png",
-                    ContentType = "image/png"
-                }
-            },
-            [
-                new SocialMediaLinkDto
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            ],
-            [],
-            ["B"],
-            []
-        ));
-        request.IsError.Should().BeFalse();
-        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
-        returnedValue.PhoneNumber.Should().NotBeNull();
-        returnedValue.PhoneNumber.Value.Should().Be("123213");
-        returnedValue.PhoneNumbersGroups.Count.Should().Be(0);
-    }
+
 
     [Fact]
     public void WithTwoPhoneNumbers_FirstIsSetAsMain()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "Test Driving School LLC",
-            "Test",
-            "Owner",
-            "Owner@EMail.com",
-            "School@EMail.com",
-            "123xad21!~",
-            "Test City",
-            "123 Test St",
-            "",
-            "/path/to/valid/image.png",
-            "image/png",
-            [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("123213"), new PhoneNumberDto("455656")])],
-            new WebsiteLinkReadDto
-            {
-                Url = "https://example.com",
-                Name = "Website",
-                Description = "Official website",
-                IconData = new ImageReadDto
-                {
-                    Url = "/path/to/valid/website-icon.png",
-                    ContentType = "image/png"
-                }
-            },
-            [
-                new SocialMediaLinkDto
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            ],
-            [],
-            ["B"],
-            []
-        ));
-        request.IsError.Should().BeFalse();
-        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
-        returnedValue.PhoneNumber.Should().NotBeNull();
-        returnedValue.PhoneNumber.Value.Should().Be("123213");
-        returnedValue.PhoneNumbersGroups.Count.Should().Be(1);
-        returnedValue.PhoneNumbersGroups[0].PhoneNumbers.Count.Should().Be(1);
-        returnedValue.PhoneNumbersGroups[0].PhoneNumbers[0].Value.Should().Be("455656");
+          Name: "Test Driving School",
+          LegalName: "Test Driving School LLC",
+          OwnerEmail: "Owner@EMail.com",
+          SchoolEmail: "Scgool@Email.com",
+          City: "Test City",
+          Address: "123 Test St",
+          PhoneNumber: null,
+          ImagePath: "/path/to/valid/image.png",
+          ImageContentType: "image/png",
+          Slogan: "slogan",
+          Description: "description",
+          X: "25,251",
+          Y: "42.81",
+          PhoneNumberGroups:
+          [new PhoneNumberGroupDto("Test", [new PhoneNumberDto("0758154581")]),
+              new PhoneNumberGroupDto("Test2", [new PhoneNumberDto("0758154581")])],
+          WebsiteLink: new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+               new ImageReadDto
+               (
+                   "",
+                   "/path/to/valid/website-icon.png",
+                   "image/png",
+                   "Some description"
+               )
+           ),
+          SocialMediaLinks: [new SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+          BussinessHours: [new BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new HourIntervals("08:00", "17:00")])],
+          VechiclesCategories: ["B"],
+          ArrCertifications: []
+       ));
+        Assert.False(request.IsError);
+        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        Assert.NotNull(returnedValue.PhoneNumber);
+        Assert.Equal("0758154581", returnedValue.PhoneNumber.Value);
+        Assert.Single(returnedValue.PhoneNumbersGroups);
+        Assert.Single(returnedValue.PhoneNumbersGroups[0].PhoneNumbers);
+        Assert.Equal("0758154581", returnedValue.PhoneNumbersGroups[0].PhoneNumbers[0].Value);
     }
 
 
@@ -285,47 +214,41 @@ public class CreateSchoolCommandCreationTests
     public void WithTwoPhoneNumbers_OneInGroupAndOneInMain_KeepBoth()
     {
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            "Test Driving School",
-            "Test Driving School LLC",
-            "Test",
-            "Owner",
-            "Owner@EMail.com",
-            "School@EMail.com",
-            "123xad21!~",
-            "Test City",
-            "123 Test St",
-            "123213",
-            "/path/to/valid/image.png",
-            "image/png",
-            [new PhoneNumberGroupDto("Default", [new PhoneNumberDto("455656")])],
-            new WebsiteLinkReadDto
-            {
-                Url = "https://example.com",
-                Name = "Website",
-                Description = "Official website",
-                IconData = new ImageReadDto
-                {
-                    Url = "/path/to/valid/website-icon.png",
-                    ContentType = "image/png"
-                }
-            },
-            [
-                new SocialMediaLinkDto
-                {
-                    Url = "https://facebook.com/test-school",
-                    SocialPlatformName = "Facebook"
-                }
-            ],
-            [],
-            ["B"],
-            []
-        ));
-        request.IsError.Should().BeFalse();
-        var returnedValue = request.Value ?? throw new Exception("The returned value is null");
-        returnedValue.PhoneNumber.Should().NotBeNull();
-        returnedValue.PhoneNumber.Value.Should().Be("123213");
-        returnedValue.PhoneNumbersGroups.Count.Should().Be(1);
-        returnedValue.PhoneNumbersGroups[0].PhoneNumbers.Count.Should().Be(1);
-        returnedValue.PhoneNumbersGroups[0].PhoneNumbers[0].Value.Should().Be("455656");
+             Name: "Test Driving School",
+             LegalName: "Test Driving School LLC",
+             OwnerEmail: "Owner@EMail.com",
+             SchoolEmail: "Scgool@Email.com",
+             City: "Test City",
+             Address: "123 Test St",
+             PhoneNumber: "075751512",
+             ImagePath: "/path/to/valid/image.png",
+             ImageContentType: "image/png",
+             Slogan: "slogan",
+             Description: "description",
+             X: "25,251",
+             Y: "42.81",
+             PhoneNumberGroups:
+             [new PhoneNumberGroupDto("Test", [new PhoneNumberDto("0758154581")])],
+             WebsiteLink: new WebsiteLinkReadDto("https://example.com", "Website", "Official website",
+                  new ImageReadDto
+                  (
+                      "",
+                      "/path/to/valid/website-icon.png",
+                      "image/png",
+                      "Some description"
+                  )
+              ),
+             SocialMediaLinks: [new SocialMediaLinkDto("https://facebook.com/test-school", "Facebook")],
+             BussinessHours: [new BusinessHoursEntryDto([DayOfWeek.Monday.ToString()], [new HourIntervals("08:00", "17:00")])],
+             VechiclesCategories: ["B"],
+             ArrCertifications: []
+          ));
+        Assert.False(request.IsError);
+        var returnedValue = request.Value??throw new Exception("The returned value is null");
+        Assert.NotNull(returnedValue.PhoneNumber);
+        Assert.Equal("075751512", returnedValue.PhoneNumber.Value);
+        Assert.Single(returnedValue.PhoneNumbersGroups);
+        Assert.Single(returnedValue.PhoneNumbersGroups[0].PhoneNumbers);
+        Assert.Equal("0758154581", returnedValue.PhoneNumbersGroups[0].PhoneNumbers[0].Value);
     }
 }

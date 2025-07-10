@@ -4,7 +4,6 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Xunit2;
 
-using FluentAssertions;
 using Domain.Shared;
 using Microsoft.Extensions.Logging;
 using Domain.Entities;

@@ -1,45 +1,43 @@
 ﻿using Application.Schools.Commands.CreateSchool;
 using Application.Users.Commands.RegisterUser;
+
 using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;
-using FluentAssertions;
+
 using JetBrains.Annotations;
-using MediatR;
+
+using Messager;
+
 using Moq;
 
 namespace Instructo.UnitTests.Application.Schools.Commands.CreateSchools;
 
-[TestSubject(typeof(CreateSchoolCommandHandler))]
 public class CreateSchoolCommandTests
 {
     private readonly CreateSchoolCommandHandler _handler;
-    private readonly Mock<IIdentityService> _identityServiceMock;
-    private readonly Mock<ISchoolCommandRepository> _repositoryMock;
+    private readonly Mock<ISchoolManagementDirectory> _schoolManagementDirectoryMock;
+    private readonly Mock<ISocialMediaPlatformImageProvider> _socialMediaProviderMock;
+    private readonly Mock<Microsoft.AspNetCore.Identity.RoleManager<ApplicationRole>> _roleManagerMock;
     private readonly Mock<ISender> _senderMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
 
     public CreateSchoolCommandTests()
     {
-        _repositoryMock = new Mock<ISchoolCommandRepository>();
-        var queryRepositoryMock = new Mock<IQueryRepository<School, SchoolId>>();
-        var certificatesRepositoryMock = new Mock<IQueryRepository<ArrCertificate, ARRCertificateType>>();
-        var vehicleCategoriesRepositoryMock = new Mock<IQueryRepository<VehicleCategory, VehicleCategoryType>>();
-        var socialMediaProviderMock = new Mock<ISocialMediaPlatformImageProvider>();
-        _identityServiceMock = new Mock<IIdentityService>();
-        _senderMock = new Mock<ISender>();
-        vehicleCategoriesRepositoryMock.Setup(x
-            => x.GetByIdAsync(VehicleCategoryType.A1)).ReturnsAsync(
-            VehicleCategory.Create(VehicleCategoryType.A1, "Test"));
+        _schoolManagementDirectoryMock=new Mock<ISchoolManagementDirectory>();
+        _socialMediaProviderMock=new Mock<ISocialMediaPlatformImageProvider>();
+        _roleManagerMock=new Mock<Microsoft.AspNetCore.Identity.RoleManager<ApplicationRole>>(
+            Mock.Of<Microsoft.AspNetCore.Identity.IRoleStore<ApplicationRole>>(), null, null, null, null);
+        _senderMock=new Mock<ISender>();
+        _identityServiceMock=new Mock<IIdentityService>();
 
-        _handler = new CreateSchoolCommandHandler(
-            _repositoryMock.Object,
-            queryRepositoryMock.Object,
-            certificatesRepositoryMock.Object,
-            vehicleCategoriesRepositoryMock.Object,
-            socialMediaProviderMock.Object,
+        _handler=new CreateSchoolCommandHandler(
+            _schoolManagementDirectoryMock.Object,
+            _socialMediaProviderMock.Object,
+            _roleManagerMock.Object,
             _senderMock.Object);
     }
 
@@ -60,9 +58,9 @@ public class CreateSchoolCommandTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Code == userRegistrationError.Code);
-        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<School>()), Times.Never);
+        Assert.True(result.IsError);
+        Assert.Contains(result.Errors, e => e.Code==userRegistrationError.Code);
+        _schoolManagementDirectoryMock.Verify(r => r.SchoolCommandRepository.AddAsync(It.IsAny<School>()), Times.Never);
     }
 
     [Fact]
@@ -83,8 +81,8 @@ public class CreateSchoolCommandTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Code == "Create-School");
-        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<School>()), Times.Never);
+        Assert.True(result.IsError);
+        Assert.Contains(result.Errors, e => e.Code=="Create-School");
+        _schoolManagementDirectoryMock.Verify(r => r.SchoolCommandRepository.AddAsync(It.IsAny<School>()), Times.Never);
     }
 }

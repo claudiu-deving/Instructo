@@ -5,7 +5,7 @@ using Domain.Shared;
 
 using FluentValidation;
 
-using MediatR;
+using Messager;
 
 namespace Application.Behaviors;
 

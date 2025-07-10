@@ -71,14 +71,18 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
 
     private static List<County> GenerateCounties()
     {
-        return CsvDataReader.ReadCountiesFromCsv(File.ReadAllText(@"C:\Users\claud\source\repos\Instructo\src\Instructo.Infrastructure\Data\Hardcoded\counties.csv"));
+        var baseDir = Directory.GetCurrentDirectory();
+        var csvPath = Path.Combine(baseDir,"..",   "Instructo.Infrastructure", "Data", "Hardcoded", "counties.csv");
+        return CsvDataReader.ReadCountiesFromCsv(File.ReadAllText(csvPath));
     }
 
 
 
     private static List<City> GenerateCities()
     {
-        return CsvDataReader.ReadCitiesFromCsv((File.ReadAllText(@"C:\Users\claud\source\repos\Instructo\src\Instructo.Infrastructure\Data\Hardcoded\orase.csv")));
+        var baseDir = Directory.GetCurrentDirectory();
+        var csvPath = Path.Combine(baseDir,"..",  "Instructo.Infrastructure", "Data", "Hardcoded", "orase.csv");
+        return CsvDataReader.ReadCitiesFromCsv(File.ReadAllText(csvPath));
     }
 
     public override int SaveChanges()

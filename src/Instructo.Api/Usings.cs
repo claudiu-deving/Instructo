@@ -6,7 +6,7 @@ global using AspNetCoreRateLimit;
 
 global using FluentValidation;
 
-global using MediatR;
+global using Messager;
 
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Http.Json;

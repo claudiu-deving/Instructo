@@ -1,9 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 using Application.Abstractions.Messaging;
-using Application.Users.Commands.RegisterUser;
 using Application.Users.Queries.GetUserByEmail;
-using Application.Users.Queries.GetUserById;
 
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
@@ -14,7 +12,7 @@ using Domain.Interfaces;
 using Domain.Mappers;
 using Domain.Shared;
 
-using MediatR;
+using Messager;
 
 using Microsoft.AspNetCore.Identity;
 
@@ -32,19 +30,26 @@ public class CreateSchoolCommandHandler(
         CreateSchoolCommand request,
         CancellationToken cancellationToken)
     {
-        return await FlexContext.StartContextAsync(request)
+        var result = await FlexContext.StartContextAsync(request)
             .Then(GetUser)
             .Then(CreateSchoolWithIcon)
             .Then(AddSchoolWebsiteLink)
             .Then(AddSocialMediaLinks)
-            .Then(ctx => schoolManagementDirectory.SchoolCommandRepository.AddAsync(ctx.Get<School>()))
-            .MapAsync(ctx =>
-            {
-                ctx.Get<ApplicationUser>().Role=roleManager.Roles.FirstOrDefault(x => x.Name=="Owner");
-                schoolManagementDirectory.SaveChangesAsync();
+            .Then(ctx => schoolManagementDirectory.SchoolCommandRepository.AddAsync(ctx.Get<School>()));
 
-                return ctx.Get<School>().ToReadDto();
-            });
+        if(result.IsError)
+            return Result<SchoolReadDto>.Failure(result.Errors);
+
+        var ctx = result.Value!;
+        var user = ctx.Get<ApplicationUser>();
+        var ownerRole = roleManager.Roles.FirstOrDefault(x => x.Name=="Owner");
+        if(ownerRole!=null)
+        {
+            user.Role=ownerRole;
+        }
+        await schoolManagementDirectory.SaveChangesAsync();
+
+        return Result<SchoolReadDto>.Success(ctx.Get<School>().ToReadDto());
     }
 
     private Result<School> AddSocialMediaLinks(FlexContext context)
@@ -52,12 +57,26 @@ public class CreateSchoolCommandHandler(
         var request = context.Get<CreateSchoolCommand>();
         var school = context.Get<School>();
         var errors = new List<Error>();
+
         foreach(var socialMediaLink in request.SocialMediaLinks)
-            FlexContext.StartContext(request, school, socialMediaLink)
+        {
+            var result = FlexContext.StartContext(request, school, socialMediaLink)
                 .Then(ctx => socialMediaPlatformImageProvider.Get(socialMediaLink.SocialPlatformName))
                 .Then(CreateImage)
                 .Then(CreateSocialMediaLink)
                 .MapContext(ctx => school.AddLink(ctx.Get<WebsiteLink>()));
+
+            if(result.IsError)
+            {
+                errors.AddRange(result.Errors);
+            }
+        }
+
+        if(errors.Count>0)
+        {
+            return Result<School>.Failure([.. errors]);
+        }
+
         return school;
 
         static Result<WebsiteLink> CreateSocialMediaLink(FlexContext flexContext)
@@ -128,7 +147,7 @@ public class CreateSchoolCommandHandler(
             .Then(GetCity)
             .Then(CreateAddress)
             .Then(CreateVehicleCategories)
-            .Then(CreateCerfificates)
+            .Then(CreateCertificates)
             .MapAsync(CreateSchool);
 
         async Task<Result<CreateSchoolCommand>> CheckCompanyName(FlexContext _)
@@ -149,10 +168,18 @@ public class CreateSchoolCommandHandler(
 
         Result<Address> CreateAddress(FlexContext _)
         {
-            return Address.Create(
-                request.Address.Street,
-                request.Address.Longitude,
-                request.Address.Latitude);
+            try
+            {
+                return Address.Create(
+                    request.Address.Street,
+                    request.Address.Longitude,
+                    request.Address.Latitude);
+            }
+            catch(Exception ex)
+            {
+                return Result<Address>.Failure(
+                    new Error("Create-School-Address", $"Failed to create address: {ex.Message}"));
+            }
         }
 
         static Result<Image> CreateImage(FlexContext context)
@@ -189,17 +216,29 @@ public class CreateSchoolCommandHandler(
             return foundCategories.Where(x => request.VehicleCategories.Contains(x.Id)).ToList();
         }
 
-        Result<List<ArrCertificate>> CreateCerfificates(FlexContext context)
+        async Task<Result<List<ArrCertificate>>> CreateCertificates(FlexContext context)
         {
             var request = context.Get<CreateSchoolCommand>();
             var certificatesRetrievalErrors = new List<Error>();
             var selectedCertificates = new List<ArrCertificate>();
-            request.Certificates.ForEach(async certificateType =>
+
+            foreach(var certificateType in request.Certificates)
             {
-                await FlexContext.StartContextAsync()
-                    .Then(ctx => schoolManagementDirectory.CertificateQueriesRepository.GetByIdAsync(certificateType))
-                    .FinalizeContext(ctx => selectedCertificates.Add(ctx.Get<ArrCertificate>()));
-            });
+                var certificateResult = await schoolManagementDirectory.CertificateQueriesRepository.GetByIdAsync(certificateType);
+                if(certificateResult.IsError)
+                {
+                    certificatesRetrievalErrors.AddRange(certificateResult.Errors);
+                }
+                else if(certificateResult.Value is not null)
+                {
+                    selectedCertificates.Add(certificateResult.Value);
+                }
+                else
+                {
+                    certificatesRetrievalErrors.Add(new Error("Certificate-Not-Found", $"Certificate with type {certificateType} not found"));
+                }
+            }
+
             if(certificatesRetrievalErrors.Count!=0)
                 return Result<List<ArrCertificate>>.WithErrors([.. certificatesRetrievalErrors]);
             return selectedCertificates;

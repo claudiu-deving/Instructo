@@ -13,11 +13,9 @@ using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;
 
-using FluentAssertions;
 
-using JetBrains.Annotations;
 
-using MediatR;
+using Messager;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +23,6 @@ using Moq;
 
 namespace Instructo.IntegrationTests.Schools.Commands.CreateSchool;
 
-[TestSubject(typeof(CreateSchoolCommandHandler))]
 public class CreateSchoolCommandHandlerTests
 {
     [Fact]
@@ -36,9 +33,6 @@ public class CreateSchoolCommandHandlerTests
         var handler = serviceProvider.GetRequiredService<IRequestHandler<CreateSchoolCommand, Result<SchoolReadDto>>>();
         var requestingUser = CreateTestUser();
         var existingSchool = CreateTestSchool(requestingUser);
-
-        //  var mockCreateUserCommandHandler = new Mock<ICommandHandler<RegisterUserCommand, Result<ApplicationUser>>>();
-        //   mockCreateUserCommandHandler.Setup(x => x.Handle(It.IsAny<RegisterUserCommand>(), CancellationToken.None)).ReturnsAsync(requestingUser);
 
         var mockVehiclesCategoriesRepository = serviceProvider.GetRequiredService<Mock<IQueryRepository<VehicleCategory, VehicleCategoryType>>>()
             .Setup(x => x.GetByIdAsync(VehicleCategoryType.B));
@@ -61,45 +55,42 @@ public class CreateSchoolCommandHandlerTests
 
         var newSchoolName = SchoolName.Wrap("Updated School Name");
         var commandDto = new CreateSchoolCommandDto(
-            "Test",
-            "Test Company SRL",
-            "Owner@email.com",
-            "contact@schoo.ro",
-            "somePass123!",
-            "John",
-            "Doe",
-            "London",
-            "123 Street",
-            "0758455151",
-            "src/image",
-            "png.image",
-            [],
-            WebsiteLink.Create("url.com", "Some name", "description", Image.Create("name", "png/image", "some-url", "desc").Value!).Value!.ToDto(),
-            [],
-            [],
-            ["B"],
-            []);
+            Name: "Test",
+            LegalName: "Test Company SRL",
+            OwnerEmail: "Owner@email.com",
+            SchoolEmail: "contact@schoo.ro",
+            City: "London",
+            Address: "123 Street",
+            PhoneNumber: "0758455151",
+            ImagePath: "src/image",
+            ImageContentType: "png.image",
+            Slogan: "Test Slogan",
+            Description: "Test Description",
+            X: "25.251",
+            Y: "42.81",
+            PhoneNumberGroups: [],
+            WebsiteLink: WebsiteLink.Create("url.com", "Some name", "description", Image.Create("name", "png/image", "some-url", "desc").Value!).Value!.ToDto(),
+            SocialMediaLinks: [],
+            BussinessHours: [],
+            VechiclesCategories: ["B"],
+            ArrCertifications: []);
         var command = CreateSchoolCommand.Create(commandDto);
 
         // Act
         var result = await handler.Handle(command.Value!, CancellationToken.None);
 
         // Assert
-        if(result.IsError)
-        {
-            result.IsError.Should()
-                .BeFalse($"{string.Join(Environment.NewLine, result.Errors.ToList())}");
-        }
-        else
-        {
-            result.Value.Should().NotBeNull();
-        }
+        Assert.False(result.IsError, $"{string.Join(Environment.NewLine, result.Errors.ToList())}");
+        Assert.NotNull(result.Value);
         mockSchoolCommandRepository.Verify(x
             => x.UpdateAsync(It.Is<School>(s => s.Name==newSchoolName)), Times.Once);
     }
 
     private static School CreateTestSchool(ApplicationUser requestingUser)
     {
+        var testCounty = new County { Id=1, Name="Test County", Code="TC" };
+        var testCity = new City { Id=1, Name="Test City", CountyId=1, County=testCounty };
+
         var school = new School(
             requestingUser,
             SchoolName.Wrap("Test School"),
@@ -110,7 +101,11 @@ public class CreateSchoolCommandHandlerTests
             BussinessHours.Empty,
             [],
             [],
-            null
+            null,
+            testCity,
+            new Slogan("Test Slogan"),
+            new Description("Test Description"),
+            Address.Create("123 Test St", "45.1234", "12.5678")
         );
 
         var websiteImage = Image.Create(

@@ -35,22 +35,25 @@ public static class TestCommandFactory
             }
         ];
         var request = CreateSchoolCommand.Create(new CreateSchoolCommandDto(
-            name,
-            $"{name} LLC",
-            email,
-            "Test@test",
-            "Password123!",
-            "Name",
-            "LastName",
-            "Test City",
-            "123 Test St, Test City, TC 12345",
-            "123-456-7890",
-            "image/png",
-            "/path/to/valid/image.png",
-            [],
-            websiteLink,
-            socialMediaLinks,
-            [], ["A1"], []
+            Name: name,
+            LegalName: $"{name} LLC",
+            OwnerEmail: email,
+            SchoolEmail: "school@example.com",
+            City: "Test City",
+            Address: "123 Test St",
+            PhoneNumber: "123-456-7890",
+            ImagePath: "/path/to/valid/image.png",
+            ImageContentType: "image/png",
+            Slogan: "Test Slogan",
+            Description: "Test Description",
+            X: "25.251",
+            Y: "42.81",
+            PhoneNumberGroups: [],
+            WebsiteLink: websiteLink,
+            SocialMediaLinks: socialMediaLinks,
+            BussinessHours: [],
+            VechiclesCategories: ["A1"],
+            ArrCertifications: []
         ));
         if (request.IsError)
             throw new InvalidOperationException(

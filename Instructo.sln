@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.IntegrationTests"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F84B6034-04A9-4E0B-B9E4-5F1AD9997C7B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2F3EFB35-B59D-4C92-898F-AB49EE290FD4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{2F3EFB35-B59D-4C92-898F-AB49EE290FD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Instructo.Application\Application.csproj", "{59DBA348-C0EF-7DD7-8989-67DF8FD05069}"
 EndProject
@@ -18,11 +18,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Instr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "src\Instructo.Shared\Shared.csproj", "{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.Tests.Common", "Instructo.Tests.Common\Instructo.Tests.Common.csproj", "{6BC2A083-2DD2-4B17-8092-81425340843D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.AppHost", "src\Instructo.AppHost\Instructo.AppHost.csproj", "{FE46A67B-4A42-4648-9DA0-71F4C77BFAFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.ServiceDefaults", "src\Instructo.ServiceDefaults\Instructo.ServiceDefaults.csproj", "{5436F4C8-5E26-EAE3-F90E-6BFE26FAFB43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager", "src\MediatR\Messager.csproj", "{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,10 +54,6 @@ Global
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6BC2A083-2DD2-4B17-8092-81425340843D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BC2A083-2DD2-4B17-8092-81425340843D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BC2A083-2DD2-4B17-8092-81425340843D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BC2A083-2DD2-4B17-8092-81425340843D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FE46A67B-4A42-4648-9DA0-71F4C77BFAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FE46A67B-4A42-4648-9DA0-71F4C77BFAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE46A67B-4A42-4648-9DA0-71F4C77BFAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -66,6 +62,10 @@ Global
 		{5436F4C8-5E26-EAE3-F90E-6BFE26FAFB43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5436F4C8-5E26-EAE3-F90E-6BFE26FAFB43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5436F4C8-5E26-EAE3-F90E-6BFE26FAFB43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,7 +77,7 @@ Global
 		{59DBA348-C0EF-7DD7-8989-67DF8FD05069} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
 		{98CCA405-1841-D04C-4C40-A0F2727F1249} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
-		{6BC2A083-2DD2-4B17-8092-81425340843D} = {F84B6034-04A9-4E0B-B9E4-5F1AD9997C7B}
+		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {23954A8C-9A62-41AD-BDBB-8AED6C8D5905}
