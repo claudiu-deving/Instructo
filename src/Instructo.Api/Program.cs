@@ -6,14 +6,12 @@ using Application.Behaviors;
 using Application.Users.Commands.RegisterUser;
 
 using Domain.Entities;
-using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;
 
 using Infrastructure.Data;
-using Infrastructure.Data.Configurations;
 using Infrastructure.Data.Repositories.Commands;
 using Infrastructure.Data.Repositories.Queries;
 using Infrastructure.Data.Repositories.Directories;
@@ -34,7 +32,7 @@ builder.Host.UseSerilog((context, services, loggerConfiguration) =>
         .Destructure.With<SensitiveDataDestructuringPolicy>()
         .Enrich.WithThreadId()
         .WriteTo.Console()
-        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"]?? //Make sure to run Docker beforehand
+        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"] ?? //Make sure to run Docker beforehand
                      throw new ArgumentException("Provide the url for the seq server"));
 });
 
@@ -47,8 +45,8 @@ builder.Services.AddSingleton<IDiagnosticContext>(sp =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration.GetConnectionString("sql")??
-                         builder.Configuration["DefaultConnection"]??
+var connectionString = builder.Configuration.GetConnectionString("sql") ??
+                         builder.Configuration["DefaultConnection"] ??
                        throw new ArgumentException("{DefaultConnection} is null, provide a valid DB Connection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -60,7 +58,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             TimeSpan.FromSeconds(30),
             null);
     });
-    if(builder.Environment.IsDevelopment())
+    if (builder.Environment.IsDevelopment())
         options.EnableSensitiveDataLogging();
     else
         options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
@@ -71,44 +69,44 @@ builder.Services.AddTransient<IUserQueries, UserQueryRepository>();
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
         // Password settings
-        options.Password.RequireDigit=true;
-        options.Password.RequiredLength=8;
-        options.Password.RequireNonAlphanumeric=true;
-        options.Password.RequireUppercase=true;
-        options.Password.RequireLowercase=true;
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
 
         // Lockout settings
-        options.Lockout.DefaultLockoutTimeSpan=TimeSpan.FromMinutes(30);
-        options.Lockout.MaxFailedAccessAttempts=5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+        options.Lockout.MaxFailedAccessAttempts = 5;
 
         // User settings
-        options.User.RequireUniqueEmail=true;
+        options.User.RequireUniqueEmail = true;
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()??
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ??
                   throw new ArgumentException("JwtSettings is null, provide a valid JwtSettings");
 
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme=JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme=JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters=new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer=true,
-            ValidateAudience=true,
-            ValidateLifetime=true,
-            ValidateIssuerSigningKey=true,
-            ValidIssuer=jwtSettings.Issuer,
-            ValidAudience=jwtSettings.Audience,
-            IssuerSigningKey=new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
         };
     });
 
@@ -125,8 +123,8 @@ builder.Services.AddValidatorsFromAssembly(
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.Configure<JsonOptions>(options =>
 {
-    options.SerializerOptions.PropertyNamingPolicy=JsonNamingPolicy.CamelCase;
-    options.SerializerOptions.PropertyNameCaseInsensitive=true;
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
 // Register Identity services
@@ -178,13 +176,13 @@ var app = builder.Build();
 app.MapDefaultEndpoints();
 
 // Initialize database with proper migration handling
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     try
     {
-        if(app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
             // In development, you might want to ensure database is created
             await DbInitializer.EnsureDatabaseCreatedAsync(scope.ServiceProvider, logger);
@@ -195,11 +193,11 @@ using(var scope = app.Services.CreateScope())
             await DbInitializer.InitializeDatabaseAsync(scope.ServiceProvider, logger);
         }
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         logger.LogError(ex, "An error occurred while initializing the database.");
         // Decide whether to continue or stop the application
-        if(!app.Environment.IsDevelopment())
+        if (!app.Environment.IsDevelopment())
         {
             throw; // Stop the application in production if database initialization fails
         }
@@ -213,7 +211,7 @@ app.MapUserEndpoints();
 app.MapSchoolEndpoints();
 app.MapAuthEndpoints();
 
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.MapScalarApiReference();
     app.MapOpenApi();
@@ -229,7 +227,7 @@ app.Use(async (context, next) =>
 {
     var user = context.User;
     // Log all claims
-    foreach(var claim in user.Claims)
+    foreach (var claim in user.Claims)
         Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
 
     // Log identity authentication status
@@ -244,16 +242,16 @@ app.Use(async (context, next) =>
 
 app.UseSerilogRequestLogging(options =>
 {
-    options.EnrichDiagnosticContext=(diagnosticContext, httpContext) =>
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value??"");
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? "");
         diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
         diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
 
-        if(httpContext.User.Identity?.IsAuthenticated!=true)
+        if (httpContext.User.Identity?.IsAuthenticated != true)
             return;
         var value = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if(value!=null)
+        if (value != null)
             diagnosticContext.Set("UserId",
                 value);
     };
