@@ -5,4 +5,4 @@ using Domain.ValueObjects;
 
 namespace Application.Schools.Commands.UpdateSchool;
 
-public record UpdateSchoolApprovalStatusCommand(SchoolId School,bool IsApproved): ICommand<Result<SchoolReadDto>>;
+public record UpdateSchoolApprovalStatusCommand(SchoolId School,bool IsApproved): ICommand<Result<SchoolDetailReadDto>>;

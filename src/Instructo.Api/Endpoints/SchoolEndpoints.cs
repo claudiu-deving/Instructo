@@ -53,7 +53,7 @@ public static class SchoolEndpoints
             .Then(ctx => UpdateSchoolCommand.Create(createSchoolCommand, schoolId, guid))
             .Then(flexContext => sender.Send(flexContext.Get<UpdateSchoolCommand>()));
         if(!updateRequest.IsError)
-            return Results.Ok(updateRequest.Value!.Get<SchoolReadDto>());
+            return Results.Ok(updateRequest.Value!.Get<SchoolDetailReadDto>());
         return updateRequest.Errors.Any(x => x.Code=="NotFound") ? TypedResults.NotFound() : Results.Ok();
     }
 
@@ -96,7 +96,7 @@ public static class SchoolEndpoints
         return userRequest.Match<IResult>(
             ok =>
             {
-                if(ok==new SchoolReadDto())
+                if(ok==new SchoolDetailReadDto())
                 {
                     return TypedResults.NotFound();
                 }

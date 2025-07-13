@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories.Queries;
 
-public class ArrCertificateQueriesRepository : IQueryRepository<ArrCertificate, ARRCertificateType>
+public class ArrCertificateQueriesRepository : IQueryRepository<ArrCertificate, int>
 {
     private readonly AppDbContext _dbContext;
 
@@ -35,7 +35,7 @@ public class ArrCertificateQueriesRepository : IQueryRepository<ArrCertificate, 
         }
     }
 
-    public async Task<Result<ArrCertificate?>> GetByIdAsync(ARRCertificateType id)
+    public async Task<Result<ArrCertificate?>> GetByIdAsync(int id)
     {
         try
         {

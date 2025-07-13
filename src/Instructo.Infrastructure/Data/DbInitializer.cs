@@ -1,4 +1,6 @@
-﻿using Bogus;
+﻿using System.Reflection;
+
+using Bogus;
 
 using Domain.Entities;
 
@@ -53,8 +55,18 @@ public static class DbInitializer
             await context.Database.EnsureCreatedAsync();
             logger.LogInformation("Database creation ensured.");
 
+
             // Seed roles and users
             await SeedRolesAndAdminUser(serviceProvider);
+            context.Database.BeginTransaction();
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "Infrastructure.Data.Hardcoded.InsertTestSchools.sql";
+
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            using var reader = new StreamReader(stream);
+            var sqlContent = reader.ReadToEnd();
+            context.Database.ExecuteSqlRaw(sqlContent);
+            context.Database.CommitTransaction();
             logger.LogInformation("Database seeding completed successfully.");
         }
         catch(Exception ex)

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Technology Stack.md",
+                "file": "src/Instructo.Infrastructure/README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Technology Stack"
+              "title": "README"
             }
           }
         ]
@@ -170,13 +170,17 @@
   },
   "active": "a1be25cc16ed8bf9",
   "lastOpenFiles": [
-    "Project Overview.md",
     "Architecture Guide.md",
+    "src/Instructo.Infrastructure/raw.sql",
+    "Project Overview.md",
+    "README.md",
+    "Technology Stack.md",
+    "src/Instructo.Infrastructure/README.md",
+    "src/README.md",
+    "tests/README.md",
     "src/Instructo.Application/README.md",
     "src/Instructo.Domain/README.md",
     "src/Instructo.Api/Endpoints/README.md",
-    "Technology Stack.md",
-    "SchoolEndpoints.md",
-    "tests/README.md"
+    "SchoolEndpoints.md"
   ]
 }

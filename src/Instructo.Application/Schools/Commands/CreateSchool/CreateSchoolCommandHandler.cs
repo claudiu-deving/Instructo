@@ -24,9 +24,9 @@ public class CreateSchoolCommandHandler(
     ISchoolManagementDirectory schoolManagementDirectory,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
     RoleManager<ApplicationRole> roleManager,
-    ISender sender) : ICommandHandler<CreateSchoolCommand, Result<SchoolReadDto>>
+    ISender sender) : ICommandHandler<CreateSchoolCommand, Result<SchoolDetailReadDto>>
 {
-    public async Task<Result<SchoolReadDto>> Handle(
+    public async Task<Result<SchoolDetailReadDto>> Handle(
         CreateSchoolCommand request,
         CancellationToken cancellationToken)
     {
@@ -38,7 +38,7 @@ public class CreateSchoolCommandHandler(
             .Then(ctx => schoolManagementDirectory.SchoolCommandRepository.AddAsync(ctx.Get<School>()));
 
         if(result.IsError)
-            return Result<SchoolReadDto>.Failure(result.Errors);
+            return Result<SchoolDetailReadDto>.Failure(result.Errors);
 
         var ctx = result.Value!;
         var user = ctx.Get<ApplicationUser>();
@@ -49,7 +49,7 @@ public class CreateSchoolCommandHandler(
         }
         await schoolManagementDirectory.SaveChangesAsync();
 
-        return Result<SchoolReadDto>.Success(ctx.Get<School>().ToReadDto());
+        return Result<SchoolDetailReadDto>.Success(ctx.Get<School>().ToReadDto());
     }
 
     private Result<School> AddSocialMediaLinks(FlexContext context)
@@ -204,7 +204,7 @@ public class CreateSchoolCommandHandler(
 
             var foundCategories = categoriesResult.Value;
             var foundIds = foundCategories.Select(c => c.Id).ToHashSet();
-            var missingIds = request.VehicleCategories.Except(foundIds).ToList();
+            var missingIds = request.VehicleCategories.Select(x => (int)x).Except(foundIds).ToList();
 
             if(missingIds.Count!=0)
             {
@@ -213,7 +213,7 @@ public class CreateSchoolCommandHandler(
                 return Result<List<VehicleCategory>>.WithErrors([.. errors]);
             }
 
-            return foundCategories.Where(x => request.VehicleCategories.Contains(x.Id)).ToList();
+            return foundCategories.Where(x => request.VehicleCategories.Contains((VehicleCategoryType)x.Id)).ToList();
         }
 
         async Task<Result<List<ArrCertificate>>> CreateCertificates(FlexContext context)

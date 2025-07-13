@@ -1,4 +1,6 @@
-﻿namespace Instructo.IntegrationTests.Data.Repositories.Queries;
+﻿using Instructo.IntegrationTests.Data.Repositories.Queries;
+
+namespace Instructo.IntegrationTests;
 
 [CollectionDefinition("Integration Tests")]
 public class IntegrationTestCollection : ICollectionFixture<IntegrationTestFixture>

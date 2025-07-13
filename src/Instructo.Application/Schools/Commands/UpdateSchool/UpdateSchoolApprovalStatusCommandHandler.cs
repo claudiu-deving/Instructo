@@ -13,20 +13,20 @@ public class UpdateSchoolApprovalStatusCommandHandler(
     ISchoolQueriesRepository repository,
     ISchoolCommandRepository schoolCommandRepository
 )
-    : ICommandHandler<UpdateSchoolApprovalStatusCommand, Result<SchoolReadDto>>
+    : ICommandHandler<UpdateSchoolApprovalStatusCommand, Result<SchoolDetailReadDto>>
 {
-    public async Task<Result<SchoolReadDto>> Handle(UpdateSchoolApprovalStatusCommand request,
+    public async Task<Result<SchoolDetailReadDto>> Handle(UpdateSchoolApprovalStatusCommand request,
         CancellationToken cancellationToken)
     {
         var schoolRetrievalRequest = await repository.GetByIdAsync(request.School);
 
         if(schoolRetrievalRequest.IsError)
-            return Result<SchoolReadDto>.Failure(schoolRetrievalRequest.Errors);
+            return Result<SchoolDetailReadDto>.Failure(schoolRetrievalRequest.Errors);
 
         var approvalRequest = await schoolCommandRepository.SetApprovalState(request.School, request.IsApproved);
         return approvalRequest.Match(
             school => school.ToReadDto(),
-            Result<SchoolReadDto>.Failure
+            Result<SchoolDetailReadDto>.Failure
         );
     }
 }

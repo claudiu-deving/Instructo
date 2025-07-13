@@ -6,13 +6,13 @@ namespace Domain.Mappers;
 
 public static class SchoolMappers
 {
-    public static SchoolReadDto ToReadDto(this School school)
+    public static SchoolDetailReadDto ToReadDto(this School school)
     {
         if(school.City is null&&school.County is null)
         {
             throw new ArgumentNullException($"{school} doesn't have City or County attached");
         }
-        return new SchoolReadDto(
+        return new SchoolDetailReadDto(
             school.Id,
             school.Name.Value,
             school.CompanyName.Value,
@@ -24,8 +24,8 @@ public static class SchoolMappers
             school.Slogan.Value,
             school.Description.Value,
             school.Address.Street,
-            school.Address.Longitude,
-            school.Address.Latitude,
+            school.Address.Coordinate?.X??0,
+            school.Address.Coordinate?.Y??0,
             school.PhoneNumbersGroups.Select(x => x.ToDto()),
             school.Icon?.ToReadDto()??ImageReadDto.Empty,
            [.. school.WebsiteLinks.Select(x => x.ToReadDto())],

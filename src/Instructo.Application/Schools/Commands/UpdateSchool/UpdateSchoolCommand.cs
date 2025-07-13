@@ -8,7 +8,7 @@ using Domain.ValueObjects;
 
 namespace Application.Schools.Commands.UpdateSchool;
 
-public partial record UpdateSchoolCommand : ICommand<Result<SchoolReadDto>>
+public partial record UpdateSchoolCommand : ICommand<Result<SchoolDetailReadDto>>
 {
     private UpdateSchoolCommand()
     {

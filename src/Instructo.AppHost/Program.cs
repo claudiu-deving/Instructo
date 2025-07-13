@@ -1,10 +1,10 @@
-using Aspire.Hosting;
+using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
-
-var db = builder.AddSqlServer("sql").AddDatabase("db");
-builder.AddProject<Projects.Api>("api")
-                      .WaitFor(db)
-                      .WithReference(db);
+Environment.SetEnvironmentVariable("USING_ASPIRE", "TRUE");
+var db = builder.AddSqlServer("sql").WithDataVolume().AddDatabase("db");
+builder.AddProject<Api>("api")
+    .WaitFor(db)
+    .WithReference(db);
 
 builder.Build().Run();

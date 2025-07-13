@@ -2,11 +2,11 @@
 namespace Domain.ValueObjects;
 
 //Phone Number
-public record PhoneNumber
+public class PhoneNumber
 {
-    private PhoneNumber() { }
-    public string? Name { get; private set; }
-    public string Value { get; private set; } = string.Empty;
+    public PhoneNumber() { }
+    public string? Name { get;  set; }
+    public string Value { get;  set; } = string.Empty;
     private PhoneNumber(string value, string? name = null)
     {
         Value=value;

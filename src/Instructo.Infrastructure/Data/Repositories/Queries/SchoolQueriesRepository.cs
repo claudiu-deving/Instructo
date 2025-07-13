@@ -1,39 +1,40 @@
 ﻿using System.Data.Common;
+using System.Threading.Tasks;
 
+using Domain.Dtos;
+using Domain.Dtos.Link;
+using Domain.Dtos.School;
+using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Interfaces;
+using Domain.Mappers;
 using Domain.Shared;
 using Domain.ValueObjects;
 
 using Microsoft.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data.Repositories.Queries;
 
-public class SchoolQueriesRepository :  ISchoolQueriesRepository
+public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueriesRepository> logger) : ISchoolQueriesRepository
 {
-    private readonly AppDbContext _dbContext;
-
-    public SchoolQueriesRepository(AppDbContext dbContext)
-    {
-        _dbContext=dbContext;
-    }
-
-    public async Task<Result<IEnumerable<School>>> GetAllAsync()
+    public async Task<Result<IEnumerable<SchoolDetailReadDto>>> GetAllDetailedAsync()
     {
         try
         {
-            return Result<IEnumerable<School>>.Success(
-                await _dbContext.Schools
-                    .Include(x => x.Owner)
-                    .Include(x => x.WebsiteLinks)
-                    .Include(x => x.VehicleCategories)
-                    .Include(x => x.Certificates)
-                    .Include(x => x.County)
-                    .AsNoTracking()
-                    .AsSplitQuery()
-                    .Take(10)
-                    .ToListAsync());
+            return Result<IEnumerable<SchoolDetailReadDto>>.Success(
+               (await dbContext.Schools
+               .Include(school => school.Owner)
+               .Include(school => school.County)
+               .Include(school => school.City)
+               .Include(school => school.Icon)
+               .Include(school => school.VehicleCategories)
+               .Include(school => school.Address)
+               .AsNoTracking()
+               .AsSplitQuery()
+               .ToListAsync())
+                .Select(Map));
         }
         catch(OperationAbortedException ex)
         {
@@ -44,13 +45,48 @@ public class SchoolQueriesRepository :  ISchoolQueriesRepository
             return new Error("GetAllSchools-Db", ex.Message);
         }
     }
+    private SchoolDetailReadDto Map(School school)
+    {
+        try
+        {
+            var schoolCategories = dbContext.SchoolCategories.Include(x => x.VehicleCategory).ToList();
+            var arrCertificates = dbContext.SchoolCertificates.Include(x => x.Certificate).ToList();
+            return new SchoolDetailReadDto(
+                                    school.Id,
+                                    school.Name.Value,
+                                    school.CompanyName.Value,
+                                    school.Email.Value,
+                                    school.PhoneNumber.Value,
+                                    school.Slug.Value,
+                                    school.County!.Code,
+                                    school.City!.Name,
+                                    school.Slogan.Value,
+                                    school.Description.Value,
+                                    school.Address.Street,
+                                     school.Address.Coordinate?.X??0,
+                                     school.Address.Coordinate?.Y??0,
+                                    school.PhoneNumbersGroups.Select(x => x.ToDto()),
+                                    new Domain.Dtos.Image.ImageReadDto(school.Icon!.FileName, school.Icon.Url, school.Icon.ContentType, school.Icon.Description),
+                                    school.WebsiteLinks.Select(x => new WebsiteLinkReadDto(x.Url, x.Name, x.Description, new Domain.Dtos.Image.ImageReadDto(x.Icon!.FileName, x.Icon.Url, x.Icon.ContentType, x.Icon!.Description))).ToArray(),
+                                    school.BussinessHours.BussinessHoursEntries,
+                                    schoolCategories.Where(x => x.SchoolId==school.Id).Select(vc => new VehicleCategoryDto(vc.VehicleCategory.Name, vc.VehicleCategory.Description)).ToList(),
+                                    arrCertificates.Where(x => x.SchoolId==school.Id).Select(c => new Domain.Dtos.ArrCertificationDto(c.Certificate.Name, c.Certificate.Description)).ToList()
+                                    );
+        }
+        catch(NullReferenceException ex)
+        {
+            Console.WriteLine(ex.Message);
+            logger.LogError("Mapping {school} failed with exception {ex}", school, ex);
+            throw;
+        }
+    }
 
     public async Task<Result<School?>> GetBySlugAsync(string slug)
     {
         try
         {
             return await
-                _dbContext.Schools
+                dbContext.Schools
                     .Include(x => x.Owner)
                     .Include(x => x.WebsiteLinks)
                     .Include(x => x.VehicleCategories)
@@ -81,13 +117,13 @@ public class SchoolQueriesRepository :  ISchoolQueriesRepository
         try
         {
             return Result<School?>.Success(await
-                _dbContext.Schools
+                dbContext.Schools
                     .Include(x => x.Owner)
                     .Include(x => x.WebsiteLinks)
                     .Include(x => x.VehicleCategories)
                     .Include(x => x.Certificates)
                     .AsSplitQuery()
-                    .FirstOrDefaultAsync(x => x.Id==id));
+                    .FirstOrDefaultAsync(x => x.Id==id.Id));
         }
         catch(InvalidOperationException ex)
         {
@@ -106,7 +142,7 @@ public class SchoolQueriesRepository :  ISchoolQueriesRepository
     public async Task<Result<School?>> GetByIndexed(string companyName)
     {
         return Result<School?>.Success(await
-            _dbContext.Schools
+            dbContext.Schools
                 .Include(x => x.Owner)
                 .Include(x => x.WebsiteLinks)
                 .Include(x => x.VehicleCategories)

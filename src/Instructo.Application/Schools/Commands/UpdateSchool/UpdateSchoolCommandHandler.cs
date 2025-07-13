@@ -21,9 +21,9 @@ public class UpdateSchoolCommandHandler(
     IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
     IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
-    ISender sender) : ICommandHandler<UpdateSchoolCommand, Result<SchoolReadDto>>
+    ISender sender) : ICommandHandler<UpdateSchoolCommand, Result<SchoolDetailReadDto>>
 {
-    public async Task<Result<SchoolReadDto>> Handle(UpdateSchoolCommand request, CancellationToken cancellationToken)
+    public async Task<Result<SchoolDetailReadDto>> Handle(UpdateSchoolCommand request, CancellationToken cancellationToken)
     {
         return await FlexContext.StartContextAsync(request)
             .Then(GetSchool)
@@ -109,7 +109,7 @@ public class UpdateSchoolCommandHandler(
         {
             var existingCategories = existingSchool.VehicleCategories;
             if(request.VehicleCategories is null||request.VehicleCategories.Count==0)
-                return Result<List<VehicleCategory>>.Success(existingCategories);
+                return Result<List<VehicleCategory>>.Success(existingCategories.ToList());
             var vehiclesCategoryRetrievalErrors = new List<Error>();
             List<VehicleCategory> selectedCategories = [];
             request.VehicleCategories.ForEach(async void (x) =>
@@ -128,8 +128,8 @@ public class UpdateSchoolCommandHandler(
             );
             if(selectedCategories.Count!=0)
             {
-                existingCategories.ForEach(category => existingSchool.RemoveVehicleCategory(category));
-                selectedCategories.ForEach(category => existingSchool.AddVehicleCategory(category));
+                existingCategories.ToList().ForEach(category => existingSchool.RemoveVehicleCategory(category));
+                selectedCategories.ForEach(existingSchool.AddVehicleCategory);
             }
 
             return vehiclesCategoryRetrievalErrors.Count>0
@@ -143,7 +143,7 @@ public class UpdateSchoolCommandHandler(
             var selectedCertificates = new List<ArrCertificate>();
             var existingCertificates = existingSchool.Certificates;
             if(request.Certificates is null||request.Certificates.Count==0)
-                return Result<List<ArrCertificate>>.Success(existingCertificates);
+                return Result<List<ArrCertificate>>.Success(existingCertificates.ToList());
             request.Certificates.ForEach(async void (certificateType) =>
             {
                 try
@@ -160,8 +160,8 @@ public class UpdateSchoolCommandHandler(
 
             if(selectedCertificates.Count!=0)
             {
-                existingCertificates.ForEach(certificate => existingSchool.RemoveCertificate(certificate));
-                selectedCertificates.ForEach(certificate => existingSchool.AddCertificate(certificate));
+                existingCertificates.ToList().ForEach(certificate => existingSchool.RemoveCertificate(certificate));
+                selectedCertificates.ForEach(existingSchool.AddCertificate);
             }
 
             return certificatesRetrievalErrors.Count!=0

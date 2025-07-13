@@ -9,7 +9,7 @@ using Domain.ValueObjects;
 
 namespace Application.Schools.Commands.CreateSchool;
 
-public partial record CreateSchoolCommand : ICommand<Result<SchoolReadDto>>
+public partial record CreateSchoolCommand : ICommand<Result<SchoolDetailReadDto>>
 {
     private CreateSchoolCommand()
     {

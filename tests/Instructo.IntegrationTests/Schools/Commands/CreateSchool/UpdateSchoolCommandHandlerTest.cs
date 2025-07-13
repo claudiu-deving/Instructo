@@ -30,7 +30,7 @@ public class CreateSchoolCommandHandlerTests
     {
         // Arrange
         var serviceProvider = ConfigureServices();
-        var handler = serviceProvider.GetRequiredService<IRequestHandler<CreateSchoolCommand, Result<SchoolReadDto>>>();
+        var handler = serviceProvider.GetRequiredService<IRequestHandler<CreateSchoolCommand, Result<SchoolDetailReadDto>>>();
         var requestingUser = CreateTestUser();
         var existingSchool = CreateTestSchool(requestingUser);
 
@@ -171,7 +171,7 @@ public class CreateSchoolCommandHandlerTests
         services.AddScoped(_ => mockMediator);
         services.AddScoped(_ => mockMediator.Object);
 
-        services.AddScoped<IRequestHandler<CreateSchoolCommand, Result<SchoolReadDto>>, CreateSchoolCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateSchoolCommand, Result<SchoolDetailReadDto>>, CreateSchoolCommandHandler>();
 
         return services.BuildServiceProvider();
     }

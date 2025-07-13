@@ -1,24 +1,18 @@
-﻿using NetTopologySuite.Geometries;
+﻿using Domain.Common;
+
 using NetTopologySuite;
-using Domain.Common;
+using NetTopologySuite.Geometries;
 
 namespace Domain.Entities;
 
 public class Address : IEntity
 {
-    private static readonly GeometryFactory _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-
-    public int Id { get; private set; }
-    public string Street { get; private set; } = string.Empty;
-    public Point Coordinate { get; private set; } = _geometryFactory.CreatePoint(new Coordinate(0, 0));
-
-    public string? Comment { get; private set; }
-
     // Romanian geographical boundaries
     private const double MIN_LATITUDE = 43.6;
     private const double MAX_LATITUDE = 48.3;
     private const double MIN_LONGITUDE = 20.3;
     private const double MAX_LONGITUDE = 29.7;
+    private static readonly GeometryFactory _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(4326);
 
     public Address(string street, Point coordinate, string? comment = null)
     {
@@ -32,19 +26,23 @@ public class Address : IEntity
         // EF Core constructor
     }
 
+    public int Id { get; init; }
+    public string Street { get; } = string.Empty;
+    public Point? Coordinate { get; }
+
+    public string? Comment { get; }
+
+    public static Address Empty => new("", _geometryFactory.CreatePoint(new Coordinate(0, 0)));
+
     public static Address Create(string street, string latitude, string longitude, string? comment = null)
     {
         if(string.IsNullOrWhiteSpace(street))
             throw new ArgumentException("Street cannot be null or empty", nameof(street));
 
         if(!double.TryParse(latitude, out var lat))
-        {
             throw new ArgumentException("Invalid latitude format", nameof(latitude));
-        }
         if(!double.TryParse(longitude, out var lon))
-        {
             throw new ArgumentException("Invalid longitude format", nameof(longitude));
-        }
 
         if(lat<MIN_LATITUDE||lat>MAX_LATITUDE)
             throw new ArgumentOutOfRangeException(nameof(latitude),
@@ -55,6 +53,7 @@ public class Address : IEntity
                 $"Longitude must be between {MIN_LONGITUDE} and {MAX_LONGITUDE} for Romania");
 
         var point = _geometryFactory.CreatePoint(new Coordinate(lon, lat));
+
         return new Address(street, point, comment);
     }
 
@@ -76,26 +75,38 @@ public class Address : IEntity
         return new Address(street, point, comment);
     }
 
-    public static Address CreateWithoutValidation(string street, double latitude, double longitude, string? comment = null)
+    public static Address CreateWithoutValidation(string street, double latitude, double longitude,
+        string? comment = null)
     {
         var point = _geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
         return new Address(street, point, comment);
     }
 
-    public static Address Empty => new Address("", _geometryFactory.CreatePoint(new Coordinate(0, 0)));
+    public static Address CreateForSeeding(int id, string street, double latitude, double longitude,
+        string? comment = null)
+    {
+        var point = _geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
+        return new Address(street, point, comment) { Id=id };
+    }
 
-    public double Latitude => Coordinate.Y;
-    public double Longitude => Coordinate.X;
 
     public override string ToString()
     {
-        return $"{Street} ({Latitude:F6}, {Longitude:F6}) {Comment}";
+        return $"{Street} ({Coordinate?.X:F6}, {Coordinate?.Y:F6}) {Comment}";
     }
 
     public override bool Equals(object? obj)
     {
         if(obj is not Address other)
             return false;
+        if(Coordinate is null&&other.Coordinate is null)
+        {
+            return true;
+        }
+        if(Coordinate is null||other.Coordinate is null)
+        {
+            return false;
+        }
         return Street==other.Street&&Coordinate.Equals(other.Coordinate);
     }
 

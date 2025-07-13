@@ -78,7 +78,7 @@ public class SchoolCommandRepository(AppDbContext appDbContext, ILogger<SchoolCo
         }
     }
 
-    public async Task<Result<School>> SetApprovalState(SchoolId id, bool isApproved)
+    public async Task<Result<School>> SetApprovalState(Guid id, bool isApproved)
     {
         try
         {

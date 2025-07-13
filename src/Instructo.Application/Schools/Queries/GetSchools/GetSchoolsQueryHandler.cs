@@ -11,38 +11,15 @@ using Domain.ValueObjects;
 namespace Application.Schools.Queries.GetSchools;
 
 public class GetSchoolsQueryHandler(ISchoolQueriesRepository repository)
-    : ICommandHandler<GetSchoolsQuery, Result<IEnumerable<SchoolReadDto>>>
+    : ICommandHandler<GetSchoolsQuery, Result<IEnumerable<SchoolDetailReadDto>>>
 {
-    public async Task<Result<IEnumerable<SchoolReadDto>>> Handle(GetSchoolsQuery request,
+    public async Task<Result<IEnumerable<SchoolDetailReadDto>>> Handle(GetSchoolsQuery request,
         CancellationToken cancellationToken)
     {
-        var repositoryRequest = await repository.GetAllAsync();
+        var repositoryRequest = await repository.GetAllDetailedAsync();
         if(repositoryRequest.IsError)
-            return Result<IEnumerable<SchoolReadDto>>.Failure(repositoryRequest.Errors);
-        return repositoryRequest.Map(x => Map(x, request.IsAdmin));
+            return Result<IEnumerable<SchoolDetailReadDto>>.Failure(repositoryRequest.Errors);
+        return repositoryRequest.Map(x => x);
     }
 
-    private static IEnumerable<SchoolReadDto> Map(IEnumerable<School> schools, bool isAdmin)
-    {
-        return schools.Where(s => s.IsApproved!=isAdmin).Select(s => new SchoolReadDto(
-            s.Id.Id,
-            s.Name,
-            s.CompanyName,
-            s.Email,
-            s.PhoneNumber,
-            s.Slug,
-            s.County.Code,
-            s.City.Name,
-            s.Slogan.Value,
-            s.Description.Value,
-            s.Address.Street,
-            s.Address.Longitude,
-            s.Address.Latitude,
-            s.PhoneNumbersGroups?.Select(x => x.ToDto())?? [],
-            s.Icon?.ToDto()??new ImageReadDto(),
-            [.. s.WebsiteLinks.Select(x => x.ToDto())],
-            VehicleCategories: [.. s.VehicleCategories.Select(x => x.ToDto())],
-            BussinessHours: s.BussinessHours?.BussinessHoursEntries?? [],
-            Certificates: [.. s.Certificates.Select(x => x.ToDto())]));
-    }
 }

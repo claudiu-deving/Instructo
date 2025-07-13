@@ -1,12 +1,16 @@
-﻿using Domain.Entities;
+﻿using System.Reflection;
+
+using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
+using Domain.ValueObjects;
 
 using Infrastructure.Data.Configurations;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data;
 
@@ -26,6 +30,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<City> Cities { get; set; }
     public DbSet<County> Counties { get; set; }
     public DbSet<Address> Addresses { get; set; }
+    public DbSet<SchoolCategory> SchoolCategories { get; set; }
+
+    public DbSet<SchoolCertificate> SchoolCertificates { get; set; }
 
     public Task<int> SaveChangesAsync()
     {
@@ -35,6 +42,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(x => x.UseNetTopologySuite());
+        optionsBuilder
+        .LogTo(Console.WriteLine, LogLevel.Information)
+        .EnableSensitiveDataLogging(); // Shows parameter values
         base.OnConfiguring(optionsBuilder);
     }
 
@@ -48,15 +58,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
 
         modelBuilder.Entity<ApplicationUser>().ToTable("Users").HasIndex(u => u.Email).IsUnique();
-        //modelBuilder.Entity<ApplicationUser>().HasOne(x => x.School).WithOne(s => s.Owner);
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
         modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
         modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
         modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
-
-
         ConfigCertificates(modelBuilder);
 
         ConfigCategories(modelBuilder);
@@ -65,24 +72,30 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         modelBuilder.Entity<County>().HasData(counties);
 
         var cities = GenerateCities();
-
         modelBuilder.Entity<City>().HasData(cities);
     }
 
     private static List<County> GenerateCounties()
     {
-        var baseDir = Directory.GetCurrentDirectory();
-        var csvPath = Path.Combine(baseDir,"..",   "Instructo.Infrastructure", "Data", "Hardcoded", "counties.csv");
-        return CsvDataReader.ReadCountiesFromCsv(File.ReadAllText(csvPath));
-    }
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = "Infrastructure.Data.Hardcoded.counties.csv";
 
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        using var reader = new StreamReader(stream);
+        var csvContent = reader.ReadToEnd();
+        return CsvDataReader.ReadCountiesFromCsv(csvContent);
+    }
 
 
     private static List<City> GenerateCities()
     {
-        var baseDir = Directory.GetCurrentDirectory();
-        var csvPath = Path.Combine(baseDir,"..",  "Instructo.Infrastructure", "Data", "Hardcoded", "orase.csv");
-        return CsvDataReader.ReadCitiesFromCsv(File.ReadAllText(csvPath));
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = "Infrastructure.Data.Hardcoded.orase.csv";
+
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        using var reader = new StreamReader(stream);
+        var csvContent = reader.ReadToEnd();
+        return CsvDataReader.ReadCitiesFromCsv(csvContent);
     }
 
     public override int SaveChanges()
@@ -104,7 +117,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
             entity.HasKey(e => e.Id);
             // Store the enum as an integer in the database
             entity.Property(e => e.Id)
-                .HasConversion(x => (int)x, x => (VehicleCategoryType)x);
+                .HasConversion(x => (int)x, x => x);
 
             entity.Property(e => e.Name)
                 .IsRequired()
@@ -188,8 +201,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
             entity.HasKey(e => e.Id);
 
             // Store the enum as an integer in the database
-            entity.Property(e => e.Id)
-                .HasConversion(x => (int)x, x => (ARRCertificateType)x);
+            entity.Property(e => e.Id);
 
             entity.Property(e => e.Name)
                 .IsRequired()

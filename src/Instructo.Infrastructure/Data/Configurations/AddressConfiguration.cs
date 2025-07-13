@@ -14,9 +14,12 @@ internal class AddressConfiguration : IEntityTypeConfiguration<Address>
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.Comment);
 
         builder.Property(x => x.Street)
             .IsRequired()
             .HasMaxLength(500);
+        builder.Property(x => x.Coordinate)
+            .HasColumnType("geography");
     }
 }

@@ -265,7 +265,7 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
     //Cleanup
     public void Dispose()
     {
-        var service = serviceProvider.GetService<IRequestHandler<GetSchoolsQuery, Result<IEnumerable<SchoolReadDto>>>>();
+        var service = serviceProvider.GetService<IRequestHandler<GetSchoolsQuery, Result<IEnumerable<SchoolDetailReadDto>>>>();
         Assert.NotNull(service);
         if(serviceProvider is IDisposable disposable)
         {

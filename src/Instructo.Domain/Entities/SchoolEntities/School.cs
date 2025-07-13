@@ -13,7 +13,7 @@ namespace Domain.Entities.SchoolEntities;
 /// <remarks>
 /// One School Entity can have only one Owner and vice-versa.
 /// </remarks>
-public class School : BaseAuditableEntity<SchoolId>
+public class School : BaseAuditableEntity<Guid>
 {
     private readonly List<WebsiteLink> _websiteLinks = [];
 
@@ -60,7 +60,7 @@ public class School : BaseAuditableEntity<SchoolId>
     [Timestamp] // EF Core concurrency token
     public byte[] RowVersion { get; private set; } = [];
 
-    [ForeignKey("Owner")] 
+    [ForeignKey("Owner")]
     public Guid OwnerId { get; private set; }
 
     public ApplicationUser Owner { get; private set; } = null!;
@@ -68,8 +68,7 @@ public class School : BaseAuditableEntity<SchoolId>
     public LegalName CompanyName { get; private set; }
     public Email Email { get; private set; }
     public Slug Slug { get; }
-    public int CountyId { get; }
-    public virtual County? County { get; private set; }
+    public virtual County? County { get; init; }
     public virtual City? City { get; private set; }
     public virtual Address Address { get; private set; }
     public Slogan Slogan { get; }
@@ -77,8 +76,8 @@ public class School : BaseAuditableEntity<SchoolId>
     public PhoneNumber PhoneNumber { get; private set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; private set; } = [];
     public BussinessHours BussinessHours { get; private set; } = BussinessHours.Empty;
-    public virtual List<VehicleCategory> VehicleCategories { get; } = [];
-    public virtual List<ArrCertificate> Certificates { get; } = [];
+    public virtual ICollection<VehicleCategory> VehicleCategories { get; } = [];
+    public virtual ICollection<ArrCertificate> Certificates { get; } = [];
     public virtual Image? Icon { get; private set; }
     public virtual IReadOnlyCollection<WebsiteLink> WebsiteLinks => _websiteLinks.AsReadOnly();
 

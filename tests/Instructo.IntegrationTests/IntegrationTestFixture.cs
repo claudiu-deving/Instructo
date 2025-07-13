@@ -7,6 +7,7 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -33,14 +34,15 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
         await _dbContainer.StartAsync();
         _connectionString=_dbContainer.GetConnectionString();
 
+
         // Create a scope to set up the database
         using var scope = Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        // Ensure database is created and migrations are applied
-        await context.Database.EnsureCreatedAsync();
+        // Apply migrations (this will seed VehicleCategories and other data from migrations)
+        await context.Database.MigrateAsync();
 
-        // Seed test data
+        // Seed test data including our custom school data
         await SeedTestDataAsync(scope.ServiceProvider);
     }
 
@@ -75,48 +77,61 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
             });
         });
 
-        builder.UseEnvironment("Testing");
+        builder.UseEnvironment("Staging");
     }
 
-    private async Task SeedTestDataAsync(IServiceProvider serviceProvider)
+    private static async Task SeedTestDataAsync(IServiceProvider serviceProvider)
     {
         // Seed roles and initial user data
         await DbInitializer.SeedRolesAndAdminUser(serviceProvider);
 
-        // Add any additional test-specific seeding here
-        await SeedTestSchools(serviceProvider);
+        // Execute the test school data SQL
+        await ExecuteTestSchoolDataAsync(serviceProvider);
     }
 
-    private async Task SeedTestSchools(IServiceProvider serviceProvider)
+    private static async Task ExecuteTestSchoolDataAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        // Add some test schools if they don't exist
-        if(!await context.Schools.AnyAsync())
+        // Read the SQL file content
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var resourceName = "Instructo.IntegrationTests.TestData.InsertTestSchools.sql";
+        
+        // Try alternative path if the embedded resource doesn't exist
+        string sqlContent;
+        using (var stream = assembly.GetManifestResourceStream(resourceName))
         {
-            var testSchools = new[]
+            if (stream == null)
             {
-                new School(new ApplicationUser(),
-                    SchoolName.Wrap("Test Driving School 1"),
-                    LegalName.Wrap("Name"),
-                    Email.Create("<EMAIL>").Value!,
-                    PhoneNumber.Create("555-123-4567").Value!,
-                    [], BussinessHours.Empty,
-                    [], [], null,new City(){Name = "Cluj-Napoca"},new Slogan(""),new Description(""),new Address("test",new NetTopologySuite.Geometries.Point(new NetTopologySuite.Geometries.Coordinate(0,0)))),
-                new School(new ApplicationUser(),
-                    SchoolName.Wrap("Test Driving School 2"),
-                    LegalName.Wrap("Name2"),
-                    Email.Create("<EMAIL>").Value!,
-                    PhoneNumber.Create("555-123-4567").Value!,
-                    [], BussinessHours.Empty,
-                    [], [], null,new City(){Name = "Cluj-Napoca"},new Slogan(""),new Description(""),new Address("test",new NetTopologySuite.Geometries.Point(new NetTopologySuite.Geometries.Coordinate(0,0))))
-            };
+                // Fallback: read from file system
+                var sqlFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", 
+                    "..", "src", "Instructo.Infrastructure", "Data", "Hardcoded", "InsertTestSchools.sql");
+                
+                if (File.Exists(sqlFilePath))
+                {
+                    sqlContent = await File.ReadAllTextAsync(sqlFilePath);
+                }
+                else
+                {
+                    // Skip seeding if file not found - tests will handle empty state
+                    return;
+                }
+            }
+            else
+            {
+                using var reader = new StreamReader(stream);
+                sqlContent = await reader.ReadToEndAsync();
+            }
+        }
 
-            context.Schools.AddRange(testSchools);
-            await context.SaveChangesAsync();
+        // Execute the SQL commands
+        if (!string.IsNullOrWhiteSpace(sqlContent))
+        {
+            await context.Database.ExecuteSqlRawAsync(sqlContent);
         }
     }
+
 
     // Helper method to get a fresh database context for tests
     public AppDbContext GetDbContext()
@@ -129,9 +144,6 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
     public async Task ResetDatabaseAsync()
     {
         using var context = GetDbContext();
-
-        // Remove test-specific data but keep seeded reference data
-        context.Schools.RemoveRange(context.Schools);
 
         // Don't remove users, roles, or other reference data as they're expensive to recreate
         await context.SaveChangesAsync();

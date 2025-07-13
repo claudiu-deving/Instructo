@@ -13,13 +13,19 @@ using Domain.ValueObjects;
 
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories.Commands;
-using Infrastructure.Data.Repositories.Queries;
 using Infrastructure.Data.Repositories.Directories;
+using Infrastructure.Data.Repositories.Queries;
 using Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
+// Only add Aspire service defaults if running with Aspire orchestrator
+var isAspireEnabled = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("USING_ASPIRE"));
+
+if(isAspireEnabled)
+{
+    builder.AddServiceDefaults();
+}
 
 builder.Logging.ClearProviders();
 
@@ -32,10 +38,9 @@ builder.Host.UseSerilog((context, services, loggerConfiguration) =>
         .Destructure.With<SensitiveDataDestructuringPolicy>()
         .Enrich.WithThreadId()
         .WriteTo.Console()
-        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"] ?? //Make sure to run Docker beforehand
+        .WriteTo.Seq(context.Configuration["Seq:ServerUrl"]?? //Make sure to run Docker beforehand
                      throw new ArgumentException("Provide the url for the seq server"));
 });
-
 
 
 // Integration between Serilog and OpenTelemetry
@@ -45,10 +50,8 @@ builder.Services.AddSingleton<IDiagnosticContext>(sp =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration.GetConnectionString("sql") ??
-                         builder.Configuration["DefaultConnection"] ??
-                       throw new ArgumentException("{DefaultConnection} is null, provide a valid DB Connection");
-
+var connectionString = builder.Configuration.GetConnectionString("db")??
+                        builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(connectionString, sqlOptions =>
@@ -58,57 +61,100 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             TimeSpan.FromSeconds(30),
             null);
     });
-    if (builder.Environment.IsDevelopment())
+    if(builder.Environment.IsDevelopment()||builder.Environment.IsStaging())
         options.EnableSensitiveDataLogging();
     else
         options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 builder.Services.AddTransient<IUserQueries, UserQueryRepository>();
+builder.Services.AddMiniProfiler(options =>
+{
+    options.RouteBasePath="/profiler";
+}).AddEntityFramework();
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
         // Password settings
-        options.Password.RequireDigit = true;
-        options.Password.RequiredLength = 8;
-        options.Password.RequireNonAlphanumeric = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit=true;
+        options.Password.RequiredLength=8;
+        options.Password.RequireNonAlphanumeric=true;
+        options.Password.RequireUppercase=true;
+        options.Password.RequireLowercase=true;
 
         // Lockout settings
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan=TimeSpan.FromMinutes(30);
+        options.Lockout.MaxFailedAccessAttempts=5;
 
         // User settings
-        options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail=true;
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ??
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()??
                   throw new ArgumentException("JwtSettings is null, provide a valid JwtSettings");
 
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme=JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme=JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters=new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+            ValidateIssuer=true,
+            ValidateAudience=true,
+            ValidateLifetime=true,
+            ValidateIssuerSigningKey=true,
+            ValidIssuer=jwtSettings.Issuer,
+            ValidAudience=jwtSettings.Audience,
+            IssuerSigningKey=new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
         };
     });
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
+    {
+        tracerProviderBuilder
+            .AddSource(builder.Environment.ApplicationName)
+            .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                .AddService(builder.Environment.ApplicationName))
+            .AddAspNetCoreInstrumentation(options =>
+            {
+                options.RecordException=true;
+                options.EnrichWithHttpRequest=(activity, httpRequest) =>
+                {
+                    activity.SetTag("http.request.headers.correlation_id",
+                        httpRequest.Headers["X-Correlation-ID"].FirstOrDefault()??"");
+                };
+            })
+            .AddHttpClientInstrumentation(options =>
+            {
+                options.RecordException=true;
+                options.EnrichWithException=(activity, exception) =>
+                {
+                    activity.SetTag("error.type", exception.GetType().Name);
+                    activity.SetTag("error.message", exception.Message);
+                };
+            });
+    })
+    .WithMetrics(metricsProviderBuilder =>
+    {
+        metricsProviderBuilder
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint=new Uri(builder.Configuration["OpenTelemetry:OtlpEndpoint"]??
+                                           throw new ArgumentException("Provide the url for the OTLP endpoint"));
+            });
+    });
+
 
 
 builder.Services.AddMediator(configuration =>
@@ -123,8 +169,8 @@ builder.Services.AddValidatorsFromAssembly(
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.Configure<JsonOptions>(options =>
 {
-    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+    options.SerializerOptions.PropertyNamingPolicy=JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.PropertyNameCaseInsensitive=true;
 });
 
 // Register Identity services
@@ -155,68 +201,64 @@ builder.Services.AddAuthorizationBuilder()
         ApplicationRole.Owner.Name!));
 
 builder.Services.AddScoped<ISchoolQueriesRepository, SchoolQueriesRepository>();
-builder.Services.AddScoped<IQueryRepository<VehicleCategory, VehicleCategoryType>, VehicleCategoryQueriesRepository>();
-builder.Services.AddScoped<IQueryRepository<ArrCertificate, ARRCertificateType>, ArrCertificateQueriesRepository>();
+builder.Services.AddScoped<IQueryRepository<VehicleCategory, int>, VehicleCategoryQueriesRepository>();
+builder.Services.AddScoped<IQueryRepository<ArrCertificate, int>, ArrCertificateQueriesRepository>();
 builder.Services.AddScoped<IQueryRepository<City, int>, CityQueryRepository>();
 builder.Services.AddScoped<ISchoolCommandRepository, SchoolCommandRepository>();
 builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
 builder.Services.AddScoped<ISchoolManagementDirectory, SchoolManagementDirectory>();
 builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
 
-
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval=TimeSpan.FromMinutes(30); // Default is 30 min
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("GetorPost",
         builder =>
-        builder.AllowAnyOrigin().WithMethods("GET", "POST")
-        .AllowAnyHeader());
+            builder.AllowAnyOrigin().WithMethods("GET", "POST")
+                .AllowAnyHeader());
 });
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
+// Only map Aspire default endpoints if running with Aspire
+if(isAspireEnabled)
+{
+    app.MapDefaultEndpoints();
+}
 
 // Initialize database with proper migration handling
-using (var scope = app.Services.CreateScope())
+using(var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     try
     {
-        if (app.Environment.IsDevelopment())
-        {
-            // In development, you might want to ensure database is created
-            await DbInitializer.EnsureDatabaseCreatedAsync(scope.ServiceProvider, logger);
-        }
-        else
-        {
+        if(builder.Environment.IsProduction())
             // In production, apply migrations
             await DbInitializer.InitializeDatabaseAsync(scope.ServiceProvider, logger);
-        }
     }
-    catch (Exception ex)
+    catch(Exception ex)
     {
         logger.LogError(ex, "An error occurred while initializing the database.");
-        // Decide whether to continue or stop the application
-        if (!app.Environment.IsDevelopment())
-        {
-            throw; // Stop the application in production if database initialization fails
-        }
+        if(!app.Environment
+                .IsDevelopment())
+            throw;
     }
 }
-
-// Commented out old approach
-//await DbInitializer.SeedRolesAndAdminUser(app.Services);
 
 app.MapUserEndpoints();
 app.MapSchoolEndpoints();
 app.MapAuthEndpoints();
 
-if (app.Environment.IsDevelopment())
+if(app.Environment.IsDevelopment())
 {
     app.MapScalarApiReference();
     app.MapOpenApi();
     app.UseDeveloperExceptionPage();
     app.UseCors("GetorPost");
+    app.UseMiniProfiler();
 }
 
 app.UseExceptionHandler(exceptionHandlerApp
@@ -227,7 +269,7 @@ app.Use(async (context, next) =>
 {
     var user = context.User;
     // Log all claims
-    foreach (var claim in user.Claims)
+    foreach(var claim in user.Claims)
         Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
 
     // Log identity authentication status
@@ -242,16 +284,16 @@ app.Use(async (context, next) =>
 
 app.UseSerilogRequestLogging(options =>
 {
-    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    options.EnrichDiagnosticContext=(diagnosticContext, httpContext) =>
     {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? "");
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value??"");
         diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
         diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
 
-        if (httpContext.User.Identity?.IsAuthenticated != true)
+        if(httpContext.User.Identity?.IsAuthenticated!=true)
             return;
         var value = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (value != null)
+        if(value!=null)
             diagnosticContext.Set("UserId",
                 value);
     };

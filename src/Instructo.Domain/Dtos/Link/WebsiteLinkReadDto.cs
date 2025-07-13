@@ -2,7 +2,7 @@
 
 namespace Domain.Dtos.Link;
 
-public readonly record struct WebsiteLinkReadDto(string Url, string Name, string Description, ImageReadDto IconData)
+public readonly record struct WebsiteLinkReadDto(string Url, string Name, string? Description, ImageReadDto IconData)
 {
     public static WebsiteLinkReadDto Empty => new(string.Empty, string.Empty, string.Empty, new ImageReadDto(string.Empty, string.Empty, string.Empty, string.Empty));
 }
