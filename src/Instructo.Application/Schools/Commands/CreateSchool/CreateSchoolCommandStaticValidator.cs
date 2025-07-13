@@ -144,11 +144,18 @@ public partial record CreateSchoolCommand
                     phoneNumberGroups.Clear();
                 }
             }
+            if(phoneNumberGroups.Count>=1&&phoneNumberGroups[0].PhoneNumbers.Count==1)
+            {
+                mainPhoneNumber=phoneNumberGroups[0].PhoneNumbers[0];
+                phoneNumberGroups[0].PhoneNumbers.RemoveAt(0);
+                phoneNumberGroups.RemoveAt(0);
+            }
             if(phoneNumberGroups.Count>=1&&phoneNumberGroups[0].PhoneNumbers.Count>1)
             {
                 mainPhoneNumber=phoneNumberGroups[0].PhoneNumbers[0];
                 phoneNumberGroups[0].PhoneNumbers.RemoveAt(0);
             }
+
             if(MainPhoneNumberExists(createSchoolCommandDto))
             {
                 var phoneNumberCreationRequest = PhoneNumber.Create(createSchoolCommandDto.PhoneNumber)

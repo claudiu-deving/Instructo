@@ -224,7 +224,7 @@ public class CreateSchoolCommandHandler(
 
             foreach(var certificateType in request.Certificates)
             {
-                var certificateResult = await schoolManagementDirectory.CertificateQueriesRepository.GetByIdAsync(certificateType);
+                var certificateResult = await schoolManagementDirectory.CertificateQueriesRepository.GetByIdAsync((int)certificateType);
                 if(certificateResult.IsError)
                 {
                     certificatesRetrievalErrors.AddRange(certificateResult.Errors);
@@ -253,7 +253,7 @@ public class CreateSchoolCommandHandler(
             var city = flexContext.Get<Domain.Entities.City>();
             var icon = flexContext.Get<Image>();
             var address = flexContext.Get<Address>();
-            return new School(
+            return School.Create(
                 user,
                 request.Name,
                 request.LegalName,

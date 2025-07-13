@@ -87,7 +87,7 @@ public class CreateSchoolCommandCreationTests
           ArrCertifications: []
        ));
         Assert.True(request.IsError);
-        Assert.Contains("Legal name must start with a capital letter", request.Errors.Select(e => e.Message));
+        Assert.Contains("Company name must start with a capital letter", request.Errors.Select(e => e.Code));
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class CreateSchoolCommandCreationTests
           ArrCertifications: []
        ));
         Assert.True(request.IsError);
-        Assert.Contains("At least one phone number is required", request.Errors.Select(e => e.Message));
+        Assert.Contains("No phone number groups and no phone number", request.Errors.Select(e => e.Message));
     }
 
     [Fact]

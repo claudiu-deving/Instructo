@@ -8,8 +8,8 @@ public class SchoolManagementDirectory(
     ISchoolQueriesRepository SchoolQueriesRepository,
     ISchoolCommandRepository SchoolCommandRepository,
     IQueryRepository<City, int> CityQueriesRepository,
-    IQueryRepository<ArrCertificate, ARRCertificateType> CertificateQueriesRepository,
-    IQueryRepository<VehicleCategory, VehicleCategoryType> VehicleQueriesRepository) : UnitOfWork(appDbContext), ISchoolManagementDirectory
+    IQueryRepository<ArrCertificate, int> CertificateQueriesRepository,
+    IQueryRepository<VehicleCategory, int> VehicleQueriesRepository) : UnitOfWork(appDbContext), ISchoolManagementDirectory
 {
     public ISchoolQueriesRepository SchoolQueriesRepository { get; } = SchoolQueriesRepository;
 
@@ -17,7 +17,7 @@ public class SchoolManagementDirectory(
 
     public IQueryRepository<City, int> CityQueriesRepository { get; } = CityQueriesRepository;
 
-    public IQueryRepository<ArrCertificate, ARRCertificateType> CertificateQueriesRepository { get; } = CertificateQueriesRepository;
+    public IQueryRepository<ArrCertificate, int> CertificateQueriesRepository { get; } = CertificateQueriesRepository;
 
-    public IQueryRepository<VehicleCategory, VehicleCategoryType> VehicleQueriesRepository { get; } = VehicleQueriesRepository;
+    public IQueryRepository<VehicleCategory, int> VehicleQueriesRepository { get; } = VehicleQueriesRepository;
 }

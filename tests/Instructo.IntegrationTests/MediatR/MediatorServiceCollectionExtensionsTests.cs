@@ -71,8 +71,8 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
 
 
         services.AddScoped<ISchoolQueriesRepository, SchoolQueriesRepository>();
-        services.AddScoped<IQueryRepository<VehicleCategory, VehicleCategoryType>, VehicleCategoryQueriesRepository>();
-        services.AddScoped<IQueryRepository<ArrCertificate, ARRCertificateType>, ArrCertificateQueriesRepository>();
+        services.AddScoped<IQueryRepository<VehicleCategory, int>, VehicleCategoryQueriesRepository>();
+        services.AddScoped<IQueryRepository<ArrCertificate, int>, ArrCertificateQueriesRepository>();
         services.AddScoped<IQueryRepository<City, int>, CityQueryRepository>();
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {

@@ -3,7 +3,6 @@
 using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
-using Domain.ValueObjects;
 
 using Infrastructure.Data.Configurations;
 

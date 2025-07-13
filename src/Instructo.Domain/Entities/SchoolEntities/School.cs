@@ -17,7 +17,7 @@ public class School : BaseAuditableEntity<Guid>
 {
     private readonly List<WebsiteLink> _websiteLinks = [];
 
-    public School(
+    private School(
         ApplicationUser owner,
         SchoolName name,
         LegalName companyName,
@@ -44,11 +44,11 @@ public class School : BaseAuditableEntity<Guid>
         BussinessHours=bussinessHours;
         VehicleCategories=vehicleCategories;
         Certificates=certificates;
-        Slug=Slug.Create(CompanyName);
+        Slug=Domain.ValueObjects.Slug.Create(companyName);
         City=city;
         County=city.County;
-        Slogan=slogan;
-        Description=description;
+        Slogan=slogan.Value;
+        Description=description.Value;
         Address=address;
     }
 
@@ -64,15 +64,15 @@ public class School : BaseAuditableEntity<Guid>
     public Guid OwnerId { get; private set; }
 
     public ApplicationUser Owner { get; private set; } = null!;
-    public SchoolName Name { get; private set; }
-    public LegalName CompanyName { get; private set; }
-    public Email Email { get; private set; }
-    public Slug Slug { get; }
+    public string Name { get; private set; }
+    public string CompanyName { get; private set; }
+    public string Email { get; private set; }
+    public string Slug { get; }
     public virtual County? County { get; init; }
     public virtual City? City { get; private set; }
     public virtual Address Address { get; private set; }
-    public Slogan Slogan { get; }
-    public Description Description { get; }
+    public string Slogan { get; }
+    public string Description { get; }
     public PhoneNumber PhoneNumber { get; private set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; private set; } = [];
     public BussinessHours BussinessHours { get; private set; } = BussinessHours.Empty;
@@ -170,16 +170,36 @@ public class School : BaseAuditableEntity<Guid>
         {
             return false;
         }
-        return otherSchool.CompanyName.Value.Equals(this.CompanyName.Value);
+        return otherSchool.CompanyName.Equals(this.CompanyName);
     }
 
     public override int GetHashCode()
     {
-        return CompanyName.Value.GetHashCode()*13;
+        return CompanyName.GetHashCode()*13;
     }
 
     public override string ToString()
     {
-        return CompanyName.Value;
+        return CompanyName;
+    }
+
+    public static School Create(
+        ApplicationUser owner,
+        SchoolName name,
+        LegalName companyName,
+        Email email,
+        PhoneNumber phoneNumber,
+        List<PhoneNumbersGroup> phoneNumberGroups,
+        BussinessHours bussinessHours,
+        List<VehicleCategory> vehicleCategories,
+        List<ArrCertificate> certificates,
+        Image? icon,
+        City city,
+        Slogan slogan,
+        Description description,
+        Address address)
+    {
+        return new School(
+            owner, name, companyName, email, phoneNumber, phoneNumberGroups, bussinessHours, vehicleCategories, certificates, icon, city, slogan, description, address);
     }
 }

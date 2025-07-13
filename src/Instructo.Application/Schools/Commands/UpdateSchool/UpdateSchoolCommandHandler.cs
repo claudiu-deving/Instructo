@@ -18,8 +18,8 @@ namespace Application.Schools.Commands.UpdateSchool;
 public class UpdateSchoolCommandHandler(
     ISchoolCommandRepository repository,
    ISchoolQueriesRepository queryRepository,
-    IQueryRepository<ArrCertificate, ARRCertificateType> certificatesRepository,
-    IQueryRepository<VehicleCategory, VehicleCategoryType> vehicleQueryRepository,
+    IQueryRepository<ArrCertificate, int> certificatesRepository,
+    IQueryRepository<VehicleCategory, int> vehicleQueryRepository,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
     ISender sender) : ICommandHandler<UpdateSchoolCommand, Result<SchoolDetailReadDto>>
 {
@@ -117,7 +117,7 @@ public class UpdateSchoolCommandHandler(
                     try
                     {
                         await FlexContext.StartContextAsync()
-                            .Then(_ => vehicleQueryRepository.GetByIdAsync(x))
+                            .Then(_ => vehicleQueryRepository.GetByIdAsync((int)x))
                             .FinalizeContext(ctx => selectedCategories.Add(ctx.Get<VehicleCategory>()));
                     }
                     catch(Exception e)
@@ -149,7 +149,7 @@ public class UpdateSchoolCommandHandler(
                 try
                 {
                     await FlexContext.StartContextAsync()
-                        .Then(_ => certificatesRepository.GetByIdAsync(certificateType))
+                        .Then(_ => certificatesRepository.GetByIdAsync((int)certificateType))
                         .FinalizeContext(ctx => selectedCertificates.Add(ctx.Get<ArrCertificate>()));
                 }
                 catch(Exception e)

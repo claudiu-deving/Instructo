@@ -1,13 +1,8 @@
-﻿using Domain.Entities;
-using Domain.Entities.SchoolEntities;
-using Domain.ValueObjects;
-
-using Infrastructure.Data;
+﻿using Infrastructure.Data;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -97,20 +92,20 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
         // Read the SQL file content
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         var resourceName = "Instructo.IntegrationTests.TestData.InsertTestSchools.sql";
-        
+
         // Try alternative path if the embedded resource doesn't exist
         string sqlContent;
-        using (var stream = assembly.GetManifestResourceStream(resourceName))
+        using(var stream = assembly.GetManifestResourceStream(resourceName))
         {
-            if (stream == null)
+            if(stream==null)
             {
                 // Fallback: read from file system
-                var sqlFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", 
+                var sqlFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                     "..", "src", "Instructo.Infrastructure", "Data", "Hardcoded", "InsertTestSchools.sql");
-                
-                if (File.Exists(sqlFilePath))
+
+                if(File.Exists(sqlFilePath))
                 {
-                    sqlContent = await File.ReadAllTextAsync(sqlFilePath);
+                    sqlContent=await File.ReadAllTextAsync(sqlFilePath);
                 }
                 else
                 {
@@ -121,12 +116,12 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
             else
             {
                 using var reader = new StreamReader(stream);
-                sqlContent = await reader.ReadToEndAsync();
+                sqlContent=await reader.ReadToEndAsync();
             }
         }
 
         // Execute the SQL commands
-        if (!string.IsNullOrWhiteSpace(sqlContent))
+        if(!string.IsNullOrWhiteSpace(sqlContent))
         {
             await context.Database.ExecuteSqlRawAsync(sqlContent);
         }

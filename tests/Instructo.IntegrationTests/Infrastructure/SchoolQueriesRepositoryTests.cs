@@ -207,8 +207,8 @@ public class SchoolQueriesRepositoryTests(
 
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
-        Assert.Equal("Elite Driving Academy", result.Value.Name.Value);
-        Assert.Equal("elite-driving-academy-srl", result.Value.Slug.Value);
+        Assert.Equal("Elite Driving Academy", result.Value.Name);
+        Assert.Equal("elite-driving-academy-srl", result.Value.Slug);
     }
 
     [Fact]
@@ -219,7 +219,7 @@ public class SchoolQueriesRepositoryTests(
 
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
-        Assert.Equal("Elite Driving Academy", result.Value.Name.Value);
+        Assert.Equal("Elite Driving Academy", result.Value.Name);
         Assert.Equal(schoolId.Id, result.Value.Id);
     }
 
