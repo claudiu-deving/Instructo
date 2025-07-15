@@ -16,6 +16,6 @@ public class GetSchoolBySlugQueryHandler(ISchoolQueriesRepository repository) : 
         var repositoryRequest = await repository.GetBySlugAsync(request.Slug);
         if(repositoryRequest.IsError)
             return Result<SchoolDetailReadDto>.Failure(repositoryRequest.Errors);
-        return repositoryRequest.Map(x => x is null ? new SchoolDetailReadDto() : x.ToReadDto());
+        return repositoryRequest.Map(x => x is null ? new SchoolDetailReadDto() : x.ToDetailedReadDto());
     }
 }

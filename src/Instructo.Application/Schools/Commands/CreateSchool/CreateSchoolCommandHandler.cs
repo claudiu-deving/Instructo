@@ -17,7 +17,6 @@ using Messager;
 using Microsoft.AspNetCore.Identity;
 
 [assembly: InternalsVisibleTo("Instructo.IntegrationTests")]
-
 namespace Application.Schools.Commands.CreateSchool;
 
 public class CreateSchoolCommandHandler(
@@ -49,7 +48,7 @@ public class CreateSchoolCommandHandler(
         }
         await schoolManagementDirectory.SaveChangesAsync();
 
-        return Result<SchoolDetailReadDto>.Success(ctx.Get<School>().ToReadDto());
+        return Result<SchoolDetailReadDto>.Success(ctx.Get<School>().ToDetailedReadDto());
     }
 
     private Result<School> AddSocialMediaLinks(FlexContext context)
@@ -253,6 +252,7 @@ public class CreateSchoolCommandHandler(
             var city = flexContext.Get<Domain.Entities.City>();
             var icon = flexContext.Get<Image>();
             var address = flexContext.Get<Address>();
+            var team = flexContext.Get<Team>();
             return School.Create(
                 user,
                 request.Name,
@@ -267,7 +267,10 @@ public class CreateSchoolCommandHandler(
                 city,
                 request.Slogan,
                 request.Description,
-                address
+                address,
+                request.Statistics,
+                request.CategoryPricings,
+                team
             );
         }
     }

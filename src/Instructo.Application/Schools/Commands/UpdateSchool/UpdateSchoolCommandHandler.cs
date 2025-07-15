@@ -32,7 +32,7 @@ public class UpdateSchoolCommandHandler(
             .Then(UpdateSchoolWebsiteLink)
             .Then(UpdateSocialMediaLinks)
             .Then(ctx => repository.UpdateAsync(ctx.Get<School>()))
-            .MapAsync(ctx => ctx.Get<School>().ToReadDto());
+            .MapAsync(ctx => ctx.Get<School>().ToDetailedReadDto());
     }
 
     private async Task<Result<School>> GetSchool(FlexContext context)

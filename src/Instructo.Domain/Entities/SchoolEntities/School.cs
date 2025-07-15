@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 
+using Domain.Models;
 using Domain.Shared;
 using Domain.ValueObjects;
 
@@ -31,7 +33,10 @@ public class School : BaseAuditableEntity<Guid>
         City city,
         Slogan slogan,
         Description description,
-        Address address)
+        Address address,
+        Statistics statistics,
+        List<SchoolCategoryPricing> schoolCategoryPricings,
+        Team team)
     {
         Id=SchoolId.CreateNew();
         Owner=owner;
@@ -50,6 +55,9 @@ public class School : BaseAuditableEntity<Guid>
         Slogan=slogan.Value;
         Description=description.Value;
         Address=address;
+        Statistics=statistics;
+        CategoryPricings=schoolCategoryPricings;
+        Team=team;
     }
 
     private School()
@@ -73,13 +81,16 @@ public class School : BaseAuditableEntity<Guid>
     public virtual Address Address { get; private set; }
     public string Slogan { get; }
     public string Description { get; }
+    public Statistics Statistics { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; private set; } = [];
     public BussinessHours BussinessHours { get; private set; } = BussinessHours.Empty;
     public virtual ICollection<VehicleCategory> VehicleCategories { get; } = [];
     public virtual ICollection<ArrCertificate> Certificates { get; } = [];
+    public virtual ICollection<SchoolCategoryPricing> CategoryPricings { get; } = [];
     public virtual Image? Icon { get; private set; }
     public virtual IReadOnlyCollection<WebsiteLink> WebsiteLinks => _websiteLinks.AsReadOnly();
+    public virtual Team? Team { get; private set; }
 
     public bool IsApproved { get; set; }
 
@@ -137,6 +148,18 @@ public class School : BaseAuditableEntity<Guid>
     public void AddLogo(Image schoolLogo)
     {
         Icon=schoolLogo;
+    }
+
+    public void CreateTeam()
+    {
+        if(Team!=null)
+            return;
+        Team=SchoolEntities.Team.Create(Id);
+    }
+
+    public void RemoveTeam()
+    {
+        Team=null;
     }
 
     public void ChangeName(SchoolName newSchoolName)
@@ -197,9 +220,28 @@ public class School : BaseAuditableEntity<Guid>
         City city,
         Slogan slogan,
         Description description,
-        Address address)
+        Address address,
+        Statistics statistics,
+         List<SchoolCategoryPricing> schoolCategoryPricings,
+         Team team)
     {
         return new School(
-            owner, name, companyName, email, phoneNumber, phoneNumberGroups, bussinessHours, vehicleCategories, certificates, icon, city, slogan, description, address);
+            owner,
+            name,
+            companyName,
+            email,
+            phoneNumber,
+            phoneNumberGroups,
+            bussinessHours,
+            vehicleCategories,
+            certificates,
+            icon,
+            city,
+            slogan,
+            description,
+            address,
+            statistics,
+            schoolCategoryPricings,
+            team);
     }
 }

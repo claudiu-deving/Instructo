@@ -1,5 +1,6 @@
 ﻿using Domain.Dtos.Link;
 using Domain.Dtos.PhoneNumbers;
+using Domain.Entities;
 
 namespace Domain.Dtos.School;
 
@@ -22,4 +23,6 @@ public readonly record struct CreateSchoolCommandDto(
     List<SocialMediaLinkDto> SocialMediaLinks,
     List<BusinessHoursEntryDto> BussinessHours,
     List<string> VechiclesCategories,
-    List<string> ArrCertifications);
+    List<string> ArrCertifications,
+    int NumberOfStudents,
+    List<SchoolCategoryPricing> CategoryPricings);

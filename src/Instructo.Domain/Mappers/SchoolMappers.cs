@@ -6,7 +6,7 @@ namespace Domain.Mappers;
 
 public static class SchoolMappers
 {
-    public static SchoolDetailReadDto ToReadDto(this School school)
+    public static SchoolDetailReadDto ToDetailedReadDto(this School school)
     {
         if(school.City is null&&school.County is null)
         {
@@ -31,7 +31,10 @@ public static class SchoolMappers
            [.. school.WebsiteLinks.Select(x => x.ToReadDto())],
            [.. school.BussinessHours.BussinessHoursEntries],
            [.. school.VehicleCategories.Select(x => x.ToDto())],
-           [.. school.Certificates.Select(x => x.ToDto())]
+           [.. school.Certificates.Select(x => x.ToDto())],
+           school.Statistics.NumberOfStudents,
+           [.. school.CategoryPricings.Select(x => x.ToDto())],
+           school.Team.ToDto()
         );
     }
 }

@@ -50,11 +50,10 @@ public static class DbInitializer
 
         try
         {
-            // This creates the database if it doesn't exist (useful for testing)
-            logger.LogInformation("Ensuring database is created...");
-            await context.Database.EnsureCreatedAsync();
-            logger.LogInformation("Database creation ensured.");
-
+            // Apply any pending migrations
+            logger.LogInformation("Applying database migrations...");
+            await context.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied successfully.");
 
             // Seed roles and users
             await SeedRolesAndAdminUser(serviceProvider);

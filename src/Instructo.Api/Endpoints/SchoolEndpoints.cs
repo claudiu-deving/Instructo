@@ -110,27 +110,34 @@ public static class SchoolEndpoints
     {
         var role = context.User.FindFirstValue(ClaimTypes.Role);
         var isAdmin = role is "IronMan";
+        var requestsWithDetails = parameters.Fields is not null&&parameters.Fields.ToLower().Equals("all");
+        var normalizedParams = new GetSchoolsQueryParameters
+        {
+            PageNumber=Math.Max(1, parameters.PageNumber),
+            PageSize=Math.Min(50, Math.Max(1, parameters.PageSize)),
+            SearchTerm=parameters.SearchTerm,
+            Fields=parameters.Fields
+        };
 
-        var query = new GetSchoolsQuery(isAdmin);
-        var userRequest = await sender.Send(query);
-        parameters=parameters with { PageNumber=parameters.PageNumber==0 ? 1 : parameters.PageNumber };
-        parameters=parameters with { PageSize=parameters.PageSize>50 ? 50 : parameters.PageSize };
-        return userRequest.Match<IResult>(
+        var query = new GetSchoolsQuery(isAdmin, requestsWithDetails, normalizedParams);
+        var schoolRequest = await sender.Send(query);
+
+
+        return schoolRequest.Match<IResult>(
             ok =>
             {
-                if(!string.IsNullOrEmpty(parameters.SearchTerm))
-                    ok=
-                    [
-                        .. ok.Where(x =>
-                            x.CompanyName.Contains(parameters.SearchTerm) ||
-                            x.Name.Contains(parameters.SearchTerm) ||
-                            x.Email.Contains(parameters.SearchTerm) ||
-                            x.PhoneNumber.Contains(parameters.SearchTerm))
-                    ];
-                ok= [.. ok.Skip((parameters.PageNumber-1)*parameters.PageSize).Take(parameters.PageSize)];
-
-                return TypedResults.Ok(ok);
+                if(requestsWithDetails)
+                {
+                    var schools = ok.Cast<SchoolDetailReadDto>();
+                    return TypedResults.Ok(schools);
+                }
+                else
+                {
+                    var schools = ok.Cast<SchoolReadDto>();
+                    return TypedResults.Ok(schools);
+                }
             },
             nok => { return TypedResults.BadRequest(new { errors = nok.ToList() }); });
+
     }
 }

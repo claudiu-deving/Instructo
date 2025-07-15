@@ -236,8 +236,15 @@ using(var scope = app.Services.CreateScope())
     try
     {
         if(builder.Environment.IsProduction())
+        {
             // In production, apply migrations
             await DbInitializer.InitializeDatabaseAsync(scope.ServiceProvider, logger);
+        }
+        else if(builder.Environment.IsDevelopment())
+        {
+            // In development or staging, ensure database is created
+            await DbInitializer.EnsureDatabaseCreatedAsync(scope.ServiceProvider, logger);
+        }
     }
     catch(Exception ex)
     {

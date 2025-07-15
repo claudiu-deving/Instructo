@@ -64,7 +64,7 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
                 options.EnableDetailedErrors();
             });
 
-            // Configure logging for tests
+            // ConfigureArrCertificates logging for tests
             services.AddLogging(builder =>
             {
                 builder.AddConsole();

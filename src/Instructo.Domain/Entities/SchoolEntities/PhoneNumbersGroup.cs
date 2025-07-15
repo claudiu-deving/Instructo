@@ -1,4 +1,4 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Models;
 
 namespace Domain.Entities.SchoolEntities;
 public class PhoneNumbersGroup

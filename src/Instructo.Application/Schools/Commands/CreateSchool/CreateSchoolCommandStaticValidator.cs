@@ -2,6 +2,7 @@
 using Domain.Dtos.School;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
+using Domain.Models;
 using Domain.Shared;
 using Domain.ValueObjects;
 
@@ -99,13 +100,22 @@ public partial record CreateSchoolCommand
         });
         createSchoolCommand.Certificates=certificates;
 
+
+        createSchoolCommand.Statistics=new Statistics()
+        {
+            NumberOfStudents=createSchoolCommandDto.NumberOfStudents
+        };
+
+        createSchoolCommand.CategoryPricings=createSchoolCommandDto.CategoryPricings;
+
         if(errors.Count!=0)
         {
             return Result<CreateSchoolCommand>.Failure([.. errors]);
         }
-
-
-        return Result<CreateSchoolCommand>.Success(createSchoolCommand);
+        else
+        {
+            return Result<CreateSchoolCommand>.Success(createSchoolCommand);
+        }
     }
 
     private static Result<(IEnumerable<PhoneNumbersGroup> numberGroups, PhoneNumber phoneNumber)> ValidatePhoneNumbers(CreateSchoolCommandDto createSchoolCommandDto)

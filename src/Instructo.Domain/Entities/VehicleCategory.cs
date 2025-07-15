@@ -20,7 +20,9 @@ public class VehicleCategory : IEntity
     public int Id { get; private set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public virtual List<School> Schools { get; private set; } = [];
+    public virtual ICollection<School> Schools { get; private set; } = [];
+
+    public virtual ICollection<InstructorProfile> Instructors { get; private set; } = [];
 
     public static VehicleCategory Create(VehicleCategoryType id, string description)
     {

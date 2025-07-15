@@ -25,7 +25,7 @@ public class UpdateSchoolApprovalStatusCommandHandler(
 
         var approvalRequest = await schoolCommandRepository.SetApprovalState(request.School, request.IsApproved);
         return approvalRequest.Match(
-            school => school.ToReadDto(),
+            school => school.ToDetailedReadDto(),
             Result<SchoolDetailReadDto>.Failure
         );
     }

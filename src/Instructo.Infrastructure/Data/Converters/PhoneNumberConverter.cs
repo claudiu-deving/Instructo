@@ -1,4 +1,4 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Models;
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 

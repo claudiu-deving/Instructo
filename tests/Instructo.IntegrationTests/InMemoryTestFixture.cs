@@ -26,7 +26,7 @@ public class InMemoryTestFixture : WebApplicationFactory<Program>
                 options.EnableSensitiveDataLogging();
             });
 
-            // Configure logging for tests
+            // ConfigureArrCertificates logging for tests
             services.AddLogging(builder =>
             {
                 builder.AddConsole();

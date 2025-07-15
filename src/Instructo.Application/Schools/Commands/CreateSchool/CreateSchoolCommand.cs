@@ -2,8 +2,10 @@
 
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
+using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
+using Domain.Models;
 using Domain.Shared;
 using Domain.ValueObjects;
 
@@ -31,4 +33,6 @@ public partial record CreateSchoolCommand : ICommand<Result<SchoolDetailReadDto>
     public BussinessHours BussinessHours { get; internal set; } = BussinessHours.Empty;
     public List<VehicleCategoryType> VehicleCategories { get; internal set; } = [];
     public List<ARRCertificateType> Certificates { get; internal set; } = [];
+    public Statistics Statistics { get; internal set; } = Statistics.Empty;
+    public List<SchoolCategoryPricing> CategoryPricings { get; internal set; } = [];
 }

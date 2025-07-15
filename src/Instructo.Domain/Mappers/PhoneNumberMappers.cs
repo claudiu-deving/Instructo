@@ -1,6 +1,6 @@
 ﻿using Domain.Dtos.PhoneNumbers;
 using Domain.Entities.SchoolEntities;
-using Domain.ValueObjects;
+using Domain.Models;
 
 namespace Domain.Mappers;
 

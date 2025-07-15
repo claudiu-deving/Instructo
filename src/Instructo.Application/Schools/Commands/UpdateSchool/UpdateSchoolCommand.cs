@@ -3,6 +3,7 @@ using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
+using Domain.Models;
 using Domain.Shared;
 using Domain.ValueObjects;
 

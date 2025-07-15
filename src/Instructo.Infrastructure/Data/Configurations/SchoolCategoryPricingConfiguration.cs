@@ -1,0 +1,13 @@
+﻿using Domain.Entities;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructure.Data.Configurations;
+internal class SchoolCategoryPricingConfiguration : IEntityTypeConfiguration<SchoolCategoryPricing>
+{
+    public void Configure(EntityTypeBuilder<SchoolCategoryPricing> builder)
+    {
+        builder.HasKey(scp => new { scp.SchoolId, scp.VehicleCategoryId });
+    }
+}
