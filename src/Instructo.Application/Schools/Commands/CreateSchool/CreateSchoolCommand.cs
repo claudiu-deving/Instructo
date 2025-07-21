@@ -1,5 +1,7 @@
-﻿using Application.Abstractions.Messaging;
+﻿
+using Application.Abstractions.Messaging;
 
+using Domain.Dtos;
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
@@ -34,5 +36,6 @@ public partial record CreateSchoolCommand : ICommand<Result<SchoolDetailReadDto>
     public List<VehicleCategoryType> VehicleCategories { get; internal set; } = [];
     public List<ARRCertificateType> Certificates { get; internal set; } = [];
     public Statistics Statistics { get; internal set; } = Statistics.Empty;
-    public List<SchoolCategoryPricing> CategoryPricings { get; internal set; } = [];
+    public List<SchoolCategoryPricingDto> CategoryPricings { get; internal set; } = [];
+    public List<AddressDto> ExtraLocations { get; internal set; } = [];
 }

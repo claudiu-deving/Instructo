@@ -1,19 +1,22 @@
 ﻿using Domain.Dtos.Image;
 using Domain.Dtos.Link;
+using Domain.Dtos.School;
 using Domain.Entities;
 
 namespace Domain.Mappers;
 
 public static class WebsiteLinkMappers
 {
-    public static WebsiteLinkReadDto ToReadDto(this WebsiteLink link)
+    public static WebsiteLinkRead ToReadDto(this WebsiteLink link)
     {
-        return new WebsiteLinkReadDto
-        {
-            Url=link.Url,
-            Name=link.Name,
-            Description=link.Description??"",
-            IconData=link.Icon?.ToReadDto()??ImageReadDto.Empty
-        };
+        return new WebsiteLinkRead(
+            link.Url,
+           link.Name,
+          link.Description??"",
+          link.Icon?.FileName??string.Empty,
+          link.Icon?.Url??string.Empty,
+          link.Icon?.ContentType??string.Empty,
+            link.Icon?.Description??string.Empty
+        );
     }
 }

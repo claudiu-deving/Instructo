@@ -8,48 +8,47 @@ namespace Domain.Entities;
 
 public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
 {
-    private readonly List<School> _schools = [];
     private WebsiteLink() { }
 
     public Url Url { get; private set; }
     public WebsiteLinkName Name { get; private set; }
     public string? Description { get; private set; }
     public virtual Image? Icon { get; private set; }
-    public virtual IReadOnlyCollection<School> Schools => _schools.AsReadOnly();
+    public virtual School? School { get; private set; }
 
     public Result<WebsiteLink> Update(string? url, string? name, string? description, Image? icon)
     {
         var errors = new List<Error>();
-        if (url is not null)
+        if(url is not null)
         {
             var urlResult = Url.Create(url)
-                .OnSuccess(lnk => this.Url = lnk)
+                .OnSuccess(lnk => this.Url=lnk)
                 .OnError(errors.AddRange);
         }
 
-        if (name is not null)
+        if(name is not null)
         {
             var nameResult = WebsiteLinkName.Create(name)
-                .OnSuccess(n => this.Name = n)
+                .OnSuccess(n => this.Name=n)
                 .OnError(errors.AddRange);
         }
 
-        if (description is not null)
+        if(description is not null)
         {
-            this.Description = description;
+            this.Description=description;
         }
 
-        if (icon is not null)
+        if(icon is not null)
         {
-            this.Icon = icon;
+            this.Icon=icon;
         }
 
-        return errors.Count>0 
-            ? Result<WebsiteLink>.Failure([.. errors]) 
+        return errors.Count>0
+            ? Result<WebsiteLink>.Failure([.. errors])
             : this;
     }
 
-    public static Result<WebsiteLink> Create(string url, string name, string description, Image icon)
+    public static Result<WebsiteLink> Create(string url, string name, string? description, Image icon)
     {
         var websiteLink = new WebsiteLink();
         var errors = new List<Error>();
@@ -62,8 +61,8 @@ public class WebsiteLink : BaseAuditableEntity<WebsiteLinkId>
         websiteLink.Description=description;
         websiteLink.Icon=icon;
         websiteLink.Id=WebsiteLinkId.CreateNew();
-        return errors.Count>0 
-            ? Result<WebsiteLink>.Failure([.. errors]) 
+        return errors.Count>0
+            ? Result<WebsiteLink>.Failure([.. errors])
             : websiteLink;
     }
 

@@ -135,7 +135,7 @@ public partial record CreateSchoolCommand
                 {
                     PhoneNumber.Create(phoneNumber.Value, phoneNumber.Name)
                                .OnError(errors.AddRange)
-                               .OnSuccess(phoneNum => phoneNumberGroup.PhoneNumbers.Add(phoneNum));
+                               .OnSuccess(phoneNumberGroup.PhoneNumbers.Add);
                 }
                 if(errors.Count==0)
                 {
@@ -168,7 +168,7 @@ public partial record CreateSchoolCommand
 
             if(MainPhoneNumberExists(createSchoolCommandDto))
             {
-                var phoneNumberCreationRequest = PhoneNumber.Create(createSchoolCommandDto.PhoneNumber)
+                var phoneNumberCreationRequest = PhoneNumber.Create(createSchoolCommandDto.PhoneNumber!)
                    .OnError(errors.AddRange)
                    .OnSuccess(phoneNum => mainPhoneNumber=phoneNum);
             }

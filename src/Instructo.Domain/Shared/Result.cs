@@ -43,7 +43,7 @@ public class Result<TValue> : IResult<TValue>
 
     public static Result<TValue> Success(TValue value) => new(value);
     public static Result<TValue> Failure(params Error[] errors) => new(errors);
-    public static Result<TValue> WithErrors(Error[] errors) => new(errors);
+    public static Result<TValue> WithErrors(params Error[] errors) => new(errors);
 
     public Result<TOut> Map<TOut>(Func<TValue, TOut> mapper)
     {

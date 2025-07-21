@@ -35,6 +35,11 @@ public record TimeOfDay(int Hour, int Minutes)
     {
         return Hour+(double)Minutes/60;
     }
+
+    public override string ToString()
+    {
+        return $"{Hour:D2}:{Minutes:D2}";
+    }
 }
 
 

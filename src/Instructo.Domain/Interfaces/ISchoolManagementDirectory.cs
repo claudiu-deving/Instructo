@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
-using Domain.Enums;
+
+using Infrastructure.Data.Repositories.Queries;
 
 namespace Domain.Interfaces;
 public interface ISchoolManagementDirectory : IUnitOfWork
@@ -9,4 +10,5 @@ public interface ISchoolManagementDirectory : IUnitOfWork
     IQueryRepository<City, int> CityQueriesRepository { get; }
     IQueryRepository<ArrCertificate, int> CertificateQueriesRepository { get; }
     IQueryRepository<VehicleCategory, int> VehicleQueriesRepository { get; }
+    ISchoolCategoryPricingQueryRepository SchoolCategoryPricingQueriesRepository { get; }
 }

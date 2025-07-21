@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories.Queries;
 
-public class UserQueryRepository(AppDbContext dbContext) : IUserQueries
+public class UserQueryRepository(AppDbContext dbContext) : IUserQueriesRepository
 {
     public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
     {

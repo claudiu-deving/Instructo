@@ -12,7 +12,7 @@ public class SensitiveDataDestructuringPolicy : IDestructuringPolicy
 {
     public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue result)
     {
-        result=null;
+        result=null!;
 
         if(value==null)
             return false;

@@ -9,8 +9,8 @@ namespace Application.Users.Queries.GetUserByEmail;
 
 public class GetUserByEmailQueryHandler : ICommandHandler<GetUserByEmailQuery, Result<ApplicationUser>>
 {
-    private readonly IUserQueries _userQueries;
-    public GetUserByEmailQueryHandler(IUserQueries userQueries)
+    private readonly IUserQueriesRepository _userQueries;
+    public GetUserByEmailQueryHandler(IUserQueriesRepository userQueries)
     {
         _userQueries=userQueries;
     }

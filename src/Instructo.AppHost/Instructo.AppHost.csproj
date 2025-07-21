@@ -9,6 +9,7 @@
 		<Nullable>enable</Nullable>
 		<IsAspireHost>true</IsAspireHost>
 		<UserSecretsId>e1cfb951-01ce-455c-866b-68b7f733453c</UserSecretsId>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>

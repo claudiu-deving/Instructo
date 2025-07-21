@@ -9,11 +9,9 @@ public static class TeamMappers
     {
         if(team==null)
         {
-            return new TeamDto(0, new Dictionary<string, int>(), []);
+            return new TeamDto([]);
         }
         return new TeamDto(
-            team.TotalInstructors,
-            team.InstructorsByGender,
             [.. team.Instructors.Select(i => i.ToDto())]
         );
     }
@@ -28,11 +26,15 @@ public static class TeamMappers
             instructor.LastName,
             age,
             instructor.YearsExperience,
-            instructor.VehicleCategories.Select(vc => vc.Name).ToList(),
+           instructor.VehicleCategories.Select(vc => vc.ToDto()).ToList(),
             instructor.Specialization,
             instructor.Description,
-            new ContactDto(instructor.Phone, instructor.Email),
-            instructor.ProfileImage?.Url
+             instructor.Email,
+           instructor.Phone,
+            instructor.ProfileImage?.FileName,
+            instructor.ProfileImage?.Url,
+            instructor.ProfileImage?.ContentType,
+            instructor.ProfileImage?.Description
         );
     }
 }

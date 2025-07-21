@@ -2,22 +2,27 @@
 using Domain.Enums;
 using Domain.Interfaces;
 
+using Infrastructure.Data.Repositories.Queries;
+
 namespace Infrastructure.Data.Repositories.Directories;
 public class SchoolManagementDirectory(
     AppDbContext appDbContext,
-    ISchoolQueriesRepository SchoolQueriesRepository,
-    ISchoolCommandRepository SchoolCommandRepository,
-    IQueryRepository<City, int> CityQueriesRepository,
-    IQueryRepository<ArrCertificate, int> CertificateQueriesRepository,
-    IQueryRepository<VehicleCategory, int> VehicleQueriesRepository) : UnitOfWork(appDbContext), ISchoolManagementDirectory
+    ISchoolQueriesRepository schoolQueriesRepository,
+    ISchoolCommandRepository schoolCommandRepository,
+    IQueryRepository<City, int> cityQueriesRepository,
+    IQueryRepository<ArrCertificate, int> certificateQueriesRepository,
+    IQueryRepository<VehicleCategory, int> vehicleQueriesRepository,
+    ISchoolCategoryPricingQueryRepository schoolCategoryPricingQueryRepository) : UnitOfWork(appDbContext), ISchoolManagementDirectory
 {
-    public ISchoolQueriesRepository SchoolQueriesRepository { get; } = SchoolQueriesRepository;
+    public ISchoolQueriesRepository SchoolQueriesRepository => schoolQueriesRepository;
 
-    public ISchoolCommandRepository SchoolCommandRepository { get; } = SchoolCommandRepository;
+    public ISchoolCommandRepository SchoolCommandRepository => schoolCommandRepository;
 
-    public IQueryRepository<City, int> CityQueriesRepository { get; } = CityQueriesRepository;
+    public IQueryRepository<City, int> CityQueriesRepository => cityQueriesRepository;
 
-    public IQueryRepository<ArrCertificate, int> CertificateQueriesRepository { get; } = CertificateQueriesRepository;
+    public IQueryRepository<ArrCertificate, int> CertificateQueriesRepository => certificateQueriesRepository;
 
-    public IQueryRepository<VehicleCategory, int> VehicleQueriesRepository { get; } = VehicleQueriesRepository;
+    public IQueryRepository<VehicleCategory, int> VehicleQueriesRepository => vehicleQueriesRepository;
+
+    public ISchoolCategoryPricingQueryRepository SchoolCategoryPricingQueriesRepository => schoolCategoryPricingQueryRepository;
 }

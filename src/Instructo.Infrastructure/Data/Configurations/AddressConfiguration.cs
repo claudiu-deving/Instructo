@@ -1,4 +1,3 @@
-using Domain.Common;
 using Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
@@ -21,5 +20,11 @@ internal class AddressConfiguration : IEntityTypeConfiguration<Address>
             .HasMaxLength(500);
         builder.Property(x => x.Coordinate)
             .HasColumnType("geography");
+
+        builder.Property(x => x.AddressType)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(50);
+
     }
 }

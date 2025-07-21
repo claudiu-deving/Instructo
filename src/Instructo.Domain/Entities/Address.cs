@@ -1,4 +1,10 @@
-﻿using Domain.Common;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+using Domain.Common;
+using Domain.Entities.SchoolEntities;
+using Domain.Enums;
+using Domain.Shared;
+using Domain.ValueObjects;
 
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
@@ -14,11 +20,12 @@ public class Address : IEntity
     private const double MAX_LONGITUDE = 29.7;
     private static readonly GeometryFactory _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(4326);
 
-    public Address(string street, Point coordinate, string? comment = null)
+    public Address(string street, Point coordinate, AddressType addressType, string? comment = null)
     {
         Street=street??throw new ArgumentNullException(nameof(street));
         Coordinate=coordinate??throw new ArgumentNullException(nameof(coordinate));
         Comment=comment??string.Empty;
+        AddressType=addressType;
     }
 
     private Address()
@@ -29,12 +36,15 @@ public class Address : IEntity
     public int Id { get; init; }
     public string Street { get; } = string.Empty;
     public Point? Coordinate { get; }
-
     public string? Comment { get; }
 
-    public static Address Empty => new("", _geometryFactory.CreatePoint(new Coordinate(0, 0)));
+    public virtual School? School { get; private set; }
 
-    public static Address Create(string street, string latitude, string longitude, string? comment = null)
+    public AddressType AddressType { get; private set; }
+
+    public static Address Empty => new("", _geometryFactory.CreatePoint(new Coordinate(0, 0)), AddressType.MainLocation);
+
+    public static Address Create(string street, string latitude, string longitude, AddressType addressType, string? comment = null)
     {
         if(string.IsNullOrWhiteSpace(street))
             throw new ArgumentException("Street cannot be null or empty", nameof(street));
@@ -54,41 +64,8 @@ public class Address : IEntity
 
         var point = _geometryFactory.CreatePoint(new Coordinate(lon, lat));
 
-        return new Address(street, point, comment);
+        return new Address(street, point, addressType, comment);
     }
-
-
-    public static Address Create(string street, double latitude, double longitude, string? comment = null)
-    {
-        if(string.IsNullOrWhiteSpace(street))
-            throw new ArgumentException("Street cannot be null or empty", nameof(street));
-
-        if(latitude<MIN_LATITUDE||latitude>MAX_LATITUDE)
-            throw new ArgumentOutOfRangeException(nameof(latitude),
-                $"Latitude must be between {MIN_LATITUDE} and {MAX_LATITUDE} for Romania");
-
-        if(longitude<MIN_LONGITUDE||longitude>MAX_LONGITUDE)
-            throw new ArgumentOutOfRangeException(nameof(longitude),
-                $"Longitude must be between {MIN_LONGITUDE} and {MAX_LONGITUDE} for Romania");
-
-        var point = _geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
-        return new Address(street, point, comment);
-    }
-
-    public static Address CreateWithoutValidation(string street, double latitude, double longitude,
-        string? comment = null)
-    {
-        var point = _geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
-        return new Address(street, point, comment);
-    }
-
-    public static Address CreateForSeeding(int id, string street, double latitude, double longitude,
-        string? comment = null)
-    {
-        var point = _geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
-        return new Address(street, point, comment) { Id=id };
-    }
-
 
     public override string ToString()
     {
@@ -113,5 +90,10 @@ public class Address : IEntity
     public override int GetHashCode()
     {
         return HashCode.Combine(Street, Coordinate);
+    }
+
+    public Result<AddressDto> ToDto()
+    {
+        return AddressDto.Create(Street, Coordinate?.X.ToString()??"", Coordinate?.Y.ToString()??"", Comment);
     }
 }

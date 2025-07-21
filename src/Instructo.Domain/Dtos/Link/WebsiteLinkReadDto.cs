@@ -11,8 +11,6 @@ public readonly record struct WebsiteLinkUpdateDto(string? Url, string? Name, st
     public static WebsiteLinkUpdateDto Empty => new(string.Empty, string.Empty, string.Empty, new ImageUpdateDto(string.Empty, string.Empty, string.Empty, string.Empty));
 }
 
-
-
 public readonly record struct SocialMediaLinkDto(string Url, string SocialPlatformName)
 {
     public static SocialMediaLinkDto Empty => new(string.Empty, string.Empty);

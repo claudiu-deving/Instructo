@@ -16,8 +16,8 @@ public readonly record struct LegalName
         if(string.IsNullOrWhiteSpace(value))
             return Failure<LegalName>(value, "Company name cannot be empty");
         value=value.Trim();
-        if(value.Length>100)
-            return Failure<LegalName>(value, "Company name cannot be longer than 100 characters");
+        if(value.Length>200)
+            return Failure<LegalName>(value, "Company name cannot be longer than 200 characters");
         if(value.FirstOrDefault().ToString().Equals(value.FirstOrDefault().ToString().ToLower()))
             return Failure<LegalName>(value, "Company name must start with a capital letter");
 

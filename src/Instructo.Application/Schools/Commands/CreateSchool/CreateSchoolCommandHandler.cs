@@ -11,6 +11,7 @@ using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Mappers;
 using Domain.Shared;
+using Domain.ValueObjects;
 
 using Messager;
 
@@ -34,6 +35,8 @@ public class CreateSchoolCommandHandler(
             .Then(CreateSchoolWithIcon)
             .Then(AddSchoolWebsiteLink)
             .Then(AddSocialMediaLinks)
+            .Then(AddExtraLocations)
+            .Then(CreateCategoryPricings)
             .Then(ctx => schoolManagementDirectory.SchoolCommandRepository.AddAsync(ctx.Get<School>()));
 
         if(result.IsError)
@@ -49,6 +52,76 @@ public class CreateSchoolCommandHandler(
         await schoolManagementDirectory.SaveChangesAsync();
 
         return Result<SchoolDetailReadDto>.Success(ctx.Get<School>().ToDetailedReadDto());
+    }
+    private async Task<Result<School>> CreateCategoryPricings(FlexContext context)
+    {
+        var request = context.Get<CreateSchoolCommand>();
+        var school = context.Get<School>();
+        var categoryPricings = new List<SchoolCategoryPricing>();
+        var vehicleTypes = Enum.GetValues<VehicleCategoryType>().ToDictionary(x => x.ToString(), x => x);
+        var transmissionTypes = Enum.GetValues<TransmissionType>().ToDictionary(x => x.ToString(), x => x);
+
+        foreach(var categoryPricing in request.CategoryPricings)
+        {
+            if(!vehicleTypes.TryGetValue(categoryPricing.VehicleCategory.ToString(), out var vehicleCategoryType))
+            {
+                return Result<School>.WithErrors(
+                    new Error("Create-School", $"Vehicle category {categoryPricing.VehicleCategory} not found"));
+            }
+            var vehicleCategory = await schoolManagementDirectory.VehicleQueriesRepository.GetByIdAsync((int)vehicleCategoryType);
+            if(vehicleCategory.IsError)
+            {
+                return Result<School>.WithErrors(vehicleCategory.Errors);
+            }
+            if(vehicleCategory.Value is null)
+            {
+                return Result<School>.WithErrors(
+                    new Error("Create-School", $"Vehicle category with ID {categoryPricing.VehicleCategory} not found"));
+            }
+            if(!transmissionTypes.TryGetValue(categoryPricing.Transmission.ToString(), out var transmission))
+            {
+                return Result<School>.WithErrors(
+                    new Error("Create-School", $"Transmission type {categoryPricing.Transmission} not found"));
+            }
+
+            categoryPricings.Add(new SchoolCategoryPricing()
+            {
+                Category=vehicleCategory.Value,
+                FullPrice=categoryPricing.FullPrice,
+                InstallmentPrice=categoryPricing.InstallmentPrice,
+                Transmission=transmission
+            });
+        }
+        school.SetCategoryPricings(categoryPricings);
+        return school;
+    }
+    private async Task<Result<object>> AddExtraLocations(FlexContext context)
+    {
+        var request = context.Get<CreateSchoolCommand>();
+        var school = context.Get<School>();
+        if(request.ExtraLocations is null||request.ExtraLocations.Count==0)
+            return school;
+        var errors = new List<Error>();
+        foreach(var extraLocation in request.ExtraLocations)
+        {
+            var result = await FlexContext.StartContextAsync(request, school, extraLocation)
+                .Then(CreateAddress)
+                .Then(ctx => school.AddExtraLocation(ctx.Get<Address>()));
+            if(result.IsError)
+            {
+                errors.AddRange(result.Errors);
+            }
+        }
+        if(errors.Count>0)
+        {
+            return Result<object>.Failure([.. errors]);
+        }
+        return school;
+        static Result<Address> CreateAddress(FlexContext flexContext)
+        {
+            var extraLocation = flexContext.Get<AddressDto>();
+            return Address.Create(extraLocation.Street, extraLocation.Longitude, extraLocation.Latitude, AddressType.LessonStart);
+        }
     }
 
     private Result<School> AddSocialMediaLinks(FlexContext context)
@@ -147,6 +220,7 @@ public class CreateSchoolCommandHandler(
             .Then(CreateAddress)
             .Then(CreateVehicleCategories)
             .Then(CreateCertificates)
+            .Then(CreateCategoryPricings)
             .MapAsync(CreateSchool);
 
         async Task<Result<CreateSchoolCommand>> CheckCompanyName(FlexContext _)
@@ -172,7 +246,8 @@ public class CreateSchoolCommandHandler(
                 return Address.Create(
                     request.Address.Street,
                     request.Address.Longitude,
-                    request.Address.Latitude);
+                    request.Address.Latitude,
+                    AddressType.MainLocation);
             }
             catch(Exception ex)
             {
@@ -201,7 +276,7 @@ public class CreateSchoolCommandHandler(
             if(categoriesResult.IsError)
                 return Result<List<VehicleCategory>>.WithErrors(categoriesResult.Errors);
 
-            var foundCategories = categoriesResult.Value;
+            var foundCategories = categoriesResult.Value!;
             var foundIds = foundCategories.Select(c => c.Id).ToHashSet();
             var missingIds = request.VehicleCategories.Select(x => (int)x).Except(foundIds).ToList();
 
@@ -214,6 +289,7 @@ public class CreateSchoolCommandHandler(
 
             return foundCategories.Where(x => request.VehicleCategories.Contains((VehicleCategoryType)x.Id)).ToList();
         }
+
 
         async Task<Result<List<ArrCertificate>>> CreateCertificates(FlexContext context)
         {
@@ -269,11 +345,11 @@ public class CreateSchoolCommandHandler(
                 request.Description,
                 address,
                 request.Statistics,
-                request.CategoryPricings,
                 team
             );
         }
     }
+
 
     private async Task<Result<ApplicationUser>> GetUser(FlexContext context)
     {

@@ -6,7 +6,9 @@ VALUES
 
 INSERT INTO Addresses (Street,Coordinate,Comment)
 VALUES
-('Aurel Vlaicu',0xE6100000010C52B81E85EB913740295C8FC2F5084740,'')
+('Aurel Vlaicu',0xE6100000010C52B81E85EB913740295C8FC2F5084740,''),
+('Strada Libertății',0xE6100000010C52B81E85EB913740295C8FC2F5084740,''),
+('Strada Unirii',0xE6100000010C52B81E85EB913740295C8FC2F5084740,'');
 
 INSERT INTO Images
     (Id, FileName, ContentType, Url, Description, Created, CreatedBy, LastModified, LastModifiedBy)
@@ -23,7 +25,27 @@ VALUES
 INSERT INTO Schools
     (Id, OwnerId, Name, CompanyName, Email, Slug, PhoneNumber, PhoneNumbersGroups, BussinessHours, CityId, CountyId, AddressId, Slogan, Description, IconId, IsApproved, Created, CreatedBy, LastModified,"Statistics")
 VALUES
-    ('55555555-5555-5555-5555-555555555555', '11111111-1111-1111-1111-111111111111', 'Elite Driving Academy', 'Elite Driving Academy SRL', 'contact@elitedriving.ro', 'elite-driving-academy-srl', '+40721123456', '[{{"Name":"Main Office","PhoneNumbers":[{{"Value":"+40721123456"}}]}}]', '{{"BussinessHoursEntries":[{{"DayOfTheWeek":[1,2,3,4],"Times":[{{"Start":{{"Hour":8,"Minute":0}},"End":{{"Hour":18,"Minute":0}},"Span":"10:00:00"}}]}},{{"DayOfTheWeek":[5],"Times":[{{"Start":{{"Hour":8,"Minute":0}},"End":{{"Hour":17,"Minute":0}},"Span":"09:00:00"}}]}},{{"DayOfTheWeek":[6],"Times":[{{"Start":{{"Hour":9,"Minute":0}},"End":{{"Hour":14,"Minute":0}},"Span":"05:00:00"}}]}}]}}', 46, 2, (SELECT TOP 1 Id FROM Addresses), 'Learn to drive with confidence!', 'Professional driving school with experienced instructors and modern vehicles.', '33333333-3333-3333-3333-333333333333', 1, GETUTCDATE(), 'System', GETUTCDATE(),'{{"NumberOfStudents":123}}'),
+    ('55555555-5555-5555-5555-555555555555',
+    '11111111-1111-1111-1111-111111111111',
+    'Elite Driving Academy',
+    'Elite Driving Academy SRL',
+    'contact@elitedriving.ro',
+    'elite-driving-academy-srl',
+    '+40721123456',
+    '[{{"Name":"Main Office","PhoneNumbers":[{{"Value":"+40721123456"}}]}}]',
+    '{{"BussinessHoursEntries":[{{"DayOfTheWeek":[1,2,3,4],"Times":[{{"Start":{{"Hour":8,"Minute":0}},"End":{{"Hour":18,"Minute":0}},"Span":"10:00:00"}}]}},{{"DayOfTheWeek":[5],"Times":[{{"Start":{{"Hour":8,"Minute":0}},"End":{{"Hour":17,"Minute":0}},"Span":"09:00:00"}}]}},{{"DayOfTheWeek":[6],"Times":[{{"Start":{{"Hour":9,"Minute":0}},"End":{{"Hour":14,"Minute":0}},"Span":"05:00:00"}}]}}]}}',
+    46,
+    2,
+    (SELECT TOP 1 Id FROM Addresses),
+    'Learn to drive with confidence!',
+    'Professional driving school with experienced instructors and modern vehicles.',
+    '33333333-3333-3333-3333-333333333333',
+    1,
+    GETUTCDATE(),
+    'System',
+    GETUTCDATE(),
+    '{{"NumberOfStudents":123}}'),
+
     ('66666666-6666-6666-6666-666666666666', '22222222-2222-2222-2222-222222222222', 'Professional Drive Center', 'Professional Drive Center SRL', 'info@profdrive.ro', 'professional-drive-center-srl', '+40722987654', '[{{"Name":"Reception","PhoneNumbers":[{{"Value":"+40722987654"}}]}}]', '{{"BussinessHoursEntries":[{{"DayOfTheWeek":[1,2,3,4],"Times":[{{"Start":{{"Hour":9,"Minute":0}},"End":{{"Hour":19,"Minute":0}},"Span":"10:00:00"}}]}},{{"DayOfTheWeek":[5],"Times":[{{"Start":{{"Hour":9,"Minute":0}},"End":{{"Hour":18,"Minute":0}},"Span":"09:00:00"}}]}},{{"DayOfTheWeek":[6],"Times":[{{"Start":{{"Hour":10,"Minute":0}},"End":{{"Hour":15,"Minute":0}},"Span":"05:00:00"}}]}}]}}', 46, 2, (SELECT TOP 1 Id FROM Addresses), 'Your path to safe driving!', 'Comprehensive driving education with focus on road safety and practical skills.', '44444444-4444-4444-4444-444444444444', 0, GETUTCDATE(), 'System', GETUTCDATE(),'{{"NumberOfStudents":465}}');
 
 INSERT INTO SchoolCategories

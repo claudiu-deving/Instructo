@@ -19,8 +19,8 @@ public static class SchoolMappers
             school.Email,
             school.PhoneNumber,
             school.Slug,
-            school.County.Code,
-            school.City.Name,
+            school.County?.Code,
+            school.City?.Name,
             school.Slogan,
             school.Description,
             school.Address.Street,
@@ -29,12 +29,13 @@ public static class SchoolMappers
             school.PhoneNumbersGroups.Select(x => x.ToDto()),
             school.Icon?.ToReadDto()??ImageReadDto.Empty,
            [.. school.WebsiteLinks.Select(x => x.ToReadDto())],
-           [.. school.BussinessHours.BussinessHoursEntries],
+            school.BussinessHours,
            [.. school.VehicleCategories.Select(x => x.ToDto())],
            [.. school.Certificates.Select(x => x.ToDto())],
-           school.Statistics.NumberOfStudents,
+           school.Statistics.ToDto(),
            [.. school.CategoryPricings.Select(x => x.ToDto())],
-           school.Team.ToDto()
+           school.Team.ToDto(),
+           [.. school.ExtraLocations.Select(x => x.ToDto().ValueOrThrow())]
         );
     }
 }

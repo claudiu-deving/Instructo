@@ -4,10 +4,12 @@ namespace Domain.ValueObjects;
 //AddressDto
 public readonly record struct AddressDto
 {
-    public string Longitude { get; }
-    public string Latitude { get; }
-    public string Street { get; }
-    public string? Comment { get; }
+    public string Longitude { get; init; } = string.Empty;
+    public string Latitude { get; init; } = string.Empty;
+    public string Street { get; init; } = string.Empty;
+    public string? Comment { get; init; }
+
+    public AddressDto() { }
     private AddressDto(string value, string x, string y, string? comment = null)
     {
         Street=value;

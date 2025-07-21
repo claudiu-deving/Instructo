@@ -99,7 +99,7 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
         services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
         services.AddScoped<ISchoolManagementDirectory, SchoolManagementDirectory>();
         services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
-        services.AddTransient<IUserQueries, UserQueryRepository>();
+        services.AddTransient<IUserQueriesRepository, UserQueryRepository>();
         services.AddMediator(applicationAssembly);
 
         serviceProvider=services.BuildServiceProvider();

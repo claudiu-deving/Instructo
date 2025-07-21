@@ -19,8 +19,7 @@ public class CorrelationIdMiddleware(RequestDelegate next)
         using(LogContext.PushProperty("CorrelationId", correlationId))
         {
             // Add the correlation ID to the current activity
-            if(Activity.Current!=null)
-                Activity.Current.SetTag("correlation_id", correlationId);
+            Activity.Current?.SetTag("correlation_id", correlationId);
 
             await next(context);
         }

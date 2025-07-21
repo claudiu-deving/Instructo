@@ -1,4 +1,6 @@
-﻿namespace Domain.Models;
+﻿using Domain.Dtos;
+
+namespace Domain.Models;
 /// <summary>
 /// Defines the statistics for the School, will be used to store various metrics in JSON format in the database column
 /// </summary>
@@ -19,4 +21,13 @@ public class Statistics
     {
         NumberOfStudents=0
     };
+
+
+    public SchoolStatisticsDto ToDto()
+    {
+        return new SchoolStatisticsDto
+        {
+            NumberOfStudents=NumberOfStudents
+        };
+    }
 }

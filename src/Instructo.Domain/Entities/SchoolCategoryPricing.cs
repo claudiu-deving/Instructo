@@ -7,7 +7,6 @@ namespace Domain.Entities;
 
 public class SchoolCategoryPricing : IEntity
 {
-    public int Id { get; set; }
     public Guid SchoolId { get; set; }
     public virtual School School { get; set; } = null!;
     public virtual VehicleCategory Category { get; set; } = null!;

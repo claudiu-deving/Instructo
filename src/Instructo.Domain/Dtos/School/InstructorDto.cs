@@ -5,9 +5,13 @@ public readonly record struct InstructorDto(
     string LastName,
     int Age,
     int YearsExperience,
-    List<string> Categories,
+    List<VehicleCategoryDto> Categories,
     string Specialization,
     string Description,
-    ContactDto Contact,
-    string? ProfileImage
+    string? Email,
+    string? PhoneNumber,
+    string? ProfileImageName,
+    string? ProfileImageUrl,
+    string? ProfileImageContentType,
+    string? ProfileImageDescription
 );

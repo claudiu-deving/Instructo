@@ -9,27 +9,99 @@ namespace Domain.Dtos.School;
 /// <summary>
 /// The data required to show the School on its own dedicated page
 /// </summary>
-public readonly record struct SchoolDetailReadDto(
+public class SchoolDetailReadDto : ISchoolReadDto
+{
+    public SchoolDetailReadDto(
+        Guid Id,
+        string Name,
+        string CompanyName,
+        string Email,
+        string PhoneNumber,
+        string Slug,
+        string CountyId,
+        string CityName,
+        string Slogan,
+        string Description,
+        string StreetAndNumber,
+        double Longitude,
+        double Latitude,
+        IEnumerable<PhoneNumberGroupDto> PhoneNumberGroups,
+        ImageReadDto IconData,
+        WebsiteLinkRead[] Links,
+        BussinessHours BussinessHours,
+        List<VehicleCategoryDto> VehicleCategories,
+        List<ArrCertificationDto> Certificates,
+        SchoolStatisticsDto NumberOfStudents,
+       List<SchoolCategoryPricingDto> CategoryPricings,
+       TeamDto Team,
+       List<AddressDto> ExtraLocations)
+    {
+        this.Id=Id;
+        this.Name=Name;
+        this.CompanyName=CompanyName;
+        this.Email=Email;
+        this.PhoneNumber=PhoneNumber;
+        this.Slug=Slug;
+        this.CountyId=CountyId;
+        this.CityName=CityName;
+        this.Slogan=Slogan;
+        this.Description=Description;
+        this.StreetAndNumber=StreetAndNumber;
+        this.Longitude=Longitude;
+        this.Latitude=Latitude;
+        this.PhoneNumbersGroups=PhoneNumberGroups;
+        this.IconData=IconData;
+        this.Links=Links;
+        this.BussinessHours=BussinessHours;
+        this.VehicleCategories=VehicleCategories;
+        this.ArrCertificates=Certificates;
+        this.SchoolStatistics=NumberOfStudents;
+        this.CategoryPricings=CategoryPricings;
+        this.Team=Team;
+        this.ExtraLocations=ExtraLocations;
+    }
 
-    Guid Id,
-    string Name,
-    string CompanyName,
-    string Email,
-    string PhoneNumber,
-    string Slug,
-    string CountyId,
-    string CityName,
-    string Slogan,
-    string Description,
-    string StreetAndNumber,
-    double Longitude,
-       double Latitude,
-    IEnumerable<PhoneNumberGroupDto> PhoneNumberGroups,
-    ImageReadDto IconData,
-    WebsiteLinkReadDto[] Links,
-    List<BussinessHoursEntry> BussinessHours,
-    List<VehicleCategoryDto> VehicleCategories,
-    List<ArrCertificationDto> Certificates,
-    int NumberOfStudents,
-   List<SchoolCategoryPricingDto> CategoryPricings,
-   TeamDto Team) : ISchoolReadDto;
+    private SchoolDetailReadDto() { }
+
+    public Guid Id { get; init; }
+    public string Name { get; init; }
+    public string CompanyName { get; init; }
+    public string Email { get; init; }
+    public string PhoneNumber { get; init; }
+    public string Slug { get; init; }
+    public string CountyId { get; init; }
+    public string CityName { get; init; }
+    public string Slogan { get; init; }
+    public string Description { get; init; }
+    public string StreetAndNumber { get; init; }
+    public double Longitude { get; init; }
+    public double Latitude { get; init; }
+    public IEnumerable<PhoneNumberGroupDto> PhoneNumbersGroups { get; init; }
+    public ImageReadDto IconData { get; init; }
+    public WebsiteLinkRead[] Links { get; init; }
+    public BussinessHours BussinessHours { get; init; }
+    public List<VehicleCategoryDto> VehicleCategories { get; init; }
+    public List<ArrCertificationDto>? ArrCertificates { get; init; }
+    public SchoolStatisticsDto SchoolStatistics { get; init; }
+    public List<SchoolCategoryPricingDto> CategoryPricings { get; init; }
+    public TeamDto Team { get; init; }
+    public List<AddressDto> ExtraLocations { get; init; }
+}
+
+public class WebsiteLinkRead(
+    string url,
+    string name,
+    string? description,
+    string iconFileName,
+    string iconUrl,
+    string iconContentType,
+    string? iconDescription)
+{
+    public string Url { get; init; } = url;
+    public string Name { get; init; } = name;
+    public string? Description { get; init; } = description;
+    public string IconFileName { get; init; } = iconFileName;
+    public string IconUrl { get; init; } = iconUrl;
+    public string IconContentType { get; init; } = iconContentType;
+    public string? IconDescription { get; init; } = iconDescription;
+}

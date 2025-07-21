@@ -14,7 +14,7 @@ namespace Application.Schools.Commands.DeleteSchool;
 public class DeleteSchoolCommandHandler(
     ISchoolCommandRepository commandRepository,
    ISchoolQueriesRepository schoolQueryRepository,
-    IUserQueries userQueryRepository,
+    IUserQueriesRepository userQueryRepository,
     ILogger<DeleteSchoolCommandHandler> logger) : ICommandHandler<DeleteSchoolCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(DeleteSchoolCommand request, CancellationToken cancellationToken)

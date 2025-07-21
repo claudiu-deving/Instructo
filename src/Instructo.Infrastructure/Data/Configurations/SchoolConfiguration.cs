@@ -5,6 +5,7 @@ using Domain.Models;
 using Infrastructure.Data.Converters;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Newtonsoft.Json;
@@ -29,7 +30,10 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
         builder.Property(x => x.PhoneNumber).HasConversion(new PhoneNumberConverter());
         builder.Property(x => x.Statistics).HasConversion(x => JsonConvert.SerializeObject(x), x => JsonConvert.DeserializeObject<Statistics>(x));
         builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());
-        builder.Property(x => x.PhoneNumbersGroups).HasConversion(new PhoneNumberConvertersGroupConverter());
+        builder.Property(x => x.PhoneNumbersGroups).HasConversion(new PhoneNumberConvertersGroupConverter())
+            .Metadata.SetValueComparer(new ValueComparer<List<PhoneNumbersGroup>>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (x, y) => HashCode.Combine(x.GetHashCode(), y.GetHashCode()))));
         builder.Property(x => x.Name).IsRequired();
         builder.HasMany(x => x.CategoryPricings)
             .WithOne(x => x.School)
@@ -73,9 +77,15 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
             });
 
         builder.HasMany(s => s.WebsiteLinks)
-            .WithMany(w => w.Schools)
-            .UsingEntity(j => j.ToTable("SchoolWebsiteLinks"));
+            .WithOne(w => w.School);
+
         builder.Navigation(s => s.WebsiteLinks)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(s => s.ExtraLocations)
+            .WithOne(x => x.School)
+            .OnDelete(DeleteBehavior.NoAction);
+        builder.Navigation(s => s.ExtraLocations)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

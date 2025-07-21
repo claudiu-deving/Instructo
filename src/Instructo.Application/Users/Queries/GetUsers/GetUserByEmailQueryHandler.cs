@@ -8,9 +8,9 @@ namespace Application.Users.Queries.GetUsers;
 
 public class GetUsersQueryHandler : ICommandHandler<GetUsersQuery, Result<IEnumerable<ApplicationUser>>>
 {
-    private readonly IUserQueries _userQueries;
+    private readonly IUserQueriesRepository _userQueries;
 
-    public GetUsersQueryHandler(IUserQueries userQueries)
+    public GetUsersQueryHandler(IUserQueriesRepository userQueries)
     {
         _userQueries = userQueries;
     }

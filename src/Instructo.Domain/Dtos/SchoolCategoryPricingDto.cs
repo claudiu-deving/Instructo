@@ -1,6 +1,4 @@
-﻿using Domain.Enums;
-
-namespace Domain.Dtos;
+﻿namespace Domain.Dtos;
 public readonly record struct SchoolCategoryPricingDto
 (
      string VehicleCategory,

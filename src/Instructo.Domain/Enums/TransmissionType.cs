@@ -2,6 +2,6 @@
 
 public enum TransmissionType
 {
-    Manual,
-    Automatic
+    Manual =1,
+    Automatic=2
 }

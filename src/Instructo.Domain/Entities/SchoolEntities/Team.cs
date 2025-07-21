@@ -20,17 +20,6 @@ public class Team : BaseAuditableEntity<Guid>
     public virtual School School { get; private set; } = null!;
     public virtual IReadOnlyCollection<InstructorProfile> Instructors => _instructors.AsReadOnly();
 
-    public int TotalInstructors => _instructors.Count;
-
-    public Dictionary<string, int> InstructorsByGender
-    {
-        get
-        {
-            return _instructors.GroupBy(i => i.Gender)
-                .ToDictionary(g => g.Key, g => g.Count());
-        }
-    }
-
     public void AddInstructor(InstructorProfile instructor)
     {
         if(_instructors.Contains(instructor))

@@ -8,9 +8,9 @@ namespace Application.Users.Queries.GetUserByEmail;
 
 public class GetUserByIdQueryHandler : ICommandHandler<GetUserByIdQuery, Result<ApplicationUser>>
 {
-    private readonly IUserQueries _userQueries;
+    private readonly IUserQueriesRepository _userQueries;
 
-    public GetUserByIdQueryHandler(IUserQueries userQueries)
+    public GetUserByIdQueryHandler(IUserQueriesRepository userQueries)
     {
         _userQueries = userQueries;
     }

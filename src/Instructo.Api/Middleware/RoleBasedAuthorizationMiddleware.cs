@@ -2,15 +2,8 @@
 
 namespace Api.Middleware;
 
-public class RoleBasedAuthorizationMiddleware
+public class RoleBasedAuthorizationMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public RoleBasedAuthorizationMiddleware(RequestDelegate next)
-    {
-        _next=next;
-    }
-
     public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager)
     {
         if(context.User.Identity?.IsAuthenticated==true)
@@ -30,7 +23,7 @@ public class RoleBasedAuthorizationMiddleware
             }
         }
 
-        await _next(context);
+        await next(context);
     }
 }
 

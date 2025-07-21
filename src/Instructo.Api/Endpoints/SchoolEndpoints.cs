@@ -18,30 +18,50 @@ public static class SchoolEndpoints
     public static WebApplication MapSchoolEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("api/schools").WithTags("Schools");
+
         group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
+
         group.MapGet("/{slug}", GetSchoolBySlug).WithName("Get a School By Slug").AllowAnonymous();
+
         group.MapPost("/", CreateSchool).WithName("Create School");
+
         group.MapPatch("/{id:guid}", UpdateSchool).WithName("Update SchoolEntities")
             .RequireAuthorization(ApplicationRole.IronMan.ToString());
+
         group.MapDelete("/{id:guid}", DeleteSchool);
-        group.MapPatch("/approval/{id:guid}", MapUpdateStatus).RequireAuthorization(ApplicationRole.IronMan.ToString());
+
+        group.MapPatch("/approval/{id:guid}", UpdateApprovalStatus)
+            .WithName("Set approval state, only by Super Admin")
+            .RequireAuthorization(ApplicationRole.IronMan.ToString());
+
         group.WithOpenApi();
         return app;
     }
 
-    private static async Task<IResult> MapUpdateStatus([FromServices] ISender sender, Guid id,
+    private static async Task<IResult> UpdateApprovalStatus(
+        [FromServices] ISender sender,
+        Guid id,
         [FromBody] UpdateApprovalStatusCommandDto createSchoolCommand)
     {
         var schoolId = SchoolId.CreateNew(id);
         var command = new UpdateSchoolApprovalStatusCommand(schoolId, createSchoolCommand.IsApproved);
         var updateRequest = await sender.Send(command);
+
+        if(!updateRequest.IsError&&updateRequest.Value is null)
+        {
+            return TypedResults.NotFound();
+        }
+
         if(updateRequest.IsError)
             return TypedResults.BadRequest(new { errors = updateRequest.Errors.ToList() });
         return TypedResults.Ok();
     }
 
 
-    private static async Task<IResult> UpdateSchool([FromServices] ISender sender, HttpContext context, Guid id,
+    private static async Task<IResult> UpdateSchool(
+        [FromServices] ISender sender,
+        HttpContext context,
+        Guid id,
         [FromBody] UpdateSchoolCommandDto createSchoolCommand)
     {
         var schoolId = SchoolId.CreateNew(id);
@@ -71,7 +91,8 @@ public static class SchoolEndpoints
         return TypedResults.Ok();
     }
 
-    private static async Task<IResult> CreateSchool([FromServices] ISender sender,
+    private static async Task<IResult> CreateSchool(
+        [FromServices] ISender sender,
         [FromBody] CreateSchoolCommandDto createSchoolCommand)
     {
         var errors = new List<Error>();
@@ -89,14 +110,16 @@ public static class SchoolEndpoints
             nok => TypedResults.BadRequest(new { errors = nok.ToList() }));
     }
 
-    private static async Task<IResult> GetSchoolBySlug([FromServices] ISender sender, string slug)
+    private static async Task<IResult> GetSchoolBySlug(
+        [FromServices] ISender sender,
+        string slug)
     {
         var query = new GetSchoolBySlugQuery(slug);
         var userRequest = await sender.Send(query);
         return userRequest.Match<IResult>(
             ok =>
             {
-                if(ok==new SchoolDetailReadDto())
+                if(ok is null)
                 {
                     return TypedResults.NotFound();
                 }
@@ -105,7 +128,9 @@ public static class SchoolEndpoints
             nok => TypedResults.BadRequest(new { errors = nok.ToList() }));
     }
 
-    private static async Task<IResult> GetAllSchools(HttpContext context, [FromServices] ISender sender,
+    private static async Task<IResult> GetAllSchools(
+        HttpContext context,
+        [FromServices] ISender sender,
         [AsParameters] GetSchoolsQueryParameters parameters)
     {
         var role = context.User.FindFirstValue(ClaimTypes.Role);
@@ -138,6 +163,5 @@ public static class SchoolEndpoints
                 }
             },
             nok => { return TypedResults.BadRequest(new { errors = nok.ToList() }); });
-
     }
 }

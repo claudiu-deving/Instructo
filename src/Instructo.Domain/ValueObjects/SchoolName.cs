@@ -13,8 +13,8 @@ public readonly record struct SchoolName
     {
         if(string.IsNullOrWhiteSpace(value))
             return Result<SchoolName>.Failure([new Error("School name cannot be empty", value)]);
-        if(value.Length>100)
-            return Result<SchoolName>.Failure([new Error("School name cannot be longer than 100 characters", value)]);
+        if(value.Length>200)
+            return Result<SchoolName>.Failure([new Error("School name cannot be longer than 200 characters", value)]);
         return new SchoolName(value);
     }
     public static SchoolName Wrap(string value) => new(value);

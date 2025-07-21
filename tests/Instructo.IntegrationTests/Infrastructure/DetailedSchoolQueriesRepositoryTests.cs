@@ -103,8 +103,8 @@ public class DetailedSchoolQueriesRepositoryTests(
         var eliteSchool = schools.FirstOrDefault(s => s.Name=="Elite Driving Academy");
         Assert.NotNull(eliteSchool);
 
-        Assert.NotNull(eliteSchool.PhoneNumberGroups);
-        var phoneGroups = eliteSchool.PhoneNumberGroups.ToList();
+        Assert.NotNull(eliteSchool.PhoneNumbersGroups);
+        var phoneGroups = eliteSchool.PhoneNumbersGroups.ToList();
         Assert.Single(phoneGroups);
         Assert.Equal("Main Office", phoneGroups[0].Name);
         Assert.Single(phoneGroups[0].PhoneNumbers);
@@ -160,8 +160,8 @@ public class DetailedSchoolQueriesRepositoryTests(
         Assert.NotNull(eliteSchool.Links);
         Assert.Empty(eliteSchool.Links);
 
-        Assert.NotNull(eliteSchool.Certificates);
-        Assert.Empty(eliteSchool.Certificates);
+        Assert.NotNull(eliteSchool.ArrCertificates);
+        Assert.Empty(eliteSchool.ArrCertificates);
 
         var professionalSchool = schools.FirstOrDefault(s => s.Name=="Professional Drive Center");
         Assert.NotNull(professionalSchool);
