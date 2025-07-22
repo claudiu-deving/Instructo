@@ -12,6 +12,8 @@ public class SchoolManagementDirectory(
     IQueryRepository<City, int> cityQueriesRepository,
     IQueryRepository<ArrCertificate, int> certificateQueriesRepository,
     IQueryRepository<VehicleCategory, int> vehicleQueriesRepository,
+    IQueryRepository<Transmission, int> transmissionQueriesRepository,
+
     ISchoolCategoryPricingQueryRepository schoolCategoryPricingQueryRepository) : UnitOfWork(appDbContext), ISchoolManagementDirectory
 {
     public ISchoolQueriesRepository SchoolQueriesRepository => schoolQueriesRepository;
@@ -25,4 +27,6 @@ public class SchoolManagementDirectory(
     public IQueryRepository<VehicleCategory, int> VehicleQueriesRepository => vehicleQueriesRepository;
 
     public ISchoolCategoryPricingQueryRepository SchoolCategoryPricingQueriesRepository => schoolCategoryPricingQueryRepository;
+
+    public IQueryRepository<Transmission, int> TransmissionQueriesRepository => transmissionQueriesRepository;
 }

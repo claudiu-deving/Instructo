@@ -60,6 +60,7 @@ public static class ObjectGraphBuilder
         builder.Services.AddScoped<ISchoolManagementDirectory, SchoolManagementDirectory>();
         builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
         builder.Services.AddScoped<ISchoolCategoryPricingQueryRepository, SchoolCategoryPricingQueryRepository>();
+        builder.Services.AddScoped<IQueryRepository<Transmission, int>, TransmissionQueryRepository>();
     }
 
 }

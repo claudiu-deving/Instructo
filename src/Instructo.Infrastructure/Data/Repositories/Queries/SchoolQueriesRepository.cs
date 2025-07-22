@@ -19,27 +19,11 @@ namespace Infrastructure.Data.Repositories.Queries;
 
 public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueriesRepository> logger) : ISchoolQueriesRepository
 {
-
-    public async Task<Result<IEnumerable<SchoolDetailReadDto>>> GetAllDetailedAsync()
-    {
-        return await dbContext.SchoolDetails.AsNoTracking().ToListAsync();
-    }
-
-    public async Task<Result<School?>> GetBySlugAsync(string slug)
+    public async Task<Result<SchoolDetailReadDto?>> GetBySlugAsync(string slug)
     {
         try
         {
-            return await
-                dbContext.Schools
-                    .Include(x => x.Owner)
-                    .Include(x => x.WebsiteLinks)
-                    .Include(x => x.VehicleCategories)
-                    .Include(x => x.Certificates)
-                    .Include(x => x.City)
-                    .ThenInclude(city => city.County)
-                    .Include(x => x.Address)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(x => x.Slug==slug);
+            return await dbContext.SchoolDetails.AsNoTracking().FirstOrDefaultAsync(x => x.Slug==slug);
         }
         catch(InvalidOperationException ex)
         {
@@ -60,51 +44,53 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
     {
         try
         {
-            return Result<School?>.Success(await
-                dbContext.Schools
+            return await dbContext.Schools
                     .Include(x => x.Owner)
                     .Include(x => x.WebsiteLinks)
                     .Include(x => x.VehicleCategories)
                     .Include(x => x.Certificates)
                     .AsSplitQuery()
-                    .FirstOrDefaultAsync(x => x.Id==id.Id));
+                    .FirstOrDefaultAsync(x => x.Id==id.Id);
         }
         catch(InvalidOperationException ex)
         {
-            return Result<School?>.Failure(new Error("GetSchoolById-Empty", ex.Message));
+            return new Error("GetSchoolById-Empty", ex.Message);
         }
         catch(OperationAbortedException ex)
         {
-            return Result<School?>.Failure(new Error("GetSchoolById-Aborted", ex.Message));
+            return new Error("GetSchoolById-Aborted", ex.Message);
         }
         catch(DbException ex)
         {
-            return Result<School?>.Failure(new Error("GetSchoolById-Db", ex.Message));
+            return new Error("GetSchoolById-Db", ex.Message);
         }
     }
 
-    public async Task<Result<School?>> GetByIndexed(string companyName)
+    public async Task<Result<bool>> SchoolExists(string companyName)
     {
-        return Result<School?>.Success(await
+        return Result<bool>.Success(await
             dbContext.Schools
-                .Include(x => x.Owner)
-                .Include(x => x.WebsiteLinks)
-                .Include(x => x.VehicleCategories)
-                .Include(x => x.Certificates)
-                .AsSplitQuery()
-                .FirstOrDefaultAsync(x => x.CompanyName==companyName));
+                .FirstOrDefaultAsync(x => x.CompanyName==companyName) is not null);
     }
     public Result<IEnumerable<ISchoolReadDto>> GetAll(
-        Func<SchoolDetailReadDto, bool>? filter = null,
+        Func<School, bool>? filter = null,
         int pageNumber = 1,
-        int pageSize = 20,
-        bool withDetails = false)
+        int pageSize = 20)
     {
         List<Error> errors = [];
-        var result = dbContext.SchoolDetails
+        var result = dbContext.Schools
+                .Include(school => school.Owner)
+              .Include(school => school.County)
+              .Include(school => school.City)
+              .Include(school => school.Icon)
+              .Include(school => school.VehicleCategories)
+              .AsNoTracking()
+              .AsSplitQuery()
              .Where(filter??(x => true))
               .Skip((pageNumber-1)*pageSize)
-              .Take(pageSize);
+              .Take(pageSize)
+              .Select(x => (ISchoolReadDto)Map(x)!);
+
 
         if(errors.Count>0)
         {
@@ -112,8 +98,7 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
         }
         else
         {
-            return Result<IEnumerable<ISchoolReadDto>>.Success(
-                result.ToList().Where(x => x!=null).Select(x => x!));
+            return Result<IEnumerable<ISchoolReadDto>>.Success(result);
         }
     }
 
@@ -126,17 +111,20 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
               .Include(school => school.City)
               .Include(school => school.Icon)
               .Include(school => school.VehicleCategories)
-              .Include(school => school.Address)
               .AsNoTracking()
               .AsSplitQuery()
               .ToListAsync())
-               .Select(Map));
+               .Select(x => (SchoolReadDto)Map(x)!));
     }
 
-    private SchoolReadDto Map(School school)
+    private SchoolReadDto? Map(School? school)
     {
         try
         {
+            if(school is null)
+            {
+                return null;
+            }
             var schoolCategories = dbContext.SchoolCategories.Include(x => x.VehicleCategory).ToList();
             var arrCertificates = dbContext.SchoolCertificates.Include(x => x.Certificate).ToList();
             return new SchoolReadDto(
@@ -150,7 +138,6 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
                                     school.City!.Name,
                                     school.Slogan,
                                     school.Description,
-                                    school.Address.Street,
                                     new Domain.Dtos.Image.ImageReadDto(school.Icon!.FileName, school.Icon.Url, school.Icon.ContentType, school.Icon.Description)
                                     );
         }

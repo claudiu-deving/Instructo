@@ -106,7 +106,13 @@ public partial record CreateSchoolCommand
             NumberOfStudents=createSchoolCommandDto.NumberOfStudents
         };
 
+
         createSchoolCommand.CategoryPricings=createSchoolCommandDto.CategoryPricings;
+
+        createSchoolCommand.ExtraLocations=createSchoolCommandDto.ExtraLocations;
+
+        createSchoolCommand.Team=createSchoolCommandDto.Team;
+
 
         if(errors.Count!=0)
         {

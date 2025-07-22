@@ -38,4 +38,5 @@ public partial record CreateSchoolCommand : ICommand<Result<SchoolDetailReadDto>
     public Statistics Statistics { get; internal set; } = Statistics.Empty;
     public List<SchoolCategoryPricingDto> CategoryPricings { get; internal set; } = [];
     public List<AddressDto> ExtraLocations { get; internal set; } = [];
+    public TeamDto? Team { get; internal set; } = null;
 }

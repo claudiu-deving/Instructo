@@ -26,7 +26,7 @@ public static class SchoolEndpoints
         group.MapPost("/", CreateSchool).WithName("Create School");
 
         group.MapPatch("/{id:guid}", UpdateSchool).WithName("Update SchoolEntities")
-            .RequireAuthorization(ApplicationRole.IronMan.ToString());
+            .RequireAuthorization(ApplicationRole.IronMan.ToString(), ApplicationRole.Owner.ToString());
 
         group.MapDelete("/{id:guid}", DeleteSchool);
 
@@ -135,32 +135,24 @@ public static class SchoolEndpoints
     {
         var role = context.User.FindFirstValue(ClaimTypes.Role);
         var isAdmin = role is "IronMan";
-        var requestsWithDetails = parameters.Fields is not null&&parameters.Fields.ToLower().Equals("all");
         var normalizedParams = new GetSchoolsQueryParameters
         {
             PageNumber=Math.Max(1, parameters.PageNumber),
             PageSize=Math.Min(50, Math.Max(1, parameters.PageSize)),
-            SearchTerm=parameters.SearchTerm,
-            Fields=parameters.Fields
+            SearchTerm=parameters.SearchTerm
         };
 
-        var query = new GetSchoolsQuery(isAdmin, requestsWithDetails, normalizedParams);
+        var query = new GetSchoolsQuery(isAdmin, normalizedParams);
         var schoolRequest = await sender.Send(query);
 
 
         return schoolRequest.Match<IResult>(
             ok =>
             {
-                if(requestsWithDetails)
-                {
-                    var schools = ok.Cast<SchoolDetailReadDto>();
-                    return TypedResults.Ok(schools);
-                }
-                else
-                {
-                    var schools = ok.Cast<SchoolReadDto>();
-                    return TypedResults.Ok(schools);
-                }
+
+                var schools = ok.Cast<SchoolReadDto>();
+                return TypedResults.Ok(schools);
+
             },
             nok => { return TypedResults.BadRequest(new { errors = nok.ToList() }); });
     }

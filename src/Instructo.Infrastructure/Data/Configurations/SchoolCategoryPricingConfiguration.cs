@@ -11,5 +11,8 @@ internal class SchoolCategoryPricingConfiguration : IEntityTypeConfiguration<Sch
         builder.HasKey(scp => new { scp.SchoolId, scp.VehicleCategoryId });
         builder.Property(x => x.FullPrice).HasColumnType("decimal(18,2)");
         builder.Property(x => x.InstallmentPrice).HasColumnType("decimal(18,2)");
+        builder.HasOne(x => x.Transmission)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

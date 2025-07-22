@@ -16,7 +16,7 @@ public class GetSchoolsQueryHandler(ISchoolQueriesRepository repository)
     public async Task<Result<IEnumerable<ISchoolReadDto>>> Handle(GetSchoolsQuery request,
         CancellationToken cancellationToken)
     {
-        Func<SchoolDetailReadDto, bool>? filter = null;
+        Func<School, bool>? filter = null;
         if(!string.IsNullOrEmpty(request.Parameters.SearchTerm))
         {
             filter=(x) =>
@@ -24,7 +24,7 @@ public class GetSchoolsQueryHandler(ISchoolQueriesRepository repository)
                 var result = x.CompanyName==request.Parameters.SearchTerm||
                                x.Name.Contains(request.Parameters.SearchTerm)||
                                x.Email.Contains(request.Parameters.SearchTerm)||
-                               x.PhoneNumber.Contains(request.Parameters.SearchTerm);
+                               x.PhoneNumber.Value.Contains(request.Parameters.SearchTerm);
                 return result;
             };
         }
@@ -32,8 +32,7 @@ public class GetSchoolsQueryHandler(ISchoolQueriesRepository repository)
         var repositoryRequest = repository.GetAll(
             filter,
             pageNumber: request.Parameters.PageNumber,
-            pageSize: request.Parameters.PageSize,
-            request.RequestWithDetails);
+            pageSize: request.Parameters.PageSize);
         if(repositoryRequest.IsError)
             return Result<IEnumerable<ISchoolReadDto>>.Failure(repositoryRequest.Errors);
         return repositoryRequest;

@@ -42,6 +42,13 @@ public class Address : IEntity
 
     public AddressType AddressType { get; private set; }
 
+    public void ChangeAddressType(AddressType newAddressType)
+    {
+        if(newAddressType==AddressType)
+            return;
+        AddressType=newAddressType;
+    }
+
     public static Address Empty => new("", _geometryFactory.CreatePoint(new Coordinate(0, 0)), AddressType.MainLocation);
 
     public static Address Create(string street, string latitude, string longitude, AddressType addressType, string? comment = null)

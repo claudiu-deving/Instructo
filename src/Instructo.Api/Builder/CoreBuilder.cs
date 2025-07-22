@@ -139,12 +139,13 @@ public static class CoreBuilder
                     ApplicationRole.IronMan.Name!)
                 .RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
                     ironManId))
-            .AddPolicy("AdminOnly", policy => policy.RequireRole(
+            .AddPolicy(ApplicationRole.Admin.Name!, policy => policy.RequireRole(
                 ApplicationRole.Admin.Name!,
                 ApplicationRole.Owner.Name!,
                 ApplicationRole.IronMan.Name!))
-            .AddPolicy("SchoolOwners", policy => policy.RequireRole(
-                ApplicationRole.Owner.Name!));
+            .AddPolicy(ApplicationRole.Owner.Name!, policy => policy.RequireRole(
+                ApplicationRole.Owner.Name!,
+                ApplicationRole.IronMan.Name!));
 
 
         string GetIronManId()

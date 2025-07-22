@@ -35,6 +35,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<SchoolCertificate> SchoolCertificates { get; set; }
     public DbSet<SchoolCategoryPricing> SchoolCategoryPricings { get; set; }
     public DbSet<InstructorProfile> Instructors { get; set; }
+    public DbSet<Transmission> Transmissions { get; set; }
     public DbSet<Team> Teams { get; set; }
 
     public DbSet<SchoolDetailReadDto> SchoolDetails { get; set; } = null!;
@@ -58,7 +59,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.ApplyConfiguration(new SchoolCategoryPricingConfiguration());
         modelBuilder.ApplyConfiguration(new InstructorProfileConfiguration());
         modelBuilder.ApplyConfiguration(new TeamConfiguration());
-
+        modelBuilder.ApplyConfiguration(new SchoolDetailConfiguration());
         modelBuilder.ConfigureIdentity();
 
         modelBuilder.ConfigureArrCertificates();
@@ -69,56 +70,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
         modelBuilder.ConfigureCities();
 
-        modelBuilder.Entity<SchoolDetailReadDto>(entity =>
-        {
-            entity.HasNoKey().ToView("SchoolDetails");
+        modelBuilder.Entity<Transmission>().HasData(
+            new Transmission { Id=1, Name="Manual" },
+            new Transmission { Id=2, Name="Automatic" }
+        );
 
-            entity.Property(x => x.ArrCertificates).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<List<ArrCertificationDto>>(x)??new List<ArrCertificationDto>())
-                                .Metadata.SetValueComparer(new ValueComparer<List<ArrCertificationDto>>(
-                                (c1, c2) => c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-            entity.Property(x => x.VehicleCategories).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<List<VehicleCategoryDto>>(x)??new List<VehicleCategoryDto>())
-                                .Metadata.SetValueComparer(new ValueComparer<List<VehicleCategoryDto>>(
-                                (c1, c2) => c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-            entity.Property(x => x.PhoneNumbersGroups).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<IEnumerable<PhoneNumberGroupDto>>(x)??new List<PhoneNumberGroupDto>())
-                                .Metadata.SetValueComparer(new ValueComparer<IEnumerable<PhoneNumberGroupDto>>(
-                                (c1, c2) => c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-
-            entity.Property(x => x.Links).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<WebsiteLinkRead[]>(x))
-                                .Metadata.SetValueComparer(new ValueComparer<WebsiteLinkRead[]>(
-                                (c1, c2) => c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToArray()));
-            entity.Property(x => x.BussinessHours).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<BussinessHours>(x));
-            entity.Property(x => x.IconData).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<ImageReadDto>(x));
-            entity.Property(x => x.ExtraLocations).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<List<AddressDto>>(x)??new List<AddressDto>())
-                                .Metadata.SetValueComparer(new ValueComparer<List<AddressDto>>(
-                                (c1, c2) => c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-            entity.Property(x => x.CategoryPricings).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<List<SchoolCategoryPricingDto>>(x)??new List<SchoolCategoryPricingDto>())
-                                .Metadata.SetValueComparer(new ValueComparer<List<SchoolCategoryPricingDto>>(
-                                (c1, c2) => c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-            entity.Property(x => x.Team).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<TeamDto>(x));
-            entity.Property(x => x.SchoolStatistics).HasConversion(x => JsonConvert.SerializeObject(x),
-                x => JsonConvert.DeserializeObject<SchoolStatisticsDto>(x));
-        });
     }
 
 

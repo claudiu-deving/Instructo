@@ -10,5 +10,6 @@ public interface ISchoolManagementDirectory : IUnitOfWork
     IQueryRepository<City, int> CityQueriesRepository { get; }
     IQueryRepository<ArrCertificate, int> CertificateQueriesRepository { get; }
     IQueryRepository<VehicleCategory, int> VehicleQueriesRepository { get; }
+    IQueryRepository<Transmission, int> TransmissionQueriesRepository { get; }
     ISchoolCategoryPricingQueryRepository SchoolCategoryPricingQueriesRepository { get; }
 }

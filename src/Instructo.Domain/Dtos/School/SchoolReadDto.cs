@@ -15,7 +15,6 @@ public readonly record struct SchoolReadDto(
     string CityName,
     string Slogan,
     string Description,
-    string StreetAndNumber,
     ImageReadDto IconData
   ) : ISchoolReadDto;
 

@@ -35,9 +35,7 @@ public class School : BaseAuditableEntity<Guid>
         City city,
         Slogan slogan,
         Description description,
-        Address address,
-        Statistics statistics,
-        Team team)
+        Statistics statistics)
     {
         Id=SchoolId.CreateNew();
         Owner=owner;
@@ -55,14 +53,11 @@ public class School : BaseAuditableEntity<Guid>
         County=city.County;
         Slogan=slogan.Value;
         Description=description.Value;
-        Address=address;
-        Statistics=statistics;
-        Team=team;
+        SchoolStatistics=statistics;
     }
 
     private School()
     {
-        Address=Address.Empty;
     }
 
     [Timestamp] // EF Core concurrency token
@@ -78,10 +73,9 @@ public class School : BaseAuditableEntity<Guid>
     public string Slug { get; private set; }
     public virtual County? County { get; private set; }
     public virtual City? City { get; private set; }
-    public virtual Address Address { get; private set; }
     public string Slogan { get; private set; }
     public string Description { get; private set; }
-    public Statistics Statistics { get; private set; }
+    public Statistics SchoolStatistics { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; } = PhoneNumber.Empty;
     public List<PhoneNumbersGroup> PhoneNumbersGroups { get; private set; } = [];
     public BussinessHours BussinessHours { get; private set; } = BussinessHours.Empty;
@@ -150,11 +144,12 @@ public class School : BaseAuditableEntity<Guid>
         Icon=schoolLogo;
     }
 
-    public void CreateTeam()
+    public Team CreateTeam()
     {
         if(Team!=null)
-            return;
+            return Team;
         Team=SchoolEntities.Team.Create(Id);
+        return Team;
     }
 
     public void RemoveTeam()
@@ -222,8 +217,7 @@ public class School : BaseAuditableEntity<Guid>
         County=newData.County;
         Slogan=newData.Slogan;
         Description=newData.Description;
-        Address=newData.Address;
-        Statistics=newData.Statistics;
+        SchoolStatistics=newData.SchoolStatistics;
         if(newData.Team!=null)
         {
             if(Team==null)
@@ -271,9 +265,7 @@ public class School : BaseAuditableEntity<Guid>
         City city,
         Slogan slogan,
         Description description,
-        Address address,
-        Statistics statistics,
-         Team team)
+        Statistics statistics)
     {
         return new School(
             owner,
@@ -289,8 +281,6 @@ public class School : BaseAuditableEntity<Guid>
             city,
             slogan,
             description,
-            address,
-            statistics,
-            team);
+            statistics);
     }
 }

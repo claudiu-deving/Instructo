@@ -22,9 +22,6 @@ public class SchoolDetailReadDto : ISchoolReadDto
         string CityName,
         string Slogan,
         string Description,
-        string StreetAndNumber,
-        double Longitude,
-        double Latitude,
         IEnumerable<PhoneNumberGroupDto> PhoneNumberGroups,
         ImageReadDto IconData,
         WebsiteLinkRead[] Links,
@@ -34,7 +31,7 @@ public class SchoolDetailReadDto : ISchoolReadDto
         SchoolStatisticsDto NumberOfStudents,
        List<SchoolCategoryPricingDto> CategoryPricings,
        TeamDto Team,
-       List<AddressDto> ExtraLocations)
+       List<AddressDto> Locations)
     {
         this.Id=Id;
         this.Name=Name;
@@ -46,9 +43,6 @@ public class SchoolDetailReadDto : ISchoolReadDto
         this.CityName=CityName;
         this.Slogan=Slogan;
         this.Description=Description;
-        this.StreetAndNumber=StreetAndNumber;
-        this.Longitude=Longitude;
-        this.Latitude=Latitude;
         this.PhoneNumbersGroups=PhoneNumberGroups;
         this.IconData=IconData;
         this.Links=Links;
@@ -58,7 +52,7 @@ public class SchoolDetailReadDto : ISchoolReadDto
         this.SchoolStatistics=NumberOfStudents;
         this.CategoryPricings=CategoryPricings;
         this.Team=Team;
-        this.ExtraLocations=ExtraLocations;
+        this.Locations=Locations;
     }
 
     private SchoolDetailReadDto() { }
@@ -73,9 +67,6 @@ public class SchoolDetailReadDto : ISchoolReadDto
     public string CityName { get; init; }
     public string Slogan { get; init; }
     public string Description { get; init; }
-    public string StreetAndNumber { get; init; }
-    public double Longitude { get; init; }
-    public double Latitude { get; init; }
     public IEnumerable<PhoneNumberGroupDto> PhoneNumbersGroups { get; init; }
     public ImageReadDto IconData { get; init; }
     public WebsiteLinkRead[] Links { get; init; }
@@ -85,23 +76,5 @@ public class SchoolDetailReadDto : ISchoolReadDto
     public SchoolStatisticsDto SchoolStatistics { get; init; }
     public List<SchoolCategoryPricingDto> CategoryPricings { get; init; }
     public TeamDto Team { get; init; }
-    public List<AddressDto> ExtraLocations { get; init; }
-}
-
-public class WebsiteLinkRead(
-    string url,
-    string name,
-    string? description,
-    string iconFileName,
-    string iconUrl,
-    string iconContentType,
-    string? iconDescription)
-{
-    public string Url { get; init; } = url;
-    public string Name { get; init; } = name;
-    public string? Description { get; init; } = description;
-    public string IconFileName { get; init; } = iconFileName;
-    public string IconUrl { get; init; } = iconUrl;
-    public string IconContentType { get; init; } = iconContentType;
-    public string? IconDescription { get; init; } = iconDescription;
+    public List<AddressDto> Locations { get; init; }
 }

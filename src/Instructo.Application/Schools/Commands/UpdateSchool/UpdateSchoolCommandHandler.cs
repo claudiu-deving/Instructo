@@ -83,7 +83,7 @@ public class UpdateSchoolCommandHandler(
         {
             if(request.LegalName is null)
                 return Result<UpdateSchoolCommand>.Success(request);
-            if((await queryRepository.GetByIndexed(request.LegalName)).Value is not null)
+            if((await queryRepository.SchoolExists(request.LegalName)).Value)
                 return Result<UpdateSchoolCommand>.Failure(new Error("Create-School", "Company name already exists"));
 
             return Result<UpdateSchoolCommand>.Success(request);

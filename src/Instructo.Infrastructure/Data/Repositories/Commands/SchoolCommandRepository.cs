@@ -37,7 +37,13 @@ public class SchoolCommandRepository(AppDbContext appDbContext, ILogger<SchoolCo
     {
         try
         {
-            appDbContext.Schools.Remove(entity);
+            var rowsAffected = await appDbContext.Schools
+                             .Where(s => s.Id==entity.Id)
+                             .ExecuteDeleteAsync();
+            if(rowsAffected==0)
+            {
+                return new Error("School-Delete-No-Rows", $"No rows affected during the removal of: {entity.Slug}");
+            }
             return Result<School>.Success(entity);
         }
         catch(DbUpdateConcurrencyException ex)

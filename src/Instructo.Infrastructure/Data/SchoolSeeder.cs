@@ -216,9 +216,6 @@ public class SchoolSeeder
         // Create business hours
         var businessHours = CreateBusinessHours();
 
-        // Create address
-        var address = CreateRandomAddress();
-
         // Select random city
         var city = _faker.PickRandom(cities);
 
@@ -234,13 +231,16 @@ public class SchoolSeeder
         // Select random certificates (0-2 certificates)
         var selectedCertificates = _faker.PickRandom(certificates, _faker.Random.Int(0, Math.Min(2, certificates.Count))).ToList();
 
+        var manualTransmission = _context.Transmissions.FirstOrDefault(x => x.Id==1);
         // Create category pricings
         var categoryPricings = selectedCategories.Select(vc => new SchoolCategoryPricing
         {
             VehicleCategoryId=vc.Id,
             FullPrice=_faker.Random.Decimal(1000, 3000),
             Installments=_faker.Random.Int(1, 6),
-            InstallmentPrice=_faker.Random.Decimal(200, 600)
+            InstallmentPrice=_faker.Random.Decimal(200, 600),
+            Transmission =manualTransmission
+
         }).ToList();
 
         // Create team
@@ -283,7 +283,6 @@ public class SchoolSeeder
             city,
             slogan,
             description,
-            address,
             statistics,
             team
         );
@@ -294,6 +293,8 @@ public class SchoolSeeder
             var extraLocation = CreateRandomAddress(AddressType.LessonStart);
             school.AddExtraLocation(extraLocation);
         }
+        var main = CreateRandomAddress(AddressType.MainLocation);
+        school.AddExtraLocation(main);
 
         for(int i = 0; i<_faker.Random.Int(1, 3); i++)
         {
@@ -404,100 +405,5 @@ public class SchoolSeeder
         {
             _logger.LogWarning("No vehicle categories found in database. Schools will be created without categories.");
         }
-    }
-
-    /// <summary>
-    /// Creates a single school with specified parameters for testing
-    /// </summary>
-    public async Task<School> CreateSingleSchoolAsync(
-        string schoolName,
-        string ownerEmail,
-        string ownerFirstName,
-        string ownerLastName)
-    {
-        // Create owner
-        var owner = new ApplicationUser
-        {
-            Id=Guid.NewGuid(),
-            FirstName=ownerFirstName,
-            LastName=ownerLastName,
-            Email=ownerEmail,
-            UserName=ownerEmail,
-            EmailConfirmed=true,
-            IsActive=true,
-            Created=DateTime.UtcNow
-        };
-
-        var result = await _userManager.CreateAsync(owner, "TempPassword123!");
-        if(!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to create owner user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
-
-        await _userManager.AddToRoleAsync(owner, "Owner");
-
-        // Get reference data
-        var cities = await _context.Cities.Include(c => c.County).ToListAsync();
-        var vehicleCategories = await _context.Categories.ToListAsync();
-        var certificates = await _context.CertificateTypes.ToListAsync();
-
-        if(!cities.Any())
-        {
-            cities=await CreateSampleCitiesAsync();
-        }
-
-        // Create school with specified name
-        var name = SchoolName.Create(schoolName).ValueOrThrow();
-        var legalName = LegalName.Create($"{schoolName} SRL").ValueOrThrow();
-        var email = Email.Create(_faker.Internet.Email(provider: "driving-school.ro")).ValueOrThrow();
-        var slogan = Slogan.Create("Professional driving education").ValueOrThrow();
-        var description = Description.Create("A professional driving school dedicated to safe driving education.").ValueOrThrow();
-
-        var phoneNumber = PhoneNumber.Create(_faker.Phone.PhoneNumber()).ValueOrThrow();
-        var phoneNumberGroups = new List<PhoneNumbersGroup>
-        {
-            new PhoneNumbersGroup
-            {
-                Name = "Main Office",
-                PhoneNumbers = [new PhoneNumber { Value = phoneNumber.Value }]
-            }
-        };
-
-        var businessHours = CreateBusinessHours();
-        var address = CreateRandomAddress();
-        var city = cities.First();
-        var statistics = new Statistics { NumberOfStudents=_faker.Random.Int(50, 200) };
-        var selectedCategories = vehicleCategories.Take(1).ToList();
-        var selectedCertificates = new List<ArrCertificate>();
-        var categoryPricings = new List<SchoolCategoryPricing>();
-        var team = Team.Create(Guid.NewGuid());
-
-        var school = School.Create(
-            owner,
-            name,
-            legalName,
-            email,
-            phoneNumber,
-            phoneNumberGroups,
-            businessHours,
-            selectedCategories,
-            selectedCertificates,
-            null,
-            city,
-            slogan,
-            description,
-            address,
-            statistics,
-            team
-        );
-
-        school.SetCategoryPricings(categoryPricings);
-
-        _context.Schools.Add(school);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Created single school: {schoolName} with owner: {ownerEmail}", schoolName, ownerEmail);
-
-        return school;
     }
 }

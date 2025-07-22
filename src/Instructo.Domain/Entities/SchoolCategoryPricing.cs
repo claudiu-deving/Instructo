@@ -14,7 +14,7 @@ public class SchoolCategoryPricing : IEntity
     public decimal FullPrice { get; set; }
     public decimal InstallmentPrice { get; set; }
     public int Installments { get; set; } = 5;
-    public TransmissionType Transmission { get; set; } = TransmissionType.Manual;
+    public Transmission? Transmission { get; set; }
 
     public SchoolCategoryPricingDto ToDto()
     {
@@ -23,7 +23,7 @@ public class SchoolCategoryPricing : IEntity
             FullPrice,
             InstallmentPrice,
             Installments,
-            Transmission.ToString()
+            Transmission?.Name??"Manual"
         );
     }
 }

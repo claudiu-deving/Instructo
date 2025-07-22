@@ -9,13 +9,13 @@ using Domain.ValueObjects;
 
 namespace Application.Schools.Queries.GetSchoolById;
 
-public class GetSchoolBySlugQueryHandler(ISchoolQueriesRepository repository) : ICommandHandler<GetSchoolBySlugQuery, Result<SchoolDetailReadDto>>
+public class GetSchoolBySlugQueryHandler(ISchoolQueriesRepository repository) : ICommandHandler<GetSchoolBySlugQuery, Result<SchoolDetailReadDto?>>
 {
     public async Task<Result<SchoolDetailReadDto?>> Handle(GetSchoolBySlugQuery request, CancellationToken cancellationToken)
     {
         var repositoryRequest = await repository.GetBySlugAsync(request.Slug);
         if(repositoryRequest.IsError)
             return Result<SchoolDetailReadDto?>.Failure(repositoryRequest.Errors);
-        return repositoryRequest.Map(x => x?.ToDetailedReadDto());
+        return repositoryRequest.Value;
     }
 }

@@ -27,4 +27,7 @@ public readonly record struct CreateSchoolCommandDto(
     List<string> ArrCertifications,
     int NumberOfStudents,
     List<SchoolCategoryPricingDto> CategoryPricings,
-    List<AddressDto> ExtraLocations);
+    List<AddressDto> ExtraLocations,
+    TeamDto? Team)
+{
+}

@@ -34,6 +34,8 @@ public static class DbInitializer
             // Seed schools if configured
             await SeedSchoolsIfConfiguredAsync(serviceProvider, logger);
 
+            await CreateSchoolDetailsView(context);
+
             logger.LogInformation("Database seeding completed successfully.");
         }
         catch(Exception ex)
@@ -41,6 +43,120 @@ public static class DbInitializer
             logger.LogError(ex, "An error occurred while initializing the database.");
             throw;
         }
+    }
+
+    private static async Task CreateSchoolDetailsView(AppDbContext context)
+    {
+        await context.Database.ExecuteSqlRawAsync(@"CREATE VIEW SchoolDetails AS
+SELECT         
+s.Id, 
+s.Name, 
+s.CompanyName, 
+s.Email, 
+s.PhoneNumber, 
+s.Slug, 
+s.Slogan,
+s.Description, 
+county.Code AS CountyId,
+city.Name AS CityName, 
+s.PhoneNumbersGroups,
+s.BussinessHours,
+(SELECT 
+        i.FileName,
+        i.Url,
+        i.Description,
+        i.ContentType
+        FROM dbo.Images AS i
+        WHERE i.Id = s.IconId
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+) AS IconData,
+(
+    SELECT 
+        link.Url,
+        link.Name,
+        link.Description,
+        i.FileName as IconFileName,
+        i.Url as IconUrl ,
+        i.Description as IconDescription,
+        i.ContentType as IconContentType
+         FROM dbo.WebsiteLinks AS link
+         JOIN dbo.Images i on i.Id = link.IconId
+        WHERE link.SchoolId = s.Id
+        FOR JSON PATH
+) AS Links,
+(SELECT 
+        vc.Name,
+        vc.Description
+        FROM dbo.SchoolCategories AS sc
+        JOIN dbo.VehicleCategories vc on sc.VehicleCategoryId = vc.Id
+        WHERE sc.SchoolId= s.Id
+        FOR JSON PATH
+) AS VehicleCategories,
+(SELECT 
+        vc.Name,
+        vc.Description
+        FROM dbo.SchoolCertificates AS sc
+        JOIN dbo.ARRCertificates vc on sc.CertificateId = vc.Id
+        WHERE sc.SchoolId= s.Id
+        FOR JSON PATH
+) AS ArrCertificates,
+(SELECT 
+        vc.Name,
+        scp.FullPrice,
+        scp.InstallmentPrice,
+        scp.Installments,
+        t.Name Transmission,
+        vc.Name as VehicleCategory
+        FROM dbo.SchoolCategoryPricings AS scp
+        JOIN dbo.VehicleCategories vc on scp.VehicleCategoryId = vc.Id
+        JOIN dbo.Transmissions t on t.Id = scp.TransmissionId
+        WHERE scp.SchoolId = s.Id
+        FOR JSON PATH
+) AS CategoryPricings,
+(SELECT (
+    SELECT
+            i.LastName,
+            i.FirstName,
+            YEAR(GETDATE()) - i.BirthYear as Age,
+            i.YearsExperience,
+            i.Email,
+            i.Gender,
+            i.Specialization,
+            i.Phone as PhoneNumber,
+            images.FileName as ProfileImageName,
+            images.Url as ProfileImageUrl,
+            images.ContentType as ProfileImageContentType,
+            images.Description as ProfileImageDescription,
+              JSON_QUERY((
+                SELECT vc.Name
+                FROM dbo.InstructorVehicleCategories ivc
+                JOIN dbo.VehicleCategories vc ON vc.Id = ivc.VehicleCategoriesId
+                WHERE ivc.InstructorsId = i.Id
+                FOR JSON PATH
+            )) AS Categories
+            FROM dbo.Teams AS t
+            JOIN dbo.Instructors i on i.TeamId = t.Id
+            JOIN dbo.Images as images on images.Id = i.ProfileImageId
+            WHERE t.SchoolId = s.Id
+            FOR JSON PATH) as Instructors
+FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+) AS Team,
+(SELECT 
+        CAST(ROUND(addr.Coordinate.Long, 6, 1) AS DECIMAL(10,6)) AS Longitude,
+        CAST(ROUND(addr.Coordinate.Lat, 6, 1) AS DECIMAL(10,6)) AS Latitude,
+        addr.Street,
+        addr.Comment,
+        addr.AddressType
+        FROM dbo.Addresses AS addr
+        WHERE addr.SchoolId = s.Id
+        FOR JSON PATH
+) AS ExtraLocations,
+s.SchoolStatistics
+
+FROM  dbo.Schools AS s  
+JOIN dbo.Counties AS county ON s.CountyId = county.Id 
+JOIN dbo.Cities AS city ON s.CityId = city.Id 
+");
     }
 
     /// <summary>
@@ -64,14 +180,9 @@ public static class DbInitializer
             // Check if we should use legacy SQL seeding or new SchoolSeeder
             var seedingOptions = scope.ServiceProvider.GetService<IOptions<SeedingOptions>>()?.Value??new SeedingOptions();
 
-            if(seedingOptions.UseLegacyTestData)
-            {
-                await SeedLegacyTestDataAsync(context, logger);
-            }
-            else
-            {
-                await SeedSchoolsIfConfiguredAsync(serviceProvider, logger);
-            }
+
+            await SeedSchoolsIfConfiguredAsync(serviceProvider, logger);
+            await CreateSchoolDetailsView(context);
 
             logger.LogInformation("Database seeding completed successfully.");
         }

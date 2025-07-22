@@ -101,9 +101,9 @@ public class InstructorProfile : BaseAuditableEntity<Guid>
         int birthYear,
         int yearsExperience,
         string specialization,
-        string description,
-        string phone,
-        string email,
+        string? description,
+        string? phone,
+        string? email,
         string gender,
         Image? profileImage,
         List<VehicleCategory> vehicleCategories)

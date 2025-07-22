@@ -28,13 +28,14 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
         builder.Property(x => x.Slogan);
         builder.Property(x => x.Email);
         builder.Property(x => x.PhoneNumber).HasConversion(new PhoneNumberConverter());
-        builder.Property(x => x.Statistics).HasConversion(x => JsonConvert.SerializeObject(x), x => JsonConvert.DeserializeObject<Statistics>(x));
+        builder.Property(x => x.SchoolStatistics).HasConversion(x => JsonConvert.SerializeObject(x), x => JsonConvert.DeserializeObject<Statistics>(x));
         builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());
         builder.Property(x => x.PhoneNumbersGroups).HasConversion(new PhoneNumberConvertersGroupConverter())
             .Metadata.SetValueComparer(new ValueComparer<List<PhoneNumbersGroup>>(
                 (c1, c2) => c1.SequenceEqual(c2),
                 c => c.Aggregate(0, (x, y) => HashCode.Combine(x.GetHashCode(), y.GetHashCode()))));
         builder.Property(x => x.Name).IsRequired();
+
         builder.HasMany(x => x.CategoryPricings)
             .WithOne(x => x.School)
             .HasForeignKey(x => x.SchoolId)
@@ -44,7 +45,6 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
             .WithOne(x => x.School)
             .HasForeignKey<Team>(x => x.SchoolId)
             .OnDelete(DeleteBehavior.Cascade);
-
 
         builder.HasMany(x => x.VehicleCategories)
           .WithMany(c => c.Schools)
@@ -77,14 +77,15 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
             });
 
         builder.HasMany(s => s.WebsiteLinks)
-            .WithOne(w => w.School);
+            .WithOne(w => w.School)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(s => s.WebsiteLinks)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasMany(s => s.ExtraLocations)
             .WithOne(x => x.School)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(s => s.ExtraLocations)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }

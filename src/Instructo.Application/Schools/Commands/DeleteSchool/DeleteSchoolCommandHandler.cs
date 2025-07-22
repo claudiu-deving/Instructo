@@ -1,5 +1,8 @@
-﻿using Application.Abstractions.Messaging;
+﻿using System;
 
+using Application.Abstractions.Messaging;
+
+using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Interfaces;
 using Domain.Shared;
@@ -12,8 +15,7 @@ using Microsoft.Extensions.Logging;
 namespace Application.Schools.Commands.DeleteSchool;
 
 public class DeleteSchoolCommandHandler(
-    ISchoolCommandRepository commandRepository,
-   ISchoolQueriesRepository schoolQueryRepository,
+    ISchoolManagementDirectory schoolManagementDirectory,
     IUserQueriesRepository userQueryRepository,
     ILogger<DeleteSchoolCommandHandler> logger) : ICommandHandler<DeleteSchoolCommand, Result<Unit>>
 {
@@ -37,7 +39,7 @@ public class DeleteSchoolCommandHandler(
 
         School? existingSchool = null;
         List<Error> errors = [];
-        var existingSchoolRequest = await schoolQueryRepository.GetByIdAsync(request.Id);
+        var existingSchoolRequest = await schoolManagementDirectory.SchoolQueriesRepository.GetByIdAsync(request.Id);
         existingSchoolRequest.OnSuccess(school => existingSchool=school)
             .OnError(errors.AddRange);
         if(errors.Count!=0||existingSchool is null)
@@ -45,21 +47,26 @@ public class DeleteSchoolCommandHandler(
             logger.LogError("The school {school} doesn't exist", new { school = existingSchool?.Id });
             return Result<Unit>.WithErrors([.. errors]);
         }
-
-        if(existingSchool.OwnerId!=user.Id)
+        if(user.Role?.NormalizedName!=ApplicationRole.IronMan.ToString().ToUpper())
         {
-            logger.LogError("Non authorized user {User} attempted to delete a {School}", new { User = user.Id },
-                new { School = existingSchool.Id });
-            return Result<Unit>.WithErrors([
-                new Error("Unauthorized", $"The user {userId} is not the owner of the school {existingSchool.Id}")
-            ]);
+            if(existingSchool.OwnerId!=user.Id)
+            {
+                logger.LogError("Non authorized user {User} attempted to delete a {School}", new { User = user.Id },
+                    new { School = existingSchool.Id });
+                return Result<Unit>.WithErrors([
+                    new Error("Unauthorized", $"The user {userId} is not the owner of the school {existingSchool.Id}")
+                ]);
+            }
         }
 
+ 
 
-        var deletionRequest = await commandRepository.DeleteAsync(existingSchool);
+        var deletionRequest = await schoolManagementDirectory.SchoolCommandRepository.DeleteAsync(existingSchool);
         deletionRequest.OnError(errors.AddRange);
         if(errors.Count!=0)
             return Result<Unit>.WithErrors([.. errors]);
+        await schoolManagementDirectory.SaveChangesAsync();
+      
         return Result<Unit>.Success(Unit.Value);
     }
 }
