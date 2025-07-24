@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-using Domain.Shared;
 using Domain.ValueObjects;
 
 namespace Domain.Entities.SchoolEntities;
@@ -74,25 +73,34 @@ public class InstructorProfile : BaseAuditableEntity<Guid>
     }
 
     public void UpdateProfile(
-        string firstName,
-        string lastName,
-        int birthYear,
-        int yearsExperience,
-        string specialization,
-        string description,
-        string phone,
-        string email,
+        string? firstName,
+        string? lastName,
+        int? birthYear,
+        int? yearsExperience,
+        string? specialization,
+        string? description,
+        string? phone,
+        string? email,
         Image? profileImage)
     {
-        FirstName=firstName;
-        LastName=lastName;
-        BirthYear=birthYear;
-        YearsExperience=yearsExperience;
-        Specialization=specialization;
-        Description=description;
-        Phone=phone;
-        Email=email;
-        ProfileImage=profileImage;
+        if(firstName is not null)
+            FirstName=firstName;
+        if(lastName is not null)
+            LastName=lastName;
+        if(birthYear is not null)
+            BirthYear=birthYear.Value;
+        if(yearsExperience is not null)
+            YearsExperience=yearsExperience.Value;
+        if(specialization is not null)
+            Specialization=specialization;
+        if(description is not null)
+            Description=description;
+        if(phone is not null)
+            Phone=phone;
+        if(email is not null)
+            Email=email;
+        if(profileImage is not null)
+            ProfileImage=profileImage;
     }
 
     public static InstructorProfile Create(

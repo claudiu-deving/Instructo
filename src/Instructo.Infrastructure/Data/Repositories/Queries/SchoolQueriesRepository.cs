@@ -49,6 +49,9 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
                     .Include(x => x.WebsiteLinks)
                     .Include(x => x.VehicleCategories)
                     .Include(x => x.Certificates)
+                    .Include(x=>x.City)
+                    .Include(x=>x.County)
+                    .Include(x=>x.ExtraLocations)
                     .AsSplitQuery()
                     .FirstOrDefaultAsync(x => x.Id==id.Id);
         }

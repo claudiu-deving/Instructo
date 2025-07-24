@@ -173,7 +173,10 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
             logger.LogInformation("Applying database migrations...");
             await context.Database.MigrateAsync();
             logger.LogInformation("Database migrations applied successfully.");
-
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            if(roleManager.Roles.Any())
+                return;
             // Seed roles and users if not already done
             await SeedRolesAndAdminUser(serviceProvider);
 
@@ -220,49 +223,12 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
             }
         }
     }
-
-    private static async Task SeedLegacyTestDataAsync(AppDbContext context, ILogger logger)
-    {
-        try
-        {
-            logger.LogInformation("Using legacy SQL test data seeding...");
-
-            context.Database.BeginTransaction();
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "Infrastructure.Data.Hardcoded.InsertTestSchools.sql";
-
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            if(stream==null)
-            {
-                logger.LogWarning("Legacy test data SQL file not found. Skipping legacy seeding.");
-                return;
-            }
-
-            using var reader = new StreamReader(stream);
-            var sqlContent = await reader.ReadToEndAsync();
-
-            if(!string.IsNullOrWhiteSpace(sqlContent))
-            {
-                await context.Database.ExecuteSqlRawAsync(sqlContent);
-                context.Database.CommitTransaction();
-                logger.LogInformation("Legacy test data seeded successfully.");
-            }
-        }
-        catch(Exception ex)
-        {
-            logger.LogError(ex, "Failed to seed legacy test data.");
-            context.Database.RollbackTransaction();
-            throw;
-        }
-    }
-
     public static async Task SeedRolesAndAdminUser(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        if(roleManager.Roles.Any())
-            return;
+ 
         // Create roles
         string[] roleNames = ["Admin", "Owner", "Instructor", "Student"];
 

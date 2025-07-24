@@ -13,6 +13,8 @@ public class SchoolManagementDirectory(
     IQueryRepository<ArrCertificate, int> certificateQueriesRepository,
     IQueryRepository<VehicleCategory, int> vehicleQueriesRepository,
     IQueryRepository<Transmission, int> transmissionQueriesRepository,
+    IQueryRepository<Address, int> addressQueriesRepository,
+    IInstructorProfileQueryRepository instructorProfileQueryRepository,
 
     ISchoolCategoryPricingQueryRepository schoolCategoryPricingQueryRepository) : UnitOfWork(appDbContext), ISchoolManagementDirectory
 {
@@ -29,4 +31,8 @@ public class SchoolManagementDirectory(
     public ISchoolCategoryPricingQueryRepository SchoolCategoryPricingQueriesRepository => schoolCategoryPricingQueryRepository;
 
     public IQueryRepository<Transmission, int> TransmissionQueriesRepository => transmissionQueriesRepository;
+
+    public IQueryRepository<Address, int> AddressQueriesRepository => addressQueriesRepository;
+
+    public IInstructorProfileQueryRepository InstructorProfileQueryRepository => instructorProfileQueryRepository;
 }

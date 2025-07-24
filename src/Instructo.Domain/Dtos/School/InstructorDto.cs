@@ -1,6 +1,7 @@
 namespace Domain.Dtos.School;
 
 public readonly record struct InstructorDto(
+    Guid? Id,
     string FirstName,
     string LastName,
     int Age,

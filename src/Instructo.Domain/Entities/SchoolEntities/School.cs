@@ -283,4 +283,9 @@ public class School : BaseAuditableEntity<Guid>
             description,
             statistics);
     }
+
+    public void ChangeSlogan(Slogan slogan)
+    {
+        Slogan=slogan.Value;
+    }
 }

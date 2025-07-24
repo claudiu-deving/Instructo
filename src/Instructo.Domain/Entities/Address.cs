@@ -51,22 +51,22 @@ public class Address : IEntity
 
     public static Address Empty => new("", _geometryFactory.CreatePoint(new Coordinate(0, 0)), AddressType.MainLocation);
 
-    public static Address Create(string street, string latitude, string longitude, AddressType addressType, string? comment = null)
+    public static Result<Address> Create(string street, string latitude, string longitude, AddressType addressType, string? comment = null)
     {
         if(string.IsNullOrWhiteSpace(street))
-            throw new ArgumentException("Street cannot be null or empty", nameof(street));
+            return new Error("Street cannot be null or empty", nameof(street));
 
         if(!double.TryParse(latitude, out var lat))
-            throw new ArgumentException("Invalid latitude format", nameof(latitude));
+            return new Error("Invalid latitude format", nameof(latitude));
         if(!double.TryParse(longitude, out var lon))
-            throw new ArgumentException("Invalid longitude format", nameof(longitude));
+            return new Error("Invalid longitude format", nameof(longitude));
 
         if(lat<MIN_LATITUDE||lat>MAX_LATITUDE)
-            throw new ArgumentOutOfRangeException(nameof(latitude),
+            return new Error(nameof(latitude),
                 $"Latitude must be between {MIN_LATITUDE} and {MAX_LATITUDE} for Romania");
 
         if(lon<MIN_LONGITUDE||lon>MAX_LONGITUDE)
-            throw new ArgumentOutOfRangeException(nameof(longitude),
+            return new Error(nameof(longitude),
                 $"Longitude must be between {MIN_LONGITUDE} and {MAX_LONGITUDE} for Romania");
 
         var point = _geometryFactory.CreatePoint(new Coordinate(lon, lat));
@@ -99,8 +99,8 @@ public class Address : IEntity
         return HashCode.Combine(Street, Coordinate);
     }
 
-    public Result<AddressDto> ToDto()
+    public Result<AddressDto> ToDto(AddressType addressType)
     {
-        return AddressDto.Create(Street, Coordinate?.X.ToString()??"", Coordinate?.Y.ToString()??"", Comment);
+        return AddressDto.Create(Street, Coordinate?.X.ToString()??"", Coordinate?.Y.ToString()??"", addressType, Comment);
     }
 }

@@ -11,5 +11,8 @@ public interface ISchoolManagementDirectory : IUnitOfWork
     IQueryRepository<ArrCertificate, int> CertificateQueriesRepository { get; }
     IQueryRepository<VehicleCategory, int> VehicleQueriesRepository { get; }
     IQueryRepository<Transmission, int> TransmissionQueriesRepository { get; }
+
+    IQueryRepository<Address, int> AddressQueriesRepository { get; }
     ISchoolCategoryPricingQueryRepository SchoolCategoryPricingQueriesRepository { get; }
+    IInstructorProfileQueryRepository InstructorProfileQueryRepository { get; }
 }

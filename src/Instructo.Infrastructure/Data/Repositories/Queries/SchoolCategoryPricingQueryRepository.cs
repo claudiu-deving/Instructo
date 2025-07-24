@@ -116,4 +116,28 @@ public class SchoolCategoryPricingQueryRepository(AppDbContext appDbContext) : I
             return new Error("GetSchoolCategoryPricingBySchool-Db", ex.Message);
         }
     }
+
+    public async Task<Result<SchoolCategoryPricing?>> GetBySchoolAndCategory(Guid schoolId, VehicleCategoryType categoryId)
+    {
+        try
+        {
+            var result = await appDbContext.SchoolCategoryPricings
+                .Include(s => s.School)
+                .Include(s => s.Category)
+                .FirstOrDefaultAsync(s => s.School.Id==schoolId&&s.Category.Id==(int)categoryId);
+            return result;
+        }
+        catch(InvalidOperationException ex)
+        {
+            return new Error("GetSchoolCategoryPricingBySchoolAndCategory-Empty", ex.Message);
+        }
+        catch(OperationAbortedException ex)
+        {
+            return new Error("GetSchoolCategoryPricingBySchoolAndCategory-Aborted", ex.Message);
+        }
+        catch(DbException ex)
+        {
+            return new Error("GetSchoolCategoryPricingBySchoolAndCategory-Db", ex.Message);
+        }
+    }
 }

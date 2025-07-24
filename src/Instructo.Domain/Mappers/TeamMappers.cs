@@ -22,11 +22,13 @@ public static class TeamMappers
         var age = currentYear-instructor.BirthYear;
 
         return new InstructorDto(
+            instructor.Id,
             instructor.FirstName,
             instructor.LastName,
             age,
             instructor.YearsExperience,
            instructor.VehicleCategories.Select(vc => vc.ToDto()).ToList(),
+           instructor.Gender,
             instructor.Specialization,
             instructor.Description,
              instructor.Email,

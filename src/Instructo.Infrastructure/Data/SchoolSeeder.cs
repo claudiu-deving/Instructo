@@ -239,30 +239,9 @@ public class SchoolSeeder
             FullPrice=_faker.Random.Decimal(1000, 3000),
             Installments=_faker.Random.Int(1, 6),
             InstallmentPrice=_faker.Random.Decimal(200, 600),
-            Transmission =manualTransmission
+            Transmission=manualTransmission
 
         }).ToList();
-
-        // Create team
-        var team = Team.Create(Guid.NewGuid()); // Will be updated with actual school ID after creation
-
-        for(int i = 0; i<_faker.Random.Int(1, 30); i++)
-        {
-            var instructor = InstructorProfile.Create(
-                _faker.Name.FirstName(),
-                _faker.Name.LastName(),
-                _faker.Random.Int(1980, 2000),
-                _faker.Random.Int(1, 20),
-                _faker.PickRandom(new[] { "Car", "Motorcycle", "Truck" }),
-                _faker.Lorem.Sentence(10),
-                _faker.Phone.PhoneNumber(),
-                _faker.Internet.Email(),
-                _faker.PickRandom(new string[] { "female", "male" }),
-              await CreateRandomImage(),
-                _faker.PickRandom(vehicleCategories, _faker.Random.Int(1, 3)).ToList()
-                );
-            team.AddInstructor(instructor);
-        }
 
         // Create school icon (optional)
         Image? icon = await CreateRandomImage();
@@ -283,8 +262,7 @@ public class SchoolSeeder
             city,
             slogan,
             description,
-            statistics,
-            team
+            statistics
         );
         school.SetCategoryPricings(categoryPricings);
 
@@ -300,6 +278,26 @@ public class SchoolSeeder
         {
             var randomLink = await CreateRandomSocialMediaLink();
             school.AddLink(randomLink);
+        }
+        var team = school.CreateTeam(); // Will be updated with actual school ID after creation
+
+
+        for(int i = 0; i<_faker.Random.Int(1, 30); i++)
+        {
+            var instructor = InstructorProfile.Create(
+                _faker.Name.FirstName(),
+                _faker.Name.LastName(),
+                _faker.Random.Int(1980, 2000),
+                _faker.Random.Int(1, 20),
+                _faker.PickRandom(new[] { "Car", "Motorcycle", "Truck" }),
+                _faker.Lorem.Sentence(10),
+                _faker.Phone.PhoneNumber(),
+                _faker.Internet.Email(),
+                _faker.PickRandom(new string[] { "female", "male" }),
+              await CreateRandomImage(),
+                _faker.PickRandom(vehicleCategories, _faker.Random.Int(1, 3)).ToList()
+                );
+            team.AddInstructor(instructor);
         }
 
         return school;
@@ -346,7 +344,7 @@ public class SchoolSeeder
         var latitude = _faker.Random.Double(MIN_LATITUDE, MAX_LATITUDE);
         var longitude = _faker.Random.Double(MIN_LONGITUDE, MAX_LONGITUDE);
 
-        return Address.Create(street, latitude.ToString("F6"), longitude.ToString("F6"), addressType);
+        return Address.Create(street, latitude.ToString("F6"), longitude.ToString("F6"), addressType).Value!;
     }
 
 

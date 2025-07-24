@@ -94,7 +94,7 @@ public class CreateSchoolCommandHandler(
                 null,
                 categories
                 );
-            team.AddInstructor();
+            team.AddInstructor(instructorProfile);
 
         }
         if(errors.Count>0)
@@ -155,7 +155,6 @@ public class CreateSchoolCommandHandler(
     {
         var request = context.Get<CreateSchoolCommand>();
         var school = context.Get<School>();
-        var mainAddress = context.Get<Address>();
         if(request.ExtraLocations is null||request.ExtraLocations.Count==0)
             return school;
         var errors = new List<Error>();
@@ -173,7 +172,8 @@ public class CreateSchoolCommandHandler(
         {
             return Result<object>.Failure([.. errors]);
         }
-        school.AddExtraLocation(mainAddress);
+        var mainAddressResult = CreateAddress(context);
+        school.AddExtraLocation(mainAddressResult.Value!);
 
         return school;
         static Result<Address> CreateAddress(FlexContext flexContext)

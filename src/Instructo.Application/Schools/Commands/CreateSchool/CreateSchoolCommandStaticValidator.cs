@@ -36,7 +36,7 @@ public partial record CreateSchoolCommand
             .OnSuccess(value => createSchoolCommand.City=value)
             .OnError(errors.AddRange);
 
-        AddressDto.Create(createSchoolCommandDto.Address, createSchoolCommandDto.X, createSchoolCommandDto.Y)
+        AddressDto.Create(createSchoolCommandDto.Address, createSchoolCommandDto.X, createSchoolCommandDto.Y, AddressType.MainLocation)
             .OnSuccess(value => createSchoolCommand.Address=value)
             .OnError(errors.AddRange);
 

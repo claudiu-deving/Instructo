@@ -1,5 +1,6 @@
 ﻿using Application.Schools.Commands.CreateSchool;
 
+using Domain.Dtos;
 using Domain.Dtos.School;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
@@ -34,11 +35,10 @@ public partial record UpdateSchoolCommand
             Domain.ValueObjects.CityDto.Create(updateSchoolCommandDto.City)
                 .OnSuccess(value => updateSchoolCommand.City=value)
                 .OnError(errors.AddRange);
-        if(updateSchoolCommandDto.Address is not null
-            &&updateSchoolCommandDto.Longitude is not null
-            &&updateSchoolCommandDto.Latitude is not null)
-            Domain.ValueObjects.AddressDto.Create(updateSchoolCommandDto.Address, updateSchoolCommandDto.Longitude, updateSchoolCommandDto.Latitude)
-                .OnSuccess(value => updateSchoolCommand.Address=value)
+
+        if(updateSchoolCommandDto.Slogan is not null)
+            Domain.ValueObjects.Slogan.Create(updateSchoolCommandDto.Slogan)
+                .OnSuccess(value => updateSchoolCommand.Slogan=value)
                 .OnError(errors.AddRange);
 
         if(updateSchoolCommandDto.PhoneNumber is not null)
@@ -100,6 +100,49 @@ public partial record UpdateSchoolCommand
                     certificates.Add(Enum.Parse<ARRCertificateType>(certificateInput));
             });
             updateSchoolCommand.Certificates=certificates;
+        }
+
+        if(updateSchoolCommandDto.NumberOfStudents is not null)
+        {
+            if(updateSchoolCommandDto.NumberOfStudents<0)
+                errors.Add(new Error("NumberOfStudents-Negative", "Number of students cannot be negative"));
+            else
+                updateSchoolCommand.Statistics=new Statistics() { NumberOfStudents=(int)updateSchoolCommandDto.NumberOfStudents };
+        }
+
+        if(updateSchoolCommandDto.CategoryPricings is not null)
+        {
+            List<SchoolCategoryPricingDto> categoryPricings = [];
+            foreach(var categoryPricing in updateSchoolCommandDto.CategoryPricings)
+            {
+                if(categoryPricing.FullPrice<0)
+                    errors.Add(new Error("CategoryPricing-Price-Negative",
+                        "Category pricing price cannot be negative"));
+                else
+                    categoryPricings.Add(categoryPricing);
+            }
+            updateSchoolCommand.CategoryPricings=categoryPricings;
+        }
+
+        if(updateSchoolCommandDto.ExtraLocations is not null)
+        {
+            List<AddressDto> extraLocations = [];
+            foreach(var extraLocation in updateSchoolCommandDto.ExtraLocations)
+            {
+                if(extraLocation.Street is null||extraLocation.Street.Trim().Length==0)
+                    errors.Add(new Error("ExtraLocation-Street-Empty", "Extra location street cannot be empty"));
+                else
+                    extraLocations.Add(extraLocation);
+            }
+            updateSchoolCommand.ExtraLocations=extraLocations;
+        }
+
+        if(updateSchoolCommandDto.Team is not null)
+        {
+            if(updateSchoolCommandDto.Team.Value.Instructors is not null)
+            {
+                updateSchoolCommand.Team=updateSchoolCommandDto.Team;
+            }
         }
 
         if(errors.Count!=0)

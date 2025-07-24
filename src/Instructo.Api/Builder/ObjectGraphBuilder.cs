@@ -61,6 +61,8 @@ public static class ObjectGraphBuilder
         builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
         builder.Services.AddScoped<ISchoolCategoryPricingQueryRepository, SchoolCategoryPricingQueryRepository>();
         builder.Services.AddScoped<IQueryRepository<Transmission, int>, TransmissionQueryRepository>();
+        builder.Services.AddScoped<IQueryRepository<Address, int>, AddressQueryRepository>();
+        builder.Services.AddScoped<IInstructorProfileQueryRepository, InstructorProfileQueryRepository>();
     }
 
 }
