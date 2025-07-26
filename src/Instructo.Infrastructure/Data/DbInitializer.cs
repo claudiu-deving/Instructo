@@ -37,7 +37,7 @@ public static class DbInitializer
             // Seed schools if configured
             await SeedSchoolsIfConfiguredAsync(serviceProvider, logger);
 
-            await CreateSchoolDetailsView(context);
+            await CreateSchoolDetailsView(context, logger);
 
 
             logger.LogInformation("Database seeding completed successfully.");
@@ -49,7 +49,7 @@ public static class DbInitializer
         }
     }
 
-    public static async Task CreateSchoolDetailsView(AppDbContext context)
+    public static async Task CreateSchoolDetailsView(AppDbContext context, ILogger logger)
     {
         try
         {
@@ -166,8 +166,7 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
         }
         catch(Exception ex)
         {
-            // View might already exist, ignore the error
-            // This is a simple approach - in production you might want to check if view exists first
+            logger.LogError(ex, "An error occurred while creating the SchoolDetails view.");
         }
     }
 
@@ -203,7 +202,7 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
             var seedingOptions = scope.ServiceProvider.GetService<IOptions<SeedingOptions>>()?.Value??new SeedingOptions();
 
             await SeedSchoolsIfConfiguredAsync(serviceProvider, logger);
-            await CreateSchoolDetailsView(context);
+            await CreateSchoolDetailsView(context, logger);
             logger.LogInformation("Database seeding completed successfully.");
         }
         catch(Exception ex)

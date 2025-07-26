@@ -3,7 +3,6 @@
 using Application.Abstractions.Messaging;
 
 using Domain.Entities;
-using Domain.Entities.SchoolEntities;
 using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;

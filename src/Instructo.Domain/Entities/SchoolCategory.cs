@@ -1,5 +1,4 @@
 ﻿using Domain.Common;
-using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 using Domain.ValueObjects;
 

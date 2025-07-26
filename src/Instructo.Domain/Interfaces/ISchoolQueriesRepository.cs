@@ -1,5 +1,5 @@
 ﻿using Domain.Dtos.School;
-using Domain.Entities.SchoolEntities;
+using Domain.Entities;
 using Domain.Shared;
 using Domain.ValueObjects;
 

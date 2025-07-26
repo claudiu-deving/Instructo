@@ -32,7 +32,9 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
         builder.Property(x => x.BussinessHours).HasConversion(new BussinessHoursConverter());
         builder.Property(x => x.PhoneNumbersGroups).HasConversion(new PhoneNumberConvertersGroupConverter())
             .Metadata.SetValueComparer(new ValueComparer<List<PhoneNumbersGroup>>(
-                (c1, c2) => c1.SequenceEqual(c2),
+                 (c1, c2) => c1==null&&c2==null ? true :
+                    c1==null||c2==null ? false :
+                    c1.SequenceEqual(c2),
                 c => c.Aggregate(0, (x, y) => HashCode.Combine(x.GetHashCode(), y.GetHashCode()))));
         builder.Property(x => x.Name).IsRequired();
 

@@ -1,6 +1,5 @@
 ﻿using Domain.Dtos.Image;
 using Domain.Dtos.Link;
-using Domain.Entities.SchoolEntities;
 using Domain.Shared;
 using Domain.ValueObjects;
 

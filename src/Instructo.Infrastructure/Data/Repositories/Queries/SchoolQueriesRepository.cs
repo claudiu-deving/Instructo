@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 
 using Domain.Dtos.School;
-using Domain.Entities.SchoolEntities;
+using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Shared;
 using Domain.ValueObjects;

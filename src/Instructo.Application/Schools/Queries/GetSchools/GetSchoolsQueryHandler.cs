@@ -1,19 +1,16 @@
 ﻿using Application.Abstractions.Messaging;
 
-using Domain.Dtos.Image;
 using Domain.Dtos.School;
-using Domain.Entities.SchoolEntities;
+using Domain.Entities;
 using Domain.Interfaces;
-using Domain.Mappers;
 using Domain.Shared;
-using Domain.ValueObjects;
 
 namespace Application.Schools.Queries.GetSchools;
 
 public class GetSchoolsQueryHandler(ISchoolQueriesRepository repository)
     : ICommandHandler<GetSchoolsQuery, Result<IEnumerable<ISchoolReadDto>>>
 {
-    public async Task<Result<IEnumerable<ISchoolReadDto>>> Handle(GetSchoolsQuery request,
+    public Task<Result<IEnumerable<ISchoolReadDto>>> Handle(GetSchoolsQuery request,
         CancellationToken cancellationToken)
     {
         Func<School, bool>? filter = null;
@@ -34,8 +31,8 @@ public class GetSchoolsQueryHandler(ISchoolQueriesRepository repository)
             pageNumber: request.Parameters.PageNumber,
             pageSize: request.Parameters.PageSize);
         if(repositoryRequest.IsError)
-            return Result<IEnumerable<ISchoolReadDto>>.Failure(repositoryRequest.Errors);
-        return repositoryRequest;
+            return Task.FromResult(Result<IEnumerable<ISchoolReadDto>>.Failure(repositoryRequest.Errors));
+        return Task.FromResult(repositoryRequest);
 
     }
 }

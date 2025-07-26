@@ -108,7 +108,7 @@ public class CreateSchoolCommandCreationTests
           SchoolEmail: "Scgool@Email.com",
           City: "Test City",
           Address: "123 Test St",
-          PhoneNumber: null,
+          PhoneNumber: null!,
           ImagePath: "/path/to/valid/image.png",
           ImageContentType: "image/png",
           Slogan: "slogan",

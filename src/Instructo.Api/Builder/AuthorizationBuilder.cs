@@ -33,7 +33,9 @@ public static class AuthorizationBuilder
 #if DEBUG
         return "8fb090d2-ad97-41d0-86ce-08ddc4a5a731";
 #endif
+#pragma warning disable CS0162 // Unreachable code detected
         var s = Environment.GetEnvironmentVariable("IRONMAN_ID");
+#pragma warning restore CS0162 // Unreachable code detected
         if(s is not null)
             return s;
         else

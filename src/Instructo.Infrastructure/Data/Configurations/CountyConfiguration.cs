@@ -17,7 +17,8 @@ internal static class CountyConfiguration
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = "Infrastructure.Data.Hardcoded.counties.csv";
 
-        using var stream = assembly.GetManifestResourceStream(resourceName);
+        using var stream = assembly.GetManifestResourceStream(resourceName)
+            ??throw new InvalidOperationException($"Resource '{resourceName}' not found in assembly '{assembly.FullName}'.");
         using var reader = new StreamReader(stream);
         var csvContent = reader.ReadToEnd();
         return CsvDataReader.ReadCountiesFromCsv(csvContent);

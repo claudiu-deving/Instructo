@@ -1,6 +1,5 @@
 ﻿using Domain.Common;
 using Domain.Dtos;
-using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 
 namespace Domain.Entities;
@@ -15,6 +14,7 @@ public class SchoolCategoryPricing : IEntity
     public decimal InstallmentPrice { get; set; }
     public int Installments { get; set; } = 5;
     public Transmission? Transmission { get; set; }
+    public int TransmissionId { get; set; }
 
     public SchoolCategoryPricingDto ToDto()
     {

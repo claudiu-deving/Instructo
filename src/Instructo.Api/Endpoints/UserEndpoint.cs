@@ -5,7 +5,9 @@ using Application.Users.Queries;
 using Application.Users.Queries.GetUserByEmail;
 using Application.Users.Queries.GetUserById;
 using Application.Users.Queries.GetUsers;
+
 using Domain.Dtos.User;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Endpoints;
@@ -30,23 +32,23 @@ public static class UserEndpoint
     {
         var query = new GetUsersQuery();
         var userRequest = await sender.Send(query);
-        parameters = parameters with { PageNumber = parameters.PageNumber == 0 ? 1 : parameters.PageNumber };
-        parameters = parameters with { PageSize = parameters.PageSize > 50 ? 50 : parameters.PageSize };
+        parameters=parameters with { PageNumber=parameters.PageNumber==0 ? 1 : parameters.PageNumber };
+        parameters=parameters with { PageSize=parameters.PageSize>50 ? 50 : parameters.PageSize };
         return userRequest.Match<IResult>(
             ok =>
             {
-                if (!string.IsNullOrEmpty(parameters.SearchTerm))
-                    ok =
+                if(!string.IsNullOrEmpty(parameters.SearchTerm))
+                    ok=
                     [
                         .. ok.Where(x =>
-                            x.Email.Contains(parameters.SearchTerm) || x.FirstName.Contains(parameters.SearchTerm) ||
+                           (x.Email is not null && x.Email.Contains(parameters.SearchTerm)) || x.FirstName.Contains(parameters.SearchTerm) ||
                             x.LastName.Contains(parameters.SearchTerm))
                     ];
-                if (!string.IsNullOrEmpty(parameters.Role))
-                    ok = [.. ok.Where(x => x.Role.Name == parameters.Role)];
-                if (parameters.IsActive.HasValue)
-                    ok = [.. ok.Where(x => x.IsActive == parameters.IsActive.Value)];
-                ok = [.. ok.Skip((parameters.PageNumber - 1) * parameters.PageSize).Take(parameters.PageSize)];
+                if(!string.IsNullOrEmpty(parameters.Role))
+                    ok= [.. ok.Where(x => x.Role?.Name==parameters.Role)];
+                if(parameters.IsActive.HasValue)
+                    ok= [.. ok.Where(x => x.IsActive==parameters.IsActive.Value)];
+                ok= [.. ok.Skip((parameters.PageNumber-1)*parameters.PageSize).Take(parameters.PageSize)];
 
                 return TypedResults.Ok(ok);
             },

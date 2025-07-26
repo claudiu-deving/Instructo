@@ -50,7 +50,7 @@ public class AddressQueryRepository(AppDbContext appDbContext) : IQueryRepositor
     {
         try
         {
-            return await appDbContext.Addresses.Include(x => x.School).FirstOrDefaultAsync(x => x.School.Id.ToString()==indexedValue);
+            return await appDbContext.Addresses.Include(x => x.School).FirstOrDefaultAsync(x => x.School!.Id.ToString()==indexedValue);
         }
         catch(OperationAbortedException ex)
         {

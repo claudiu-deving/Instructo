@@ -16,16 +16,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Instructo.IntegrationTests.Application.Schools.Endpoints;
 
-public class SchoolEndpointsTests : IntegrationTestBase
+public class SchoolEndpointsTests(CustomWebApplicationFactory factory) : IntegrationTestBase(factory)
 {
-    private readonly CustomWebApplicationFactory _factory;
-
-    public SchoolEndpointsTests(CustomWebApplicationFactory factory) : base(factory)
-    {
-        _factory=factory;
-    }
+    private readonly CustomWebApplicationFactory _factory = factory;
 
     #region Anonymous Access Tests
+
+    private static JsonSerializerOptions JsonSerializerOptions => new()
+    {
+        PropertyNameCaseInsensitive=true,
+        WriteIndented=true
+    };
 
     [Fact]
     public async Task Get_Schools_Returns_Ok_Without_Authentication()
@@ -37,7 +38,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var schools = JsonSerializer.Deserialize<List<SchoolReadDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive=true });
+        var schools = JsonSerializer.Deserialize<List<SchoolReadDto>>(content, JsonSerializerOptions);
 
         Assert.NotNull(schools);
     }
@@ -58,7 +59,8 @@ public class SchoolEndpointsTests : IntegrationTestBase
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync();
-        var school = JsonSerializer.Deserialize<SchoolDetailReadDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive=true });
+        var school = JsonSerializer.Deserialize<SchoolDetailReadDto>(content, JsonSerializerOptions);
+        Assert.NotNull(school);
 
         Assert.Equal(seededSchool.CompanyName, school.CompanyName);
     }
@@ -71,7 +73,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
     public async Task Create_School_Without_Authentication_Returns_Unauthorized()
     {
         // Arrange
-        var testUser = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var testUser = await _authentificationHelper!.CreateTestUserAsync("Owner");
         var createSchoolDto = CreateValidSchool(testUser);
         var json = JsonSerializer.Serialize(createSchoolDto);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -91,10 +93,10 @@ public class SchoolEndpointsTests : IntegrationTestBase
             throw new InvalidOperationException("Authentication helper is not initialized.");
         }
         // Arrange
-        var testUser = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var testUser = await _authentificationHelper!.CreateTestUserAsync("Owner");
         var token = _authentificationHelper.CreateJwtToken(testUser, "Owner");
 
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var createSchoolDto = CreateValidSchool(testUser);
 
@@ -108,7 +110,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        var createdSchool = JsonSerializer.Deserialize<SchoolDetailReadDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive=true });
+        var createdSchool = JsonSerializer.Deserialize<SchoolDetailReadDto>(responseContent, JsonSerializerOptions);
 
         Assert.NotNull(createdSchool);
         Assert.Equal("New School", createdSchool.Name);
@@ -150,16 +152,16 @@ public class SchoolEndpointsTests : IntegrationTestBase
             ImagePath="images/newschool.jpg",
             ImageContentType="image/jpeg",
             Slogan="Learn with us!",
-            PhoneNumberGroups=new List<PhoneNumberGroupDto>
-            {
+            PhoneNumberGroups=
+            [
                 new PhoneNumberGroupDto
                 {
                     Name = "Main",
-                    PhoneNumbers = new List<PhoneNumberDto> { new PhoneNumberDto( "1234567890") }
+                    PhoneNumbers = [new PhoneNumberDto( "1234567890")]
                 }
-            },
-            ExtraLocations=new List<AddressDto>
-            {
+            ],
+            ExtraLocations=
+            [
                 new AddressDto
                 {
                     Street = "456 Extra Location St",
@@ -167,7 +169,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
                     Longitude = "23.591423",
                     AddressType = Domain.Enums.AddressType.LessonStart
                 }
-            },
+            ],
             WebsiteLink=new WebsiteLinkReadDto
             {
                 Url="https://www.newschool.com",
@@ -180,8 +182,8 @@ public class SchoolEndpointsTests : IntegrationTestBase
                     Description="New School Icon",
                 }
             },
-            SocialMediaLinks=new List<SocialMediaLinkDto>
-            {
+            SocialMediaLinks=
+            [
                 new SocialMediaLinkDto
                 {
                     Url="https://www.facebook.com/newschool",
@@ -192,11 +194,11 @@ public class SchoolEndpointsTests : IntegrationTestBase
                     Url="https://www.instagram.com/newschool",
                     SocialPlatformName="Instagram"
                 }
-            },
+            ],
             Team=new TeamDto
             {
-                Instructors=new List<InstructorDto>
-                {
+                Instructors=
+                [
                     new InstructorDto
                     {
                         FirstName="John",
@@ -214,7 +216,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
                         ProfileImageDescription = "John Doe Profile Image",
                         Specialization = "Advanced Driving Techniques"
                     }
-                }
+                ]
             }
         };
     }
@@ -254,7 +256,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         // Arrange
 
         // Create school owner
-        var schoolOwner = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var schoolOwner = await _authentificationHelper!.CreateTestUserAsync("Owner");
         var seededSchool = await _seeder!.SeedSchoolWithExplicitDataAsync(
             new UpdateSchoolCommandDto
             {
@@ -264,10 +266,10 @@ public class SchoolEndpointsTests : IntegrationTestBase
             schoolOwner);
 
         // Create different user trying to update
-        var differentUser = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var differentUser = await _authentificationHelper!.CreateTestUserAsync("Owner");
         var token = _authentificationHelper.CreateJwtToken(differentUser, "Owner");
 
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var updateDto = new UpdateSchoolCommandDto
         {
@@ -289,7 +291,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var schoolOwner = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var schoolOwner = await _authentificationHelper!.CreateTestUserAsync("Owner");
 
         var seededSchool = await _seeder!.SeedSchoolWithExplicitDataAsync(
             new UpdateSchoolCommandDto
@@ -300,7 +302,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
             schoolOwner);
 
         var token = _authentificationHelper.CreateJwtToken(schoolOwner, "Owner");
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var updateDto = new UpdateSchoolCommandDto
         {
@@ -317,7 +319,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseContent = await response.Content.ReadAsStringAsync();
-        var updatedSchool = JsonSerializer.Deserialize<SchoolDetailReadDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive=true });
+        var updatedSchool = JsonSerializer.Deserialize<SchoolDetailReadDto>(responseContent, JsonSerializerOptions);
 
         Assert.NotNull(updatedSchool);
         Assert.Equal("Updated School Name", updatedSchool.Name);
@@ -330,7 +332,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         using var scope = _factory.Services.CreateScope();
 
         // Create a school with regular owner
-        var schoolOwner = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var schoolOwner = await _authentificationHelper!.CreateTestUserAsync("Owner");
         var seededSchool = await _seeder!.SeedSchoolWithExplicitDataAsync(
             new UpdateSchoolCommandDto
             {
@@ -342,7 +344,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         // Create IronMan user (super admin)
         var ironManUser = await _authentificationHelper.CreateTestUserAsync("IronMan");
         var token = _authentificationHelper.CreateJwtToken(ironManUser, "IronMan");
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var updateDto = new UpdateSchoolCommandDto
         {
@@ -385,7 +387,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var schoolOwner = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var schoolOwner = await _authentificationHelper!.CreateTestUserAsync("Owner");
 
         var seededSchool = await _seeder!.SeedSchoolWithExplicitDataAsync(
             new UpdateSchoolCommandDto
@@ -396,7 +398,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
             schoolOwner);
 
         var token = _authentificationHelper.CreateJwtToken(schoolOwner, "Owner");
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         // Act
         var response = await _client.DeleteAsync($"/api/schools/{seededSchool.Id}");
@@ -439,7 +441,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var schoolOwner = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var schoolOwner = await _authentificationHelper!.CreateTestUserAsync("Owner");
 
         var seededSchool = await _seeder!.SeedSchoolWithExplicitDataAsync(
             new UpdateSchoolCommandDto
@@ -450,7 +452,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
             schoolOwner);
 
         var token = _authentificationHelper.CreateJwtToken(schoolOwner, "Owner");
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var approvalDto = new UpdateApprovalStatusCommandDto
         {
@@ -471,7 +473,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
     public async Task Update_Approval_Status_With_IronMan_Returns_Ok()
     {
         // Arrange
-        var ironManUser = await _authentificationHelper.CreateTestUserAsync("IronMan");
+        var ironManUser = await _authentificationHelper!.CreateTestUserAsync("IronMan");
 
         var seededSchool = await _seeder!.SeedSchoolWithExplicitDataAsync(new UpdateSchoolCommandDto
         {
@@ -480,7 +482,7 @@ public class SchoolEndpointsTests : IntegrationTestBase
         });
 
         var token = _authentificationHelper.CreateJwtToken(ironManUser, "IronMan");
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var approvalDto = new UpdateApprovalStatusCommandDto
         {
@@ -515,10 +517,10 @@ public class SchoolEndpointsTests : IntegrationTestBase
     public async Task Update_NonExistent_School_Returns_NotFound()
     {
         // Arrange
-        var testUser = await _authentificationHelper.CreateTestUserAsync("Owner");
+        var testUser = await _authentificationHelper!.CreateTestUserAsync("Owner");
         var token = _authentificationHelper.CreateJwtToken(testUser, "Owner");
 
-        _authentificationHelper.AddAuthorizationHeader(_client, token);
+        AuthenticationHelper.AddAuthorizationHeader(_client, token);
 
         var updateDto = new UpdateSchoolCommandDto
         {
@@ -565,9 +567,9 @@ public class SchoolEndpointsTests : IntegrationTestBase
         var response = await _client.GetAsync("/api/schools");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<List<SchoolReadDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive=true });
+        var result = JsonSerializer.Deserialize<List<SchoolReadDto>>(content, JsonSerializerOptions);
 
-        Assert.NotEmpty(result);
+        Assert.NotNull(result);
         Assert.All(result, school => Assert.NotNull(school.Name));
     }
 

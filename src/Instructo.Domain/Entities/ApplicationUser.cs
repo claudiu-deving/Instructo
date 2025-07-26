@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Entities.SchoolEntities;
+
 using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities;
@@ -16,12 +16,12 @@ public class ApplicationUser : IdentityUser<Guid>
     public bool IsActive { get; set; }
     public virtual School? School { get; set; }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        if (obj == null || GetType() != obj.GetType())
+        if(obj==null||GetType()!=obj.GetType())
             return false;
         var user = (ApplicationUser)obj;
-        return user.Id == Id;
+        return user.Id==Id;
     }
 
     public override int GetHashCode()

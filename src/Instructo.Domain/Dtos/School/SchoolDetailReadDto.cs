@@ -61,23 +61,23 @@ public class SchoolDetailReadDto : ISchoolReadDto
     private SchoolDetailReadDto() { }
 
     public Guid Id { get; init; }
-    public string Name { get; init; }
-    public string CompanyName { get; init; }
-    public string Email { get; init; }
-    public string PhoneNumber { get; init; }
-    public string Slug { get; init; }
-    public string CountyId { get; init; }
-    public string CityName { get; init; }
-    public string Slogan { get; init; }
-    public string Description { get; init; }
-    public IEnumerable<PhoneNumberGroupDto> PhoneNumbersGroups { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string CompanyName { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string PhoneNumber { get; init; } = string.Empty;
+    public string Slug { get; init; } = string.Empty;
+    public string CountyId { get; init; } = string.Empty;
+    public string CityName { get; init; } = string.Empty;
+    public string Slogan { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public IEnumerable<PhoneNumberGroupDto> PhoneNumbersGroups { get; init; } = [];
     public ImageReadDto IconData { get; init; }
-    public WebsiteLinkRead[] Links { get; init; }
-    public BussinessHours BussinessHours { get; init; }
-    public List<VehicleCategoryDto> VehicleCategories { get; init; }
+    public WebsiteLinkRead[] Links { get; init; } = [];
+    public BussinessHours BussinessHours { get; init; } = BussinessHours.Empty;
+    public List<VehicleCategoryDto> VehicleCategories { get; init; } = [];
     public List<ArrCertificationDto>? ArrCertificates { get; init; }
     public SchoolStatisticsDto SchoolStatistics { get; init; }
-    public List<SchoolCategoryPricingDto> CategoryPricings { get; init; }
+    public List<SchoolCategoryPricingDto> CategoryPricings { get; init; } = [];
     public TeamDto Team { get; init; }
-    public List<AddressDto> Locations { get; init; }
+    public List<AddressDto> Locations { get; init; } = [];
 }

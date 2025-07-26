@@ -5,13 +5,14 @@ using Domain.Dtos;
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
-using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Mappers;
 using Domain.Models;
 using Domain.Shared;
 using Domain.ValueObjects;
+
+using Infrastructure.Data.Repositories.Queries;
 
 using Messager;
 
@@ -20,7 +21,7 @@ namespace Application.Schools.Commands.UpdateSchool;
 public class UpdateSchoolCommandHandler(
     ISchoolManagementDirectory schoolManagementDirectory,
     ISocialMediaPlatformImageProvider socialMediaPlatformImageProvider,
-    ICommandRepository<Image, ImageId> imageCommandRepository,
+    IImagesQueryRepository imagesQueryRepository,
     ISender sender) : ICommandHandler<UpdateSchoolCommand, Result<SchoolDetailReadDto>>
 {
     public async Task<Result<SchoolDetailReadDto>> Handle(UpdateSchoolCommand request, CancellationToken cancellationToken)
@@ -68,7 +69,7 @@ public class UpdateSchoolCommandHandler(
         {
             if(instructorDto.Id is null)
             {
-                await CreateAndInsertInstructor(existingTeam, teamMemberErrors, vehicleCategories, instructorDto);
+                CreateAndInsertInstructor(existingTeam, teamMemberErrors, vehicleCategories, instructorDto);
                 continue;
             }
             var existingInstructor = await schoolManagementDirectory.InstructorProfileQueryRepository.GetByIdAsync((Guid)instructorDto.Id);
@@ -82,6 +83,14 @@ public class UpdateSchoolCommandHandler(
                 teamMemberErrors.Add(new Error("Instructor-Not-Found", $"Instructor with id {instructorDto.Id} not found"));
                 continue;
             }
+
+
+            Image? profileImage = null;
+            if(!string.IsNullOrEmpty(instructorDto.ProfileImageUrl))
+            {
+                imagesQueryRepository.GetImageByUrl(instructorDto.ProfileImageUrl).OnSuccess(img => profileImage=img);
+            }
+
             existingInstructor.Value.UpdateProfile(
                 instructorDto.FirstName,
                 instructorDto.LastName,
@@ -91,7 +100,7 @@ public class UpdateSchoolCommandHandler(
                 instructorDto.Description,
                 instructorDto.PhoneNumber,
                 instructorDto.Email,
-                null
+                profileImage
                 );
         }
 
@@ -100,9 +109,25 @@ public class UpdateSchoolCommandHandler(
             : existingSchool;
     }
 
-    private async Task CreateAndInsertInstructor(Team existingTeam, List<Error> teamMemberErrors, Result<IEnumerable<VehicleCategory>> vehicleCategories, InstructorDto instructorDto)
+    private static void CreateAndInsertInstructor(
+        Team existingTeam,
+        List<Error> teamMemberErrors,
+        Result<IEnumerable<VehicleCategory>> vehicleCategories,
+        InstructorDto instructorDto)
     {
-        await UpsertImageIfNeeded(teamMemberErrors, instructorDto);
+        Image? profileImage = null;
+        if(instructorDto.ProfileImageUrl is not null&&
+            instructorDto.ProfileImageName is not null&&
+            instructorDto.ProfileImageContentType is not null
+            )
+        {
+            Image.Create(instructorDto.ProfileImageName,
+                instructorDto.ProfileImageContentType,
+                instructorDto.ProfileImageUrl,
+                instructorDto.ProfileImageDescription)
+                .OnSuccess(img => profileImage=img)
+                .OnError(teamMemberErrors.AddRange);
+        }
 
         var instructorVehicleCategories = GetInstructorVehicleCategories(instructorDto.Categories, vehicleCategories.Value!);
 
@@ -116,13 +141,13 @@ public class UpdateSchoolCommandHandler(
                instructorDto.PhoneNumber,
                instructorDto.Email,
                instructorDto.Gender,
-               null,
+               profileImage,
                instructorVehicleCategories
                );
         existingTeam.AddInstructor(instructor);
     }
 
-    private List<VehicleCategory> GetInstructorVehicleCategories(List<VehicleCategoryDto> categories, IEnumerable<VehicleCategory> vehicleCategories)
+    private static List<VehicleCategory> GetInstructorVehicleCategories(List<VehicleCategoryDto> categories, IEnumerable<VehicleCategory> vehicleCategories)
     {
         var instructorVehicleCategories = new List<VehicleCategory>();
         foreach(var category in categories)
@@ -134,16 +159,6 @@ public class UpdateSchoolCommandHandler(
         return instructorVehicleCategories;
     }
 
-    private async Task UpsertImageIfNeeded(List<Error> teamMemberErrors, InstructorDto instructorDto)
-    {
-        if(instructorDto.ProfileImageContentType is not null
-           &&instructorDto.ProfileImageName is not null
-           &&instructorDto.ProfileImageContentType is not null)
-        {
-            //TODO: Check if image already exists, if so, update it, to be done after the whole image integration service
-
-        }
-    }
 
     private Result<School> UpdateLocations(FlexContext context)
     {
@@ -276,7 +291,7 @@ public class UpdateSchoolCommandHandler(
         {
             return Result<ApplicationUser>.Failure(new Error("Owner-Not-Found", "Owner not found"));
         }
-        if(user.Value.Role.Name==ApplicationRole.IronMan.ToString())
+        if(user.Value.Role?.Name==ApplicationRole.IronMan.ToString())
         {
             return user;
         }
@@ -341,7 +356,7 @@ public class UpdateSchoolCommandHandler(
         {
             var existingCategories = existingSchool.VehicleCategories;
             if(request.VehicleCategories is null||request.VehicleCategories.Count==0)
-                return Result<List<VehicleCategory>>.Success(existingCategories.ToList());
+                return Result<List<VehicleCategory>>.Success([.. existingCategories]);
             var vehiclesCategoryRetrievalErrors = new List<Error>();
             List<VehicleCategory> selectedCategories = [];
             request.VehicleCategories.ForEach(async void (x) =>
@@ -375,7 +390,7 @@ public class UpdateSchoolCommandHandler(
             var selectedCertificates = new List<ArrCertificate>();
             var existingCertificates = existingSchool.Certificates;
             if(request.Certificates is null||request.Certificates.Count==0)
-                return Result<List<ArrCertificate>>.Success(existingCertificates.ToList());
+                return Result<List<ArrCertificate>>.Success([.. existingCertificates]);
             request.Certificates.ForEach(async void (certificateType) =>
             {
                 try

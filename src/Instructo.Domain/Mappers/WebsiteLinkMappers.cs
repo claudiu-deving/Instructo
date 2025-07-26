@@ -1,6 +1,5 @@
-﻿using Domain.Dtos.Image;
+﻿using Domain.Dtos;
 using Domain.Dtos.Link;
-using Domain.Dtos.School;
 using Domain.Entities;
 
 namespace Domain.Mappers;

@@ -24,19 +24,16 @@ using Image = Domain.Entities.Image;
 
 namespace Infrastructure.Data;
 
-public class SchoolSeeder
+public class SchoolSeeder(AppDbContext context, UserManager<ApplicationUser> userManager, ILogger<SchoolSeeder> logger)
 {
-    private readonly AppDbContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ILogger<SchoolSeeder> _logger;
-    private readonly Faker _faker;
-    private readonly GeometryFactory _geometryFactory;
+    private readonly Faker _faker = new Faker("ro");
+    private readonly GeometryFactory _geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(4326);
 
     // Romanian geographical boundaries
-    private const double MIN_LATITUDE = 43.6;
-    private const double MAX_LATITUDE = 48.3;
-    private const double MIN_LONGITUDE = 20.3;
-    private const double MAX_LONGITUDE = 29.7;
+    private const double _minLatitude = 43.6;
+    private const double _maxLatitude = 48.3;
+    private const double _min_longitude = 20.3;
+    private const double _max_Longitude = 29.7;
 
     private readonly string[] _slogans = [
         "Learn to drive with confidence!",
@@ -50,15 +47,8 @@ public class SchoolSeeder
         "Building confident drivers",
         "The road to success starts here"
     ];
-
-    public SchoolSeeder(AppDbContext context, UserManager<ApplicationUser> userManager, ILogger<SchoolSeeder> logger)
-    {
-        _context=context;
-        _userManager=userManager;
-        _logger=logger;
-        _faker=new Faker("ro");
-        _geometryFactory=NtsGeometryServices.Instance.CreateGeometryFactory(4326);
-    }
+    private static readonly string[] _items = ["Car", "Motorcycle", "Truck"];
+    private static readonly string[] _itemsArray = ["female", "male"];
 
     public static SchoolSeeder Create(IServiceProvider serviceProvider)
     {
@@ -78,15 +68,15 @@ public class SchoolSeeder
     {
         try
         {
-            _logger.LogInformation("Starting school seeding process for {count} schools", count);
+            logger.LogInformation("Starting school seeding process for {count} schools", count);
 
             // Ensure we have required reference data
             await EnsureReferenceDataAsync();
 
-            var existingSchoolsCount = await _context.Schools.CountAsync();
+            var existingSchoolsCount = await context.Schools.CountAsync();
             if(existingSchoolsCount>=count&&!includeTestData)
             {
-                _logger.LogInformation("Database already contains {existingCount} schools, skipping seeding", existingSchoolsCount);
+                logger.LogInformation("Database already contains {existingCount} schools, skipping seeding", existingSchoolsCount);
                 return;
             }
 
@@ -94,19 +84,19 @@ public class SchoolSeeder
             var owners = await CreateOwnerUsersAsync(count);
 
             // Get reference data
-            var cities = await _context.Cities.Include(c => c.County).ToListAsync();
-            var vehicleCategories = await _context.Categories.ToListAsync();
-            var certificates = await _context.CertificateTypes.ToListAsync();
+            var cities = await context.Cities.Include(c => c.County).ToListAsync();
+            var vehicleCategories = await context.Categories.ToListAsync();
+            var certificates = await context.CertificateTypes.ToListAsync();
 
             if(cities.Count==0)
             {
-                _logger.LogWarning("No cities found in database. Creating sample cities.");
+                logger.LogWarning("No cities found in database. Creating sample cities.");
                 cities=await CreateSampleCitiesAsync();
             }
 
             if(vehicleCategories.Count==0)
             {
-                _logger.LogWarning("No vehicle categories found in database. This may cause issues.");
+                logger.LogWarning("No vehicle categories found in database. This may cause issues.");
             }
 
             // Create schools
@@ -117,27 +107,27 @@ public class SchoolSeeder
                 {
                     var school = await CreateSchoolAsync(owners[i], cities, vehicleCategories, certificates);
                     schools.Add(school);
-                    _logger.LogDebug("Created school: {schoolName}", school.Name);
+                    logger.LogDebug("Created school: {schoolName}", school.Name);
                 }
                 catch(Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to create school {index}", i+1);
+                    logger.LogError(ex, "Failed to create school {index}", i+1);
                 }
             }
 
 
 
             // Save all schools
-            if(schools.Any())
+            if(schools.Count!=0)
             {
-                _context.Schools.AddRange(schools);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully seeded {count} schools", schools.Count);
+                context.Schools.AddRange(schools);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Successfully seeded {count} schools", schools.Count);
             }
         }
         catch(Exception ex)
         {
-            _logger.LogError(ex, "Failed to seed schools");
+            logger.LogError(ex, "Failed to seed schools");
             throw;
         }
     }
@@ -164,16 +154,16 @@ public class SchoolSeeder
             user.NormalizedEmail=user.Email.ToUpperInvariant();
             user.NormalizedUserName=user.Email.ToUpperInvariant();
 
-            var result = await _userManager.CreateAsync(user, "TempPassword123!");
+            var result = await userManager.CreateAsync(user, "TempPassword123!");
             if(result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, ApplicationRole.User.Name!);
+                await userManager.AddToRoleAsync(user, ApplicationRole.User.Name!);
                 owners.Add(user);
-                _logger.LogDebug("Created owner user: {email}", user.Email);
+                logger.LogDebug("Created owner user: {email}", user.Email);
             }
             else
             {
-                _logger.LogWarning("Failed to create user {email}: {errors}",
+                logger.LogWarning("Failed to create user {email}: {errors}",
                     user.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
@@ -192,7 +182,7 @@ public class SchoolSeeder
         _faker.Locale="ro-RO";
         // Generate school data
         var schoolNameTemplate = _faker.Company.CompanyName();
-        var cityName = _faker.PickRandom(_context.Cities);
+        var cityName = _faker.PickRandom(context.Cities);
         var schoolName = $"{schoolNameTemplate}";
         var companyName = $"{schoolName} SRL";
 
@@ -232,7 +222,7 @@ public class SchoolSeeder
         // Select random certificates (0-2 certificates)
         var selectedCertificates = _faker.PickRandom(certificates, _faker.Random.Int(0, Math.Min(2, certificates.Count))).ToList();
 
-        var manualTransmission = _context.Transmissions.FirstOrDefault(x => x.Id==1);
+        var manualTransmission = context.Transmissions.FirstOrDefault(x => x.Id==1);
         // Create category pricings
         var categoryPricings = selectedCategories.Select(vc => new SchoolCategoryPricing
         {
@@ -246,9 +236,9 @@ public class SchoolSeeder
 
 
         // Create school icon (optional)
-        Image? icon = await CreateRandomImage();
+        Image? icon = CreateRandomImage();
 
-        await _userManager.AddToRoleAsync(owner, ApplicationRole.Owner.Name!);
+        await userManager.AddToRoleAsync(owner, ApplicationRole.Owner.Name!);
 
         // Create the school
         var school = School.Create(
@@ -279,7 +269,7 @@ public class SchoolSeeder
 
         for(int i = 0; i<_faker.Random.Int(1, 3); i++)
         {
-            var randomLink = await CreateRandomSocialMediaLink();
+            var randomLink = CreateRandomSocialMediaLink();
             school.AddLink(randomLink);
         }
         var team = school.CreateTeam(); // Will be updated with actual school ID after creation
@@ -292,13 +282,13 @@ public class SchoolSeeder
                 _faker.Name.LastName(),
                 _faker.Random.Int(1980, 2000),
                 _faker.Random.Int(1, 20),
-                _faker.PickRandom(new[] { "Car", "Motorcycle", "Truck" }),
+                _faker.PickRandom(_items),
                 _faker.Lorem.Sentence(10),
                 _faker.Phone.PhoneNumber(),
                 _faker.Internet.Email(),
-                _faker.PickRandom(new string[] { "female", "male" }),
-              await CreateRandomImage(),
-                _faker.PickRandom(vehicleCategories, _faker.Random.Int(1, 3)).ToList()
+                _faker.PickRandom(_itemsArray),
+              CreateRandomImage(),
+                [.. _faker.PickRandom(vehicleCategories, _faker.Random.Int(1, 3))]
                 );
             team.AddInstructor(instructor);
         }
@@ -306,17 +296,18 @@ public class SchoolSeeder
         return school;
     }
 
-    private async Task<WebsiteLink> CreateRandomSocialMediaLink()
+    private WebsiteLink CreateRandomSocialMediaLink()
     {
         var socialMediaPlatforms = new[] { "Facebook", "Instagram", "Twitter", "LinkedIn", "YouTube" };
         var platform = _faker.PickRandom(socialMediaPlatforms);
         var description = _faker.Lorem.Sentence(5);
         var url = _faker.Internet.UrlWithPath();
-        var image = await CreateRandomImage();
-        return WebsiteLink.Create(platform, url, description, image).ValueOrThrow();
+        var image = CreateRandomImage();
+
+        return WebsiteLink.Create(platform, url, description, image!).ValueOrThrow();
     }
 
-    private BussinessHours CreateBusinessHours()
+    private static BussinessHours CreateBusinessHours()
     {
         var entries = new List<BusinessHoursEntryDto>
         {
@@ -344,22 +335,22 @@ public class SchoolSeeder
         var streetNumber = _faker.Random.Int(1, 200);
         var street = $"{streetName} {streetNumber}";
 
-        var latitude = _faker.Random.Double(MIN_LATITUDE, MAX_LATITUDE);
-        var longitude = _faker.Random.Double(MIN_LONGITUDE, MAX_LONGITUDE);
+        var latitude = _faker.Random.Double(_minLatitude, _maxLatitude);
+        var longitude = _faker.Random.Double(_min_longitude, _max_Longitude);
 
         return Address.Create(street, latitude.ToString("F6"), longitude.ToString("F6"), addressType).Value!;
     }
 
 
 
-    private async Task<Image?> CreateRandomImage()
+    private Image? CreateRandomImage()
     {
         var result = Image.Create(_faker.Image.PicsumUrl(width: 200, height: 200, false),
              "image/jpeg",
              _faker.Internet.UrlWithPath(),
              "School icon image")
-             .OnSuccess(image => _context.Images.Add(image))
-             .OnError(errors => _logger.LogWarning("Failed to create school icon: {errors}", string.Join(", ", errors.Select(e => e.Message))));
+             .OnSuccess(image => context.Images.Add(image))
+             .OnError(errors => logger.LogWarning("Failed to create school icon: {errors}", string.Join(", ", errors.Select(e => e.Message))));
 
 
         return result.Value!;
@@ -375,7 +366,7 @@ public class SchoolSeeder
             new County { Id = 3, Name = "Timis", Code = "TM" }
         };
 
-        _context.Counties.AddRange(counties);
+        context.Counties.AddRange(counties);
 
         // Create sample cities
         var cities = new List<City>
@@ -385,8 +376,8 @@ public class SchoolSeeder
             new City { Id = 3, Name = "Timișoara", County = counties[2] }
         };
 
-        _context.Cities.AddRange(cities);
-        await _context.SaveChangesAsync();
+        context.Cities.AddRange(cities);
+        await context.SaveChangesAsync();
 
         return cities;
     }
@@ -394,17 +385,17 @@ public class SchoolSeeder
     private async Task EnsureReferenceDataAsync()
     {
         // Check if we have required reference data, if not log warnings
-        var citiesCount = await _context.Cities.CountAsync();
-        var vehicleCategoriesCount = await _context.Categories.CountAsync();
+        var citiesCount = await context.Cities.CountAsync();
+        var vehicleCategoriesCount = await context.Categories.CountAsync();
 
         if(citiesCount==0)
         {
-            _logger.LogWarning("No cities found in database. Sample cities will be created.");
+            logger.LogWarning("No cities found in database. Sample cities will be created.");
         }
 
         if(vehicleCategoriesCount==0)
         {
-            _logger.LogWarning("No vehicle categories found in database. Schools will be created without categories.");
+            logger.LogWarning("No vehicle categories found in database. Schools will be created without categories.");
         }
     }
 
@@ -413,52 +404,52 @@ public class SchoolSeeder
     {
         try
         {
-            _logger.LogInformation("Creating school with explicit data");
+            logger.LogInformation("Creating school with explicit data");
 
             // Create owner if not provided
             if(owner==null)
             {
                 // Create a new unique user for each test to avoid conflicts
                 var uniqueEmail = $"test-user-{Guid.NewGuid():N}@test.com";
-                owner = new ApplicationUser
+                owner=new ApplicationUser
                 {
-                    Id = Guid.NewGuid(),
-                    FirstName = _faker.Name.FirstName(),
-                    LastName = _faker.Name.LastName(),
-                    Email = uniqueEmail,
-                    UserName = uniqueEmail,
-                    NormalizedEmail = uniqueEmail.ToUpperInvariant(),
-                    NormalizedUserName = uniqueEmail.ToUpperInvariant(),
-                    EmailConfirmed = true,
-                    IsActive = true,
-                    Created = _faker.Date.PastOffset(2).DateTime,
-                    PhoneNumber = _faker.Phone.PhoneNumber()
+                    Id=Guid.NewGuid(),
+                    FirstName=_faker.Name.FirstName(),
+                    LastName=_faker.Name.LastName(),
+                    Email=uniqueEmail,
+                    UserName=uniqueEmail,
+                    NormalizedEmail=uniqueEmail.ToUpperInvariant(),
+                    NormalizedUserName=uniqueEmail.ToUpperInvariant(),
+                    EmailConfirmed=true,
+                    IsActive=true,
+                    Created=_faker.Date.PastOffset(2).DateTime,
+                    PhoneNumber=_faker.Phone.PhoneNumber()
                 };
 
-                var result = await _userManager.CreateAsync(owner, "TempPassword123!");
-                if (!result.Succeeded)
+                var result = await userManager.CreateAsync(owner, "TempPassword123!");
+                if(!result.Succeeded)
                 {
                     throw new InvalidOperationException($"Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
-                
-                await _userManager.AddToRoleAsync(owner, ApplicationRole.User.Name!);
-                _logger.LogDebug("Created new test user: {email}", owner.Email);
+
+                await userManager.AddToRoleAsync(owner, ApplicationRole.User.Name!);
+                logger.LogDebug("Created new test user: {email}", owner.Email);
             }
 
             // Get reference data
-            var cities = await _context.Cities.Include(c => c.County).ToListAsync();
-            var vehicleCategories = await _context.Categories.ToListAsync();
-            var certificates = await _context.CertificateTypes.ToListAsync();
+            var cities = await context.Cities.Include(c => c.County).ToListAsync();
+            var vehicleCategories = await context.Categories.ToListAsync();
+            var certificates = await context.CertificateTypes.ToListAsync();
 
             // Ensure we have at least some reference data for tests
-            if (cities.Count == 0)
+            if(cities.Count==0)
             {
-                cities = await CreateSampleCitiesAsync();
+                cities=await CreateSampleCitiesAsync();
             }
 
-            if (vehicleCategories.Count == 0)
+            if(vehicleCategories.Count==0)
             {
-                _logger.LogWarning("No vehicle categories found in database. This may cause issues.");
+                logger.LogWarning("No vehicle categories found in database. This may cause issues.");
                 // You might want to seed some basic vehicle categories here for tests
             }
 
@@ -515,8 +506,8 @@ public class SchoolSeeder
                 explicitData.MainLocationLongitude!=null)
             {
                 var street = explicitData.MainLocationStreet??_faker.Address.StreetAddress();
-                var lat = explicitData.MainLocationLatitude??_faker.Random.Double(MIN_LATITUDE, MAX_LATITUDE).ToString("F6");
-                var lng = explicitData.MainLocationLongitude??_faker.Random.Double(MIN_LONGITUDE, MAX_LONGITUDE).ToString("F6");
+                var lat = explicitData.MainLocationLatitude??_faker.Random.Double(_minLatitude, _maxLatitude).ToString("F6");
+                var lng = explicitData.MainLocationLongitude??_faker.Random.Double(_min_longitude, _max_Longitude).ToString("F6");
 
                 var mainLocation = Address.Create(street, lat, lng, AddressType.MainLocation).ValueOrThrow();
                 baseSchool.UpdateMainLocation(mainLocation);
@@ -539,7 +530,7 @@ public class SchoolSeeder
                     FullPrice=cp.FullPrice,
                     Installments=cp.Installments,
                     InstallmentPrice=cp.InstallmentPrice,
-                    Transmission=_context.Transmissions.FirstOrDefault(t => t.Name==cp.Transmission)
+                    Transmission=context.Transmissions.FirstOrDefault(t => t.Name==cp.Transmission)
                 }).ToList();
 
                 baseSchool.SetCategoryPricings(pricings);
@@ -551,15 +542,15 @@ public class SchoolSeeder
             }
 
             // Save the school
-            _context.Schools.Add(baseSchool);
-            await _context.SaveChangesAsync();
+            context.Schools.Add(baseSchool);
+            await context.SaveChangesAsync();
 
-            _logger.LogInformation("Successfully created school with explicit data: {schoolName}", baseSchool.Name);
+            logger.LogInformation("Successfully created school with explicit data: {schoolName}", baseSchool.Name);
             return baseSchool;
         }
         catch(Exception ex)
         {
-            _logger.LogError(ex, "Failed to create school with explicit data");
+            logger.LogError(ex, "Failed to create school with explicit data");
             throw;
         }
     }

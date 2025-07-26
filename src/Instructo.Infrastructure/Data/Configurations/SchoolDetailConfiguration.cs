@@ -28,28 +28,36 @@ internal class SchoolDetailConfiguration : IEntityTypeConfiguration<SchoolDetail
         builder.Property(x => x.ArrCertificates).HasConversion(x => JsonConvert.SerializeObject(x),
             x => JsonConvert.DeserializeObject<List<ArrCertificationDto>>(x)??new List<ArrCertificationDto>())
                             .Metadata.SetValueComparer(new ValueComparer<List<ArrCertificationDto>>(
-                            (c1, c2) => c1.SequenceEqual(c2),
+                             (c1, c2) => c1==null&&c2==null ? true :
+                                        c1==null||c2==null ? false :
+                                        c1.SequenceEqual(c2),
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 
         builder.Property(x => x.VehicleCategories).HasConversion(x => JsonConvert.SerializeObject(x),
             x => JsonConvert.DeserializeObject<List<VehicleCategoryDto>>(x)??new List<VehicleCategoryDto>())
                             .Metadata.SetValueComparer(new ValueComparer<List<VehicleCategoryDto>>(
-                            (c1, c2) => c1.SequenceEqual(c2),
+                              (c1, c2) => c1==null&&c2==null ? true :
+                                            c1==null||c2==null ? false :
+                                            c1.SequenceEqual(c2),
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 
         builder.Property(x => x.PhoneNumbersGroups).HasConversion(x => JsonConvert.SerializeObject(x),
             x => JsonConvert.DeserializeObject<IEnumerable<PhoneNumberGroupDto>>(x)??new List<PhoneNumberGroupDto>())
                             .Metadata.SetValueComparer(new ValueComparer<IEnumerable<PhoneNumberGroupDto>>(
-                            (c1, c2) => c1.SequenceEqual(c2),
+                            (c1, c2) => c1==null&&c2==null ? true :
+                                        c1==null||c2==null ? false :
+                                        c1.SequenceEqual(c2),
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 
         builder.Property(x => x.Links).HasConversion(x => JsonConvert.SerializeObject(x),
             x => JsonConvert.DeserializeObject<WebsiteLinkRead[]>(x))
                             .Metadata.SetValueComparer(new ValueComparer<WebsiteLinkRead[]>(
-                            (c1, c2) => c1.SequenceEqual(c2),
+                            (c1, c2) => c1==null&&c2==null ? true :
+                                        c1==null||c2==null ? false :
+                                        c1.SequenceEqual(c2),
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToArray()));
 
@@ -62,14 +70,18 @@ internal class SchoolDetailConfiguration : IEntityTypeConfiguration<SchoolDetail
         builder.Property(x => x.Locations).HasConversion(x => JsonConvert.SerializeObject(x),
             x => JsonConvert.DeserializeObject<List<AddressDto>>(x)??new List<AddressDto>())
                             .Metadata.SetValueComparer(new ValueComparer<List<AddressDto>>(
-                            (c1, c2) => c1.SequenceEqual(c2),
+                              (c1, c2) => c1==null&&c2==null ? true :
+                                        c1==null||c2==null ? false :
+                                        c1.SequenceEqual(c2),
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 
         builder.Property(x => x.CategoryPricings).HasConversion(x => JsonConvert.SerializeObject(x),
             x => JsonConvert.DeserializeObject<List<SchoolCategoryPricingDto>>(x)??new List<SchoolCategoryPricingDto>())
                             .Metadata.SetValueComparer(new ValueComparer<List<SchoolCategoryPricingDto>>(
-                            (c1, c2) => c1.SequenceEqual(c2),
+                            (c1, c2) => c1==null&&c2==null ? true :
+                                        c1==null||c2==null ? false :
+                                        c1.SequenceEqual(c2),
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 

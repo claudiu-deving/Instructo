@@ -9,25 +9,18 @@ using Messager;
 
 namespace Application.Behaviors;
 
-public class ValidationPipelineBehavior<TRequest, TResponse> :
+public class ValidationPipelineBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) :
     IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     where TResponse : class
 {
-    private readonly IEnumerable<IValidator<TRequest>> _validators;
-
-    public ValidationPipelineBehavior(IEnumerable<IValidator<TRequest>> validators)
-    {
-        _validators=validators;
-    }
-
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if(!_validators.Any())
-            return await next();
+        if(!validators.Any())
+            return await next(cancellationToken);
         var requestName = typeof(TRequest).Name;
 
-        var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(request, cancellationToken)));
+        var validationResults = await Task.WhenAll(validators.Select(v => v.ValidateAsync(request, cancellationToken)));
         var errors = validationResults
             .SelectMany(result => result.Errors)
             .Where(error => error!=null)
@@ -39,7 +32,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
             return CreateValidationResult<TResponse>(errors);
         else
         {
-            return await next();
+            return await next(cancellationToken);
         }
     }
 
@@ -57,7 +50,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse> :
                 BindingFlags.Public|BindingFlags.Static);
 
             if(method!=null)
-                return (TResult)method.Invoke(null, new object[] { errors });
+                return (TResult)method.Invoke(null, [errors])!;
         }
 
         throw new InvalidOperationException($"Type {typeof(TResult).Name} does not support validation errors");

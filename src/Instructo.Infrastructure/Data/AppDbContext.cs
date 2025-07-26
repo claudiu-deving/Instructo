@@ -7,7 +7,6 @@ using Domain.Dtos.Link;
 using Domain.Dtos.PhoneNumbers;
 using Domain.Dtos.School;
 using Domain.Entities;
-using Domain.Entities.SchoolEntities;
 using Domain.ValueObjects;
 
 using Infrastructure.Data.Configurations;

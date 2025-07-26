@@ -50,8 +50,25 @@ public class VehicleCategoryQueriesRepository(AppDbContext dbContext)
         }
     }
 
-    public Task<Result<VehicleCategory>?> GetByIndexed(string companyName)
+    public async Task<Result<VehicleCategory?>> GetByIndexed(string vehicleCategoryName)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var category = await dbContext.Categories
+                .FirstOrDefaultAsync(c => c.Name==vehicleCategoryName);
+            return Result<VehicleCategory?>.Success(category);
+        }
+        catch(InvalidOperationException ex)
+        {
+            return Result<VehicleCategory?>.Failure(new Error("GetVehicleCategoryByIndexed-Empty", ex.Message));
+        }
+        catch(OperationAbortedException ex)
+        {
+            return Result<VehicleCategory?>.Failure(new Error("GetVehicleCategoryByIndexed-Aborted", ex.Message));
+        }
+        catch(DbException ex)
+        {
+            return Result<VehicleCategory?>.Failure(new Error("GetVehicleCategoryByIndexed-Db", ex.Message));
+        }
     }
 }

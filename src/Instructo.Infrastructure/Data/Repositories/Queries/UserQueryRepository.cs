@@ -21,9 +21,13 @@ public class UserQueryRepository(AppDbContext dbContext) : IUserQueriesRepositor
     public async Task<ApplicationUser?> GetUserByIdAsync(Guid userId)
     {
         var userRoles = await dbContext.UserRoles.FirstOrDefaultAsync(x => x.UserId==userId);
+        if(userRoles==null)
+            return null;
         var role = await dbContext.Roles.FirstOrDefaultAsync(x => x.Id==userRoles.RoleId);
 
         var user = await dbContext.Users.Include(x => x.School).FirstOrDefaultAsync(user => userId==user.Id);
+        if(user==null)
+            return null;
         user.Role=role;
         return user;
     }

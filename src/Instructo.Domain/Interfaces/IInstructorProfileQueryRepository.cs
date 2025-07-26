@@ -1,5 +1,5 @@
 ﻿
-using Domain.Entities.SchoolEntities;
+using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Shared;
 

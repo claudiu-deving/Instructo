@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
 using Domain.Common;
-using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 using Domain.Shared;
 using Domain.ValueObjects;

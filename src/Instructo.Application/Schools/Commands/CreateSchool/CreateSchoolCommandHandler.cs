@@ -6,7 +6,6 @@ using Application.Users.Queries.GetUserByEmail;
 using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities;
-using Domain.Entities.SchoolEntities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Mappers;
@@ -89,7 +88,7 @@ public class CreateSchoolCommandHandler(
             {
                 var image = Image.Create(
                     $"{instructor.FirstName}-{instructor.LastName}-Profile-Image",
-                    instructor.ProfileImageContentType,
+                    instructor.ProfileImageContentType??"",
                     instructor.ProfileImageUrl,
                     "Instructor Profile Image").Value!;
 
@@ -101,7 +100,7 @@ public class CreateSchoolCommandHandler(
                     instructor.LastName,
                     instructor.Age,
                     instructor.YearsExperience,
-                    instructor.Specialization,
+                    instructor.Specialization??"",
                     instructor.Description,
                     instructor.PhoneNumber,
                     instructor.Email,

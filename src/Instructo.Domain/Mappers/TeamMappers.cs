@@ -1,5 +1,5 @@
-using Domain.Dtos.School;
-using Domain.Entities.SchoolEntities;
+using Domain.Dtos;
+using Domain.Entities;
 
 namespace Domain.Mappers;
 

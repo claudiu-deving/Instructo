@@ -56,13 +56,13 @@ public static class ObjectGraphBuilder
         builder.Services.AddScoped<IQueryRepository<ArrCertificate, int>, ArrCertificateQueriesRepository>();
         builder.Services.AddScoped<IQueryRepository<City, int>, CityQueryRepository>();
         builder.Services.AddScoped<ISchoolCommandRepository, SchoolCommandRepository>();
-        builder.Services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
         builder.Services.AddScoped<ISchoolManagementDirectory, SchoolManagementDirectory>();
         builder.Services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
         builder.Services.AddScoped<ISchoolCategoryPricingQueryRepository, SchoolCategoryPricingQueryRepository>();
         builder.Services.AddScoped<IQueryRepository<Transmission, int>, TransmissionQueryRepository>();
         builder.Services.AddScoped<IQueryRepository<Address, int>, AddressQueryRepository>();
         builder.Services.AddScoped<IInstructorProfileQueryRepository, InstructorProfileQueryRepository>();
+        builder.Services.AddScoped<IImagesQueryRepository, ImagesQueryRepository>();
     }
 
 }

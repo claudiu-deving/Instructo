@@ -67,12 +67,11 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
         services.AddScoped(sp => new Mock<ILogger<DeleteSchoolCommandHandler>>().Object);
         services.AddScoped(sp => new Mock<ILogger<RoleManager<ApplicationRole>>>().Object);
         services.AddScoped(sp => new Mock<ILogger<SchoolQueriesRepository>>().Object);
-        services.AddScoped(sp => new Mock<ILogger<ImageCommandRepository>>().Object);
 
 
 
 
-
+        services.AddScoped<IImagesQueryRepository, ImagesQueryRepository>();
         services.AddScoped<ISchoolQueriesRepository, SchoolQueriesRepository>();
         services.AddScoped<IQueryRepository<VehicleCategory, int>, VehicleCategoryQueriesRepository>();
         services.AddScoped<IQueryRepository<ArrCertificate, int>, ArrCertificateQueriesRepository>();
@@ -104,7 +103,6 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
         services.AddScoped<ISchoolCommandRepository, SchoolCommandRepository>();
         services.AddScoped(sp => new Mock<ILogger<SchoolCommandRepository>>().Object);
 
-        services.AddScoped<ICommandRepository<Image, ImageId>, ImageCommandRepository>();
         services.AddScoped<ISchoolManagementDirectory, SchoolManagementDirectory>();
         services.AddSingleton<ISocialMediaPlatformImageProvider, SocialMediaPlatformImageProvider>();
         services.AddTransient<IUserQueriesRepository, UserQueryRepository>();

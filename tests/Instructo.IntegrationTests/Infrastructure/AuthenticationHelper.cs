@@ -45,15 +45,11 @@ public class AuthenticationHelper(IServiceProvider serviceProvider)
         return tokenHandler.WriteToken(token);
     }
 
-    public void AddAuthorizationHeader(HttpClient client, string token)
+    public static void AddAuthorizationHeader(HttpClient client, string token)
     {
         client.DefaultRequestHeaders.Authorization=new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
     }
 
-    public void RemoveAuthorizationHeader(HttpClient client)
-    {
-        client.DefaultRequestHeaders.Authorization=null;
-    }
 
     public async Task<ApplicationUser> CreateTestUserAsync(string role = "User")
     {
@@ -80,15 +76,10 @@ public class AuthenticationHelper(IServiceProvider serviceProvider)
             UserName=$"test-{Guid.NewGuid():N}@example.com",
             EmailConfirmed=true,
             IsActive=true
-        };
+        }??throw new InvalidOperationException("Failed to create test user: user is null");
 
-        if(user is null)
-        {
-            throw new InvalidOperationException("Failed to create test user: user is null");
-        }
-
-        user.NormalizedEmail=user.Email.ToUpperInvariant();
-        user.NormalizedUserName=user.UserName.ToUpperInvariant();
+        user.NormalizedEmail=user.Email?.ToUpperInvariant();
+        user.NormalizedUserName=user.UserName?.ToUpperInvariant();
 
         var result = await userManager.CreateAsync(user, "Password123!");
         if(!result.Succeeded)

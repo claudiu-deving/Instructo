@@ -5,18 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Messager;
 
-public sealed class Mediator : IMediator
+public sealed class Mediator(IServiceProvider serviceProvider) : IMediator
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ConcurrentDictionary<Type, Type> _requestHandlerTypes;
-    private readonly ConcurrentDictionary<Type, Type[]> _notificationHandlerTypes;
-
-    public Mediator(IServiceProvider serviceProvider)
-    {
-        _serviceProvider=serviceProvider;
-        _requestHandlerTypes=new ConcurrentDictionary<Type, Type>();
-        _notificationHandlerTypes=new ConcurrentDictionary<Type, Type[]>();
-    }
+    private readonly ConcurrentDictionary<Type, Type> _requestHandlerTypes = new ConcurrentDictionary<Type, Type>();
+    private readonly ConcurrentDictionary<Type, Type[]> _notificationHandlerTypes = new ConcurrentDictionary<Type, Type[]>();
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
@@ -25,11 +17,8 @@ public sealed class Mediator : IMediator
         var requestType = request.GetType();
         var responseType = typeof(TResponse);
 
-        var handler = GetRequestHandler(requestType, responseType);
-        if(handler==null)
-        {
-            throw new InvalidOperationException($"No handler found for request type {requestType.Name}");
-        }
+        var handler = GetRequestHandler(requestType, responseType)
+            ??throw new InvalidOperationException($"No handler found for request type {requestType.Name}");
 
         var behaviors = GetPipelineBehaviors<TResponse>(requestType, responseType);
 
@@ -41,7 +30,7 @@ public sealed class Mediator : IMediator
         return await ExecuteHandler<TResponse>(request, handler, cancellationToken);
     }
 
-    private async Task<TResponse> ExecuteWithPipeline<TResponse>(object request, object handler, IEnumerable<object> behaviors, CancellationToken cancellationToken)
+    private static async Task<TResponse> ExecuteWithPipeline<TResponse>(object request, object handler, IEnumerable<object?> behaviors, CancellationToken cancellationToken)
     {
         var behaviorList = behaviors.ToList();
 
@@ -51,22 +40,18 @@ public sealed class Mediator : IMediator
         {
             var behavior = behaviorList[i];
             var currentDelegate = handlerDelegate;
-
-            handlerDelegate=(ct) => ExecuteBehavior<TResponse>(behavior, request, currentDelegate, ct);
+            if(behavior is null)
+                continue;
+            handlerDelegate=(ct) => ExecuteBehavior(behavior, request, currentDelegate, ct);
         }
 
         return await handlerDelegate(cancellationToken);
     }
 
-    private async Task<TResponse> ExecuteBehavior<TResponse>(object behavior, object request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    private static async Task<TResponse> ExecuteBehavior<TResponse>(object behavior, object request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var behaviorType = behavior.GetType();
-        var handleMethod = behaviorType.GetMethod("Handle");
-
-        if(handleMethod==null)
-        {
-            throw new InvalidOperationException($"Handle method not found on behavior {behaviorType.Name}");
-        }
+        var handleMethod = behaviorType.GetMethod("Handle")??throw new InvalidOperationException($"Handle method not found on behavior {behaviorType.Name}");
 
         var result = handleMethod.Invoke(behavior, [request, next, cancellationToken]);
 
@@ -84,15 +69,10 @@ public sealed class Mediator : IMediator
         return (TResponse)result!;
     }
 
-    private async Task<TResponse> ExecuteHandler<TResponse>(object request, object handler, CancellationToken cancellationToken)
+    private static async Task<TResponse> ExecuteHandler<TResponse>(object request, object handler, CancellationToken cancellationToken)
     {
         var handlerType = handler.GetType();
-        var handleMethod = handlerType.GetMethod("Handle");
-
-        if(handleMethod==null)
-        {
-            throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
-        }
+        var handleMethod = handlerType.GetMethod("Handle")??throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
 
         var result = handleMethod.Invoke(handler, [request, cancellationToken]);
 
@@ -117,11 +97,7 @@ public sealed class Mediator : IMediator
         var requestType = request.GetType();
         var responseType = typeof(Unit);
 
-        var handler = GetRequestHandler(requestType, responseType);
-        if(handler==null)
-        {
-            throw new InvalidOperationException($"No handler found for request type {requestType.Name}");
-        }
+        var handler = GetRequestHandler(requestType, responseType)??throw new InvalidOperationException($"No handler found for request type {requestType.Name}");
 
         var behaviors = GetPipelineBehaviors<Unit>(requestType, responseType);
 
@@ -156,21 +132,17 @@ public sealed class Mediator : IMediator
         var requestInterface = requestInterfaces.First();
         var responseType = requestInterface.GetGenericArguments()[0];
 
-        var handler = GetRequestHandler(requestType, responseType);
-        if(handler==null)
-        {
-            throw new InvalidOperationException($"No handler found for request type {requestType.Name}");
-        }
+        var handler = GetRequestHandler(requestType, responseType)??throw new InvalidOperationException($"No handler found for request type {requestType.Name}");
 
         var behaviors = GetPipelineBehaviors<object>(requestType, responseType);
 
-        if(behaviors.Any())
+        if(behaviors is not null&&behaviors.Any())
         {
-            var result = await ExecuteWithPipelineObject(request, handler, behaviors, responseType, cancellationToken);
+            var result = await ExecuteWithPipelineObject(request, behaviors, responseType, cancellationToken);
             return result;
         }
 
-        return await ExecuteHandlerObject(request, handler, responseType, cancellationToken);
+        return await ExecuteHandlerObject(request, handler, cancellationToken);
     }
 
     public async Task Publish(object notification, CancellationToken cancellationToken = default)
@@ -180,15 +152,10 @@ public sealed class Mediator : IMediator
         var notificationType = notification.GetType();
         var handlers = GetNotificationHandlers(notificationType);
 
-        var tasks = handlers.Select(handler =>
+        var tasks = handlers.Where(h => h is not null).Select(handler =>
         {
-            var handlerType = handler.GetType();
-            var handleMethod = handlerType.GetMethod("Handle");
-
-            if(handleMethod==null)
-            {
-                throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
-            }
+            var handlerType = handler!.GetType();
+            var handleMethod = handlerType.GetMethod("Handle")??throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
 
             var result = handleMethod.Invoke(handler, [notification, cancellationToken]);
 
@@ -211,15 +178,10 @@ public sealed class Mediator : IMediator
         var notificationType = typeof(TNotification);
         var handlers = GetNotificationHandlers(notificationType);
 
-        var tasks = handlers.Select(handler =>
+        var tasks = handlers.Where(h => h is not null).Select(handler =>
         {
-            var handlerType = handler.GetType();
-            var handleMethod = handlerType.GetMethod("Handle");
-
-            if(handleMethod==null)
-            {
-                throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
-            }
+            var handlerType = handler!.GetType();
+            var handleMethod = handlerType.GetMethod("Handle")??throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
 
             var result = handleMethod.Invoke(handler, [notification, cancellationToken]);
 
@@ -241,17 +203,17 @@ public sealed class Mediator : IMediator
         // Check if we have cached the handler type for this request type
         if(_requestHandlerTypes.TryGetValue(key, out var cachedHandlerType))
         {
-            return _serviceProvider.GetService(cachedHandlerType);
+            return serviceProvider.GetService(cachedHandlerType);
         }
 
         var handlerType = typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType);
-        var handler = _serviceProvider.GetService(handlerType);
+        var handler = serviceProvider.GetService(handlerType);
 
         if(handler==null&&responseType==typeof(Unit))
         {
             // Try void handler
             handlerType=typeof(IRequestHandler<>).MakeGenericType(requestType);
-            handler=_serviceProvider.GetService(handlerType);
+            handler=serviceProvider.GetService(handlerType);
         }
 
         if(handler!=null)
@@ -263,53 +225,56 @@ public sealed class Mediator : IMediator
         return handler;
     }
 
-    private IEnumerable<object> GetNotificationHandlers(Type notificationType)
+    private IEnumerable<object?> GetNotificationHandlers(Type notificationType)
     {
         var key = notificationType;
 
         // Check if we have cached the handler types for this notification type
         if(_notificationHandlerTypes.TryGetValue(key, out var cachedHandlerTypes))
         {
-            return cachedHandlerTypes.Select(handlerType => _serviceProvider.GetService(handlerType))
+            return cachedHandlerTypes.Select(handlerType => serviceProvider.GetService(handlerType))
                                     .Where(handler => handler!=null)
                                     .Cast<object>();
         }
 
         var handlerType = typeof(INotificationHandler<>).MakeGenericType(notificationType);
-        var handlers = _serviceProvider.GetServices(handlerType);
+        var handlers = serviceProvider.GetServices(handlerType);
 
         var handlerList = handlers.ToList();
-        if(handlerList.Any())
+        if(handlerList.Count!=0)
         {
             // Cache the handler types
-            var handlerTypeArray = handlerList.Select(h => h.GetType()).ToArray();
+            var handlerTypeArray = handlerList.Where(h => h is not null).Select(h => h!.GetType()).ToArray();
             _notificationHandlerTypes.TryAdd(key, handlerTypeArray);
         }
 
         return handlerList;
     }
 
-    private IEnumerable<object> GetPipelineBehaviors<TResponse>(Type requestType, Type responseType)
+    private IEnumerable<object?> GetPipelineBehaviors<TResponse>(Type requestType, Type responseType)
     {
         var behaviorType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, responseType);
-        var behaviors = _serviceProvider.GetServices(behaviorType);
-        return behaviors;
+        var behaviors = serviceProvider.GetServices(behaviorType);
+        return behaviors?? [];
     }
 
-    private async Task<object?> ExecuteWithPipelineObject(object request, object handler, IEnumerable<object> behaviors, Type responseType, CancellationToken cancellationToken)
+    private async Task<object?> ExecuteWithPipelineObject(object request, IEnumerable<object?> behaviors, Type responseType, CancellationToken cancellationToken)
     {
         var behaviorList = behaviors.ToList();
 
+
         // Use reflection to create the proper delegate type
-        var delegateType = typeof(RequestHandlerDelegate<>).MakeGenericType(responseType);
-        var handlerDelegate = CreateHandlerDelegate(request, handler, responseType, cancellationToken);
+        _=typeof(RequestHandlerDelegate<>).MakeGenericType(responseType);
+        var handlerDelegate = CreateHandlerDelegate(responseType);
 
         for(int i = behaviorList.Count-1; i>=0; i--)
         {
             var behavior = behaviorList[i];
             var currentDelegate = handlerDelegate;
+            if(behavior is null)
+                continue;
 
-            handlerDelegate=CreateBehaviorDelegate(behavior, request, currentDelegate, responseType, cancellationToken);
+            handlerDelegate=CreateBehaviorDelegate(behavior, request, currentDelegate, responseType);
         }
 
         var result = handlerDelegate.DynamicInvoke(cancellationToken);
@@ -330,15 +295,10 @@ public sealed class Mediator : IMediator
         return result;
     }
 
-    private async Task<object?> ExecuteHandlerObject(object request, object handler, Type responseType, CancellationToken cancellationToken)
+    private static async Task<object?> ExecuteHandlerObject(object request, object handler, CancellationToken cancellationToken)
     {
         var handlerType = handler.GetType();
-        var handleMethod = handlerType.GetMethod("Handle");
-
-        if(handleMethod==null)
-        {
-            throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
-        }
+        var handleMethod = handlerType.GetMethod("Handle")??throw new InvalidOperationException($"Handle method not found on handler {handlerType.Name}");
 
         var result = handleMethod.Invoke(handler, [request, cancellationToken]);
 
@@ -358,24 +318,19 @@ public sealed class Mediator : IMediator
         return result;
     }
 
-    private Delegate CreateHandlerDelegate(object request, object handler, Type responseType, CancellationToken cancellationToken)
+    private Delegate CreateHandlerDelegate(Type responseType)
     {
         var delegateType = typeof(RequestHandlerDelegate<>).MakeGenericType(responseType);
         var method = typeof(Mediator).GetMethod(nameof(ExecuteHandlerObject), BindingFlags.NonPublic|BindingFlags.Instance);
 
-        return Delegate.CreateDelegate(delegateType, this, method);
+        return Delegate.CreateDelegate(delegateType, this, method!);
     }
 
-    private Delegate CreateBehaviorDelegate(object behavior, object request, Delegate next, Type responseType, CancellationToken cancellationToken)
+    private static Delegate CreateBehaviorDelegate(object behavior, object request, Delegate next, Type responseType)
     {
         var delegateType = typeof(RequestHandlerDelegate<>).MakeGenericType(responseType);
         var behaviorType = behavior.GetType();
-        var handleMethod = behaviorType.GetMethod("Handle");
-
-        if(handleMethod==null)
-        {
-            throw new InvalidOperationException($"Handle method not found on behavior {behaviorType.Name}");
-        }
+        var handleMethod = behaviorType.GetMethod("Handle")??throw new InvalidOperationException($"Handle method not found on behavior {behaviorType.Name}");
 
         return (CancellationToken ct) =>
         {

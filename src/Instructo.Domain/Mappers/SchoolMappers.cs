@@ -1,6 +1,6 @@
 ﻿using Domain.Dtos.Image;
 using Domain.Dtos.School;
-using Domain.Entities.SchoolEntities;
+using Domain.Entities;
 
 namespace Domain.Mappers;
 
@@ -8,10 +8,11 @@ public static class SchoolMappers
 {
     public static SchoolDetailReadDto ToDetailedReadDto(this School school)
     {
-        if(school.City is null&&school.County is null)
+        if(school.City is null||school.County is null)
         {
             throw new ArgumentNullException($"{school} doesn't have City or County attached");
         }
+
         return new SchoolDetailReadDto(
             school.Id,
             school.Name,
@@ -19,8 +20,8 @@ public static class SchoolMappers
             school.Email,
             school.PhoneNumber,
             school.Slug,
-            school.County?.Code,
-            school.City?.Name,
+            school.County.Code,
+            school.City.Name,
             school.Slogan,
             school.Description,
             school.PhoneNumbersGroups.Select(x => x.ToDto()),

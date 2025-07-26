@@ -21,7 +21,7 @@ public class Result<TValue> : IResult<TValue>
 
     public bool IsError { get; protected set; }
 
-    private readonly Error[] _errors;
+    protected Error[] _errors;
     public Error[] Errors => IsError ? _errors : throw new InvalidOperationException("You cannot retrieve the Errors of a Successful result");
 
     private readonly TValue? _value;
