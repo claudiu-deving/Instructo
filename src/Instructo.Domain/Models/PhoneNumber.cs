@@ -17,9 +17,9 @@ public class PhoneNumber
     public static Result<PhoneNumber> Create(string value, string? name = null)
     {
         if(string.IsNullOrWhiteSpace(value))
-            return Result<PhoneNumber>.Failure([new Error("Phone number cannot be empty", value)]);
+            return Result<PhoneNumber>.Failure([new Error("Empty-Phone-Number", "Phone number cannot be empty")]);
         if(value.Length>100)
-            return Result<PhoneNumber>.Failure([new Error("Phone number cannot be longer than 100 characters", value)]);
+            return Result<PhoneNumber>.Failure([new Error("Invalid-Phone-Number", $"Phone number cannot be longer than 100 characters - {value}")]);
         return new PhoneNumber(value, name);
     }
     public static PhoneNumber Wrap(string value) => new(value);

@@ -125,9 +125,9 @@ public class UpdateSchoolCommandHandler(
     private List<VehicleCategory> GetInstructorVehicleCategories(List<VehicleCategoryDto> categories, IEnumerable<VehicleCategory> vehicleCategories)
     {
         var instructorVehicleCategories = new List<VehicleCategory>();
-        foreach(var categoryDto in categories)
+        foreach(var category in categories)
         {
-            var vehicleCategory = vehicleCategories.FirstOrDefault(x => x.Name==categoryDto.Name);
+            var vehicleCategory = vehicleCategories.FirstOrDefault(x => x.Name==category.Name);
             if(vehicleCategory is not null)
                 instructorVehicleCategories.Add(vehicleCategory);
         }
@@ -152,7 +152,7 @@ public class UpdateSchoolCommandHandler(
         if(request.ExtraLocations is null)
             return existingSchool;
         var extraLocationsErrors = new List<Error>();
-        existingSchool.ExtraLocations.Where(x => x.AddressType!=AddressType.MainLocation).ToList().ForEach(x => existingSchool.RemoveExtraLocation(x));
+        existingSchool.Locations.Where(x => x.AddressType!=AddressType.MainLocation).ToList().ForEach(x => existingSchool.RemoveExtraLocation(x));
 
         //Bulk update all at once, clear and the add them back
         request.ExtraLocations.ForEach(locationDto =>
@@ -177,7 +177,7 @@ public class UpdateSchoolCommandHandler(
 
         if(request.ExtraLocations.Any(x => x.AddressType==AddressType.MainLocation))
         {
-            var existingMainLocation = existingSchool.ExtraLocations.FirstOrDefault(x => x.AddressType==AddressType.MainLocation);
+            var existingMainLocation = existingSchool.Locations.FirstOrDefault(x => x.AddressType==AddressType.MainLocation);
 
             existingSchool.RemoveExtraLocation(existingMainLocation!);
             var mainLocationDto = request.ExtraLocations.FirstOrDefault(x => x.AddressType==AddressType.MainLocation);
@@ -251,6 +251,12 @@ public class UpdateSchoolCommandHandler(
     {
         var request = context.Get<UpdateSchoolCommand>();
         var existingSchool = await schoolManagementDirectory.SchoolQueriesRepository.GetByIdAsync(request.SchoolId);
+
+        if(!existingSchool.IsError&&existingSchool.Value is null)
+        {
+            return Result<School>.Failure(new Error("Not Found", "School not found"));
+        }
+
         return !existingSchool.IsError
             ? existingSchool!
             : Result<School>.Failure([.. existingSchool.Errors, new Error("Not-Found", "Unable to retrieve school")]);
@@ -259,8 +265,27 @@ public class UpdateSchoolCommandHandler(
     private async Task<Result<ApplicationUser>> GetOwner(FlexContext context)
     {
         var request = context.Get<UpdateSchoolCommand>();
-        var registerUserCommand = new GetUserByIdQuery(request.RequestingUserId);
-        return await sender.Send(registerUserCommand);
+        var school = context.Get<School>();
+        var getUserById = new GetUserByIdQuery(request.RequestingUserId);
+        var user = await sender.Send(getUserById);
+        if(user.IsError)
+        {
+            return Result<ApplicationUser>.Failure([.. user.Errors, new Error("Owner-Not-Found", "Unable to retrieve school owner")]);
+        }
+        if(user.Value is null)
+        {
+            return Result<ApplicationUser>.Failure(new Error("Owner-Not-Found", "Owner not found"));
+        }
+        if(user.Value.Role.Name==ApplicationRole.IronMan.ToString())
+        {
+            return user;
+        }
+
+        if(user.Value.Id!=school.OwnerId)
+        {
+            return Result<ApplicationUser>.Failure(new Error("Owner-Mismatch", "The requesting user is not the owner of the school"));
+        }
+        return user;
     }
 
     private async Task<Result<School>> UpdateSchoolData(FlexContext context)

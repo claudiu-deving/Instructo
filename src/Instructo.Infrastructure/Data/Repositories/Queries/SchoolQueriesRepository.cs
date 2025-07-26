@@ -1,13 +1,8 @@
 ﻿using System.Data.Common;
-using System.Linq;
-using System.Threading.Tasks;
 
-using Domain.Dtos;
-using Domain.Dtos.Link;
 using Domain.Dtos.School;
 using Domain.Entities.SchoolEntities;
 using Domain.Interfaces;
-using Domain.Mappers;
 using Domain.Shared;
 using Domain.ValueObjects;
 
@@ -47,11 +42,11 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
             return await dbContext.Schools
                     .Include(x => x.Owner)
                     .Include(x => x.WebsiteLinks)
-                    .Include(x => x.VehicleCategories)
                     .Include(x => x.Certificates)
-                    .Include(x=>x.City)
-                    .Include(x=>x.County)
-                    .Include(x=>x.ExtraLocations)
+                    .Include(x => x.VehicleCategories)
+                    .Include(x => x.City)
+                    .Include(x => x.County)
+                    .Include(x => x.Locations)
                     .AsSplitQuery()
                     .FirstOrDefaultAsync(x => x.Id==id.Id);
         }
@@ -119,7 +114,6 @@ public class SchoolQueriesRepository(AppDbContext dbContext, ILogger<SchoolQueri
               .ToListAsync())
                .Select(x => (SchoolReadDto)Map(x)!));
     }
-
     private SchoolReadDto? Map(School? school)
     {
         try

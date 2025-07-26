@@ -83,10 +83,10 @@ internal class SchoolConfiguration : IEntityTypeConfiguration<School>
         builder.Navigation(s => s.WebsiteLinks)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany(s => s.ExtraLocations)
+        builder.HasMany(s => s.Locations)
             .WithOne(x => x.School)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(s => s.ExtraLocations)
+        builder.Navigation(s => s.Locations)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

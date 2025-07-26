@@ -129,39 +129,4 @@ public static class CoreBuilder
             });
     }
 
-
-    public static void AddAuthorization(this WebApplicationBuilder builder, string[] args)
-    {
-        var ironManId = GetIronManId();
-
-        builder.Services.AddAuthorizationBuilder()
-            .AddPolicy(ApplicationRole.IronMan.Name!, policy => policy.RequireRole(
-                    ApplicationRole.IronMan.Name!)
-                .RequireClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    ironManId))
-            .AddPolicy(ApplicationRole.Admin.Name!, policy => policy.RequireRole(
-                ApplicationRole.Admin.Name!,
-                ApplicationRole.Owner.Name!,
-                ApplicationRole.IronMan.Name!))
-            .AddPolicy(ApplicationRole.Owner.Name!, policy => policy.RequireRole(
-                ApplicationRole.Owner.Name!,
-                ApplicationRole.IronMan.Name!));
-
-
-        string GetIronManId()
-        {
-#if DEBUG
-            return "8fb090d2-ad97-41d0-86ce-08ddc4a5a731";
-#endif
-            var s = Environment.GetEnvironmentVariable("IRONMAN_ID");
-            if(s is not null)
-                return s;
-            if(args.Length>0&&args[0] is { } id)
-                s=id;
-            else
-                throw new ArgumentException("{IRONMAN_ID} is missing,cannot proceed");
-
-            return s;
-        }
-    }
 }

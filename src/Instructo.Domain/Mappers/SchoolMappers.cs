@@ -32,7 +32,7 @@ public static class SchoolMappers
            school.SchoolStatistics.ToDto(),
            [.. school.CategoryPricings.Select(x => x.ToDto())],
            school.Team.ToDto(),
-           [.. school.ExtraLocations.Select(x => x.ToDto(Enums.AddressType.LessonStart).ValueOrThrow())]
+           [.. school.Locations.Select(x => x.ToDto(Enums.AddressType.LessonStart).ValueOrThrow())]
         );
     }
 }

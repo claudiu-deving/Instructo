@@ -18,6 +18,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.5" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="Moq" Version="4.20.72" />
+		<PackageReference Include="Respawn" Version="6.2.1" />
 		<PackageReference Include="Serilog" Version="4.2.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 		<PackageReference Include="Testcontainers" Version="4.6.0" />
@@ -35,6 +36,7 @@
 
 	<ItemGroup>
 		<Folder Include="Application\Users\Commands\RegisterUser\" />
+		<Folder Include="Data\Repositories\Queries\" />
 		<Folder Include="Domain\" />
 	</ItemGroup>
 
@@ -44,9 +46,6 @@
 		<ProjectReference Include="..\..\src\Instructo.Domain\Domain.csproj" />
 		<ProjectReference Include="..\..\src\Instructo.Infrastructure\Infrastructure.csproj" />
 		<ProjectReference Include="..\..\src\MediatR\Messager.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="appsettings.Testing.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 

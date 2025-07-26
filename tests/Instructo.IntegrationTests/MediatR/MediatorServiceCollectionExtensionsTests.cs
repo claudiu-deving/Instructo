@@ -66,6 +66,9 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
         services.AddScoped(sp => new Mock<ILogger<CreateSchoolCommandHandler>>().Object);
         services.AddScoped(sp => new Mock<ILogger<DeleteSchoolCommandHandler>>().Object);
         services.AddScoped(sp => new Mock<ILogger<RoleManager<ApplicationRole>>>().Object);
+        services.AddScoped(sp => new Mock<ILogger<SchoolQueriesRepository>>().Object);
+        services.AddScoped(sp => new Mock<ILogger<ImageCommandRepository>>().Object);
+
 
 
 
@@ -73,6 +76,11 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
         services.AddScoped<ISchoolQueriesRepository, SchoolQueriesRepository>();
         services.AddScoped<IQueryRepository<VehicleCategory, int>, VehicleCategoryQueriesRepository>();
         services.AddScoped<IQueryRepository<ArrCertificate, int>, ArrCertificateQueriesRepository>();
+        services.AddScoped<IQueryRepository<Transmission, int>, TransmissionQueryRepository>();
+        services.AddScoped<IQueryRepository<Address, int>, AddressQueryRepository>();
+        services.AddScoped<IInstructorProfileQueryRepository, InstructorProfileQueryRepository>();
+        services.AddScoped<ISchoolCategoryPricingQueryRepository, SchoolCategoryPricingQueryRepository>();
+
         services.AddScoped<IQueryRepository<City, int>, CityQueryRepository>();
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {
@@ -265,7 +273,7 @@ public class MediatorServiceCollectionExtensionsTests : IDisposable
     //Cleanup
     public void Dispose()
     {
-        var service = serviceProvider.GetService<IRequestHandler<GetSchoolsQuery, Result<IEnumerable<SchoolDetailReadDto>>>>();
+        var service = serviceProvider.GetService<IRequestHandler<GetSchoolsQuery, Result<IEnumerable<ISchoolReadDto>>>>();
         Assert.NotNull(service);
         if(serviceProvider is IDisposable disposable)
         {

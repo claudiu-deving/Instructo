@@ -17,8 +17,8 @@ public readonly record struct AddressDto
     private AddressDto(string value, string x, string y, AddressType addressType, string? comment = null)
     {
         Street=value;
-        Longitude=x;
-        Latitude=y;
+        Longitude=y;
+        Latitude=x;
         Comment=comment;
         AddressType=addressType;
     }

@@ -19,16 +19,20 @@ public static class SchoolEndpoints
     {
         var group = app.MapGroup("api/schools").WithTags("Schools");
 
-        group.MapGet("/", GetAllSchools).WithName("Get all schools").AllowAnonymous();
+        group.MapGet("/", GetAllSchools).WithName("Get all schools")
+            .AllowAnonymous();
 
-        group.MapGet("/{slug}", GetSchoolBySlug).WithName("Get a School By Slug").AllowAnonymous();
+        group.MapGet("/{slug}", GetSchoolBySlug).WithName("Get a School By Slug")
+            .AllowAnonymous();
 
-        group.MapPost("/", CreateSchool).WithName("Create School");
+        group.MapPost("/", CreateSchool)
+            .RequireAuthorization(ApplicationRole.User.Name!).WithName("Create School");
 
         group.MapPatch("/{id:guid}", UpdateSchool).WithName("Update SchoolEntities")
-            .RequireAuthorization(ApplicationRole.IronMan.ToString(), ApplicationRole.Owner.ToString());
+            .RequireAuthorization(ApplicationRole.Owner.ToString());
 
-        group.MapDelete("/{id:guid}", DeleteSchool);
+        group.MapDelete("/{id:guid}", DeleteSchool)
+            .RequireAuthorization(ApplicationRole.Owner.ToString());
 
         group.MapPatch("/approval/{id:guid}", UpdateApprovalStatus)
             .WithName("Set approval state, only by Super Admin")
@@ -71,10 +75,12 @@ public static class SchoolEndpoints
 
         var updateRequest = await FlexContext.StartContextAsync()
             .Then(ctx => UpdateSchoolCommand.Create(createSchoolCommand, schoolId, guid))
-            .Then(flexContext => sender.Send(flexContext.Get<UpdateSchoolCommand>()));
+            .Then(async flexContext => await sender.Send(flexContext.Get<UpdateSchoolCommand>()));
         if(!updateRequest.IsError)
             return Results.Ok(updateRequest.Value!.Get<SchoolDetailReadDto>());
-        return updateRequest.Errors.Any(x => x.Code=="NotFound") ? TypedResults.NotFound() : Results.Ok();
+        return updateRequest.Errors.Any(x => x.Code.Trim().Replace(" ", "").Contains("notfound", StringComparison.CurrentCultureIgnoreCase)) ? TypedResults.BadRequest() :
+            updateRequest.Errors.Any(x => x.Code.Trim().Replace(" ", "").Contains("owner-mismatch", StringComparison.CurrentCultureIgnoreCase)) ? TypedResults.Forbid()
+            : TypedResults.Ok(updateRequest.Value!.Get<SchoolDetailReadDto>());
     }
 
     private static async Task<IResult> DeleteSchool(

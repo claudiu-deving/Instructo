@@ -14,7 +14,7 @@ public static class AppComposer
             app.MapDefaultEndpoints();
 
         await app.InitializeDatabaseAsync(
-            app.Environment.IsDevelopment() ? EnvironmentType.Development : EnvironmentType.Production);
+               ToEnvironmentType(app.Environment.EnvironmentName));
         app.MapUserEndpoints();
         app.MapSchoolEndpoints();
         app.MapAuthEndpoints();
@@ -50,4 +50,15 @@ public static class AppComposer
         return app;
     }
 
+    public static EnvironmentType ToEnvironmentType(string environmentName)
+    {
+        return environmentName switch
+        {
+            "Development" => EnvironmentType.Development,
+            "Staging" => EnvironmentType.Staging,
+            "Production" => EnvironmentType.Production,
+            "Testing" => EnvironmentType.Testing,
+            _ => throw new ArgumentException("Unknown environment type")
+        };
+    }
 }

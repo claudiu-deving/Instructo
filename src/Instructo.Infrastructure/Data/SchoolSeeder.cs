@@ -3,6 +3,7 @@
 using Bogus;
 
 using Domain.Dtos;
+using Domain.Dtos.School;
 using Domain.Entities;
 using Domain.Entities.SchoolEntities;
 using Domain.Enums;
@@ -97,13 +98,13 @@ public class SchoolSeeder
             var vehicleCategories = await _context.Categories.ToListAsync();
             var certificates = await _context.CertificateTypes.ToListAsync();
 
-            if(!cities.Any())
+            if(cities.Count==0)
             {
                 _logger.LogWarning("No cities found in database. Creating sample cities.");
                 cities=await CreateSampleCitiesAsync();
             }
 
-            if(!vehicleCategories.Any())
+            if(vehicleCategories.Count==0)
             {
                 _logger.LogWarning("No vehicle categories found in database. This may cause issues.");
             }
@@ -166,7 +167,7 @@ public class SchoolSeeder
             var result = await _userManager.CreateAsync(user, "TempPassword123!");
             if(result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "Owner");
+                await _userManager.AddToRoleAsync(user, ApplicationRole.User.Name!);
                 owners.Add(user);
                 _logger.LogDebug("Created owner user: {email}", user.Email);
             }
@@ -243,9 +244,11 @@ public class SchoolSeeder
 
         }).ToList();
 
+
         // Create school icon (optional)
         Image? icon = await CreateRandomImage();
 
+        await _userManager.AddToRoleAsync(owner, ApplicationRole.Owner.Name!);
 
         // Create the school
         var school = School.Create(
@@ -402,6 +405,162 @@ public class SchoolSeeder
         if(vehicleCategoriesCount==0)
         {
             _logger.LogWarning("No vehicle categories found in database. Schools will be created without categories.");
+        }
+    }
+
+
+    public async Task<School> SeedSchoolWithExplicitDataAsync(UpdateSchoolCommandDto explicitData, ApplicationUser? owner = null)
+    {
+        try
+        {
+            _logger.LogInformation("Creating school with explicit data");
+
+            // Create owner if not provided
+            if(owner==null)
+            {
+                // Create a new unique user for each test to avoid conflicts
+                var uniqueEmail = $"test-user-{Guid.NewGuid():N}@test.com";
+                owner = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = _faker.Name.FirstName(),
+                    LastName = _faker.Name.LastName(),
+                    Email = uniqueEmail,
+                    UserName = uniqueEmail,
+                    NormalizedEmail = uniqueEmail.ToUpperInvariant(),
+                    NormalizedUserName = uniqueEmail.ToUpperInvariant(),
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    Created = _faker.Date.PastOffset(2).DateTime,
+                    PhoneNumber = _faker.Phone.PhoneNumber()
+                };
+
+                var result = await _userManager.CreateAsync(owner, "TempPassword123!");
+                if (!result.Succeeded)
+                {
+                    throw new InvalidOperationException($"Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+                
+                await _userManager.AddToRoleAsync(owner, ApplicationRole.User.Name!);
+                _logger.LogDebug("Created new test user: {email}", owner.Email);
+            }
+
+            // Get reference data
+            var cities = await _context.Cities.Include(c => c.County).ToListAsync();
+            var vehicleCategories = await _context.Categories.ToListAsync();
+            var certificates = await _context.CertificateTypes.ToListAsync();
+
+            // Ensure we have at least some reference data for tests
+            if (cities.Count == 0)
+            {
+                cities = await CreateSampleCitiesAsync();
+            }
+
+            if (vehicleCategories.Count == 0)
+            {
+                _logger.LogWarning("No vehicle categories found in database. This may cause issues.");
+                // You might want to seed some basic vehicle categories here for tests
+            }
+
+            // Create base school with random data
+            var baseSchool = await CreateSchoolAsync(owner, cities, vehicleCategories, certificates);
+
+            // Override with explicit values
+            if(explicitData.Name!=null)
+            {
+                var name = SchoolName.Create(explicitData.Name).ValueOrThrow();
+                baseSchool.UpdateName(name);
+            }
+
+            if(explicitData.LegalName!=null)
+            {
+                var legalName = LegalName.Create(explicitData.LegalName).ValueOrThrow();
+                baseSchool.UpdateLegalName(legalName);
+            }
+
+            if(explicitData.SchoolEmail!=null)
+            {
+                var email = Email.Create(explicitData.SchoolEmail).ValueOrThrow();
+                baseSchool.UpdateEmail(email);
+            }
+
+            if(explicitData.City!=null)
+            {
+                var city = cities.FirstOrDefault(c => c.Name==explicitData.City)
+                    ??throw new InvalidOperationException($"City {explicitData.City} not found");
+                baseSchool.UpdateCity(city);
+            }
+
+            if(explicitData.Slogan!=null)
+            {
+                var slogan = Slogan.Create(explicitData.Slogan).ValueOrThrow();
+                baseSchool.UpdateSlogan(slogan);
+            }
+
+            if(explicitData.Description!=null)
+            {
+                var description = Description.Create(explicitData.Description).ValueOrThrow();
+                baseSchool.UpdateDescription(description);
+            }
+
+            if(explicitData.PhoneNumber!=null)
+            {
+                var phoneNumber = PhoneNumber.Create(explicitData.PhoneNumber).ValueOrThrow();
+                baseSchool.UpdatePhoneNumber(phoneNumber);
+            }
+
+            // Handle main location
+            if(explicitData.MainLocationStreet!=null||
+                explicitData.MainLocationLatitude!=null||
+                explicitData.MainLocationLongitude!=null)
+            {
+                var street = explicitData.MainLocationStreet??_faker.Address.StreetAddress();
+                var lat = explicitData.MainLocationLatitude??_faker.Random.Double(MIN_LATITUDE, MAX_LATITUDE).ToString("F6");
+                var lng = explicitData.MainLocationLongitude??_faker.Random.Double(MIN_LONGITUDE, MAX_LONGITUDE).ToString("F6");
+
+                var mainLocation = Address.Create(street, lat, lng, AddressType.MainLocation).ValueOrThrow();
+                baseSchool.UpdateMainLocation(mainLocation);
+            }
+
+            // Handle collections
+            if(explicitData.VehiclesCategories!=null)
+            {
+                var categories = vehicleCategories
+                    .Where(vc => explicitData.VehiclesCategories.Contains(vc.Name))
+                    .ToList();
+                baseSchool.UpdateVehicleCategories(categories);
+            }
+
+            if(explicitData.CategoryPricings!=null)
+            {
+                var pricings = explicitData.CategoryPricings.Select(cp => new SchoolCategoryPricing
+                {
+                    VehicleCategoryId=vehicleCategories.First(vc => vc.Name==cp.VehicleCategory).Id,
+                    FullPrice=cp.FullPrice,
+                    Installments=cp.Installments,
+                    InstallmentPrice=cp.InstallmentPrice,
+                    Transmission=_context.Transmissions.FirstOrDefault(t => t.Name==cp.Transmission)
+                }).ToList();
+
+                baseSchool.SetCategoryPricings(pricings);
+            }
+
+            if(explicitData.NumberOfStudents.HasValue)
+            {
+                baseSchool.SchoolStatistics.NumberOfStudents=explicitData.NumberOfStudents.Value;
+            }
+
+            // Save the school
+            _context.Schools.Add(baseSchool);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully created school with explicit data: {schoolName}", baseSchool.Name);
+            return baseSchool;
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create school with explicit data");
+            throw;
         }
     }
 }

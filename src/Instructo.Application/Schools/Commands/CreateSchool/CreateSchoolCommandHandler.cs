@@ -17,6 +17,10 @@ using Messager;
 
 using Microsoft.AspNetCore.Identity;
 
+using static System.Net.Mime.MediaTypeNames;
+
+using Image = Domain.Entities.Image;
+
 [assembly: InternalsVisibleTo("Instructo.IntegrationTests")]
 namespace Application.Schools.Commands.CreateSchool;
 
@@ -81,20 +85,32 @@ public class CreateSchoolCommandHandler(
                 }
                 categories.Add(vehicleCategory.Value!);
             }
-            var instructorProfile = InstructorProfile.Create(
-                instructor.FirstName,
-                instructor.LastName,
-                instructor.Age,
-                instructor.YearsExperience,
-                instructor.Specialization,
-                instructor.Description,
-                instructor.PhoneNumber,
-                instructor.Email,
-                instructor.Gender,
-                null,
-                categories
-                );
-            team.AddInstructor(instructorProfile);
+            if(!string.IsNullOrEmpty(instructor.ProfileImageUrl))
+            {
+                var image = Image.Create(
+                    $"{instructor.FirstName}-{instructor.LastName}-Profile-Image",
+                    instructor.ProfileImageContentType,
+                    instructor.ProfileImageUrl,
+                    "Instructor Profile Image").Value!;
+
+
+
+
+                var instructorProfile = InstructorProfile.Create(
+                    instructor.FirstName,
+                    instructor.LastName,
+                    instructor.Age,
+                    instructor.YearsExperience,
+                    instructor.Specialization,
+                    instructor.Description,
+                    instructor.PhoneNumber,
+                    instructor.Email,
+                    instructor.Gender,
+                    image,
+                    categories
+                    );
+                team.AddInstructor(instructorProfile);
+            }
 
         }
         if(errors.Count>0)
@@ -161,7 +177,7 @@ public class CreateSchoolCommandHandler(
         foreach(var extraLocation in request.ExtraLocations)
         {
             var result = await FlexContext.StartContextAsync(request, school, extraLocation)
-                .Then(CreateAddress)
+                .Then(ctx => CreateExtraAddress(extraLocation))
                 .Then(ctx => school.AddExtraLocation(ctx.Get<Address>()));
             if(result.IsError)
             {
@@ -172,14 +188,13 @@ public class CreateSchoolCommandHandler(
         {
             return Result<object>.Failure([.. errors]);
         }
-        var mainAddressResult = CreateAddress(context);
+        var mainAddressResult = CreateExtraAddress(request.Address);
         school.AddExtraLocation(mainAddressResult.Value!);
 
         return school;
-        static Result<Address> CreateAddress(FlexContext flexContext)
+        static Result<Address> CreateExtraAddress(AddressDto extraLocation)
         {
-            var extraLocation = flexContext.Get<AddressDto>();
-            return Address.Create(extraLocation.Street, extraLocation.Longitude, extraLocation.Latitude, AddressType.LessonStart);
+            return Address.Create(extraLocation.Street, extraLocation.Latitude, extraLocation.Longitude, AddressType.LessonStart);
         }
     }
 
@@ -303,8 +318,8 @@ public class CreateSchoolCommandHandler(
             {
                 return Address.Create(
                     request.Address.Street,
-                    request.Address.Longitude,
                     request.Address.Latitude,
+                    request.Address.Longitude,
                     AddressType.MainLocation);
             }
             catch(Exception ex)

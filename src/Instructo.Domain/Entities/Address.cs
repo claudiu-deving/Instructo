@@ -34,9 +34,9 @@ public class Address : IEntity
     }
 
     public int Id { get; init; }
-    public string Street { get; } = string.Empty;
-    public Point? Coordinate { get; }
-    public string? Comment { get; }
+    public string Street { get; private set; } = string.Empty;
+    public Point? Coordinate { get; private set; }
+    public string? Comment { get; private set; }
 
     public virtual School? School { get; private set; }
 
@@ -102,5 +102,48 @@ public class Address : IEntity
     public Result<AddressDto> ToDto(AddressType addressType)
     {
         return AddressDto.Create(Street, Coordinate?.X.ToString()??"", Coordinate?.Y.ToString()??"", addressType, Comment);
+    }
+
+    public Result<Address> Update(
+        string? street = null,
+        string? latitude = null,
+        string? longitude = null,
+        AddressType? addressType = null,
+        string? comment = null)
+    {
+        if(street is not null)
+        {
+            if(string.IsNullOrWhiteSpace(street))
+                return new Error("Street cannot be null or empty", nameof(street));
+            Street=street;
+        }
+        if(latitude is not null&&longitude is not null)
+        {
+            if(!double.TryParse(latitude, out var lat))
+                return new Error("Invalid latitude format", nameof(latitude));
+            if(!double.TryParse(longitude, out var lon))
+                return new Error("Invalid longitude format", nameof(longitude));
+            if(lat<MIN_LATITUDE||lat>MAX_LATITUDE)
+                return new Error(nameof(latitude),
+                    $"Latitude must be between {MIN_LATITUDE} and {MAX_LATITUDE} for Romania");
+            if(lon<MIN_LONGITUDE||lon>MAX_LONGITUDE)
+                return new Error(nameof(longitude),
+                    $"Longitude must be between {MIN_LONGITUDE} and {MAX_LONGITUDE} for Romania");
+            Coordinate=_geometryFactory.CreatePoint(new Coordinate(lon, lat));
+        }
+        if(addressType.HasValue)
+        {
+            AddressType=addressType.Value;
+        }
+        if(comment is not null)
+        {
+            Comment=comment;
+        }
+        return this;
+    }
+
+    internal void SetSchool(School school)
+    {
+        School=school;
     }
 }

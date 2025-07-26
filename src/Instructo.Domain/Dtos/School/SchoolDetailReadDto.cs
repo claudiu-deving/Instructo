@@ -1,4 +1,6 @@
-﻿using Domain.Dtos.Image;
+﻿using System.Text.Json.Serialization;
+
+using Domain.Dtos.Image;
 using Domain.Dtos.Link;
 using Domain.Dtos.PhoneNumbers;
 using Domain.Entities;
@@ -55,6 +57,7 @@ public class SchoolDetailReadDto : ISchoolReadDto
         this.Locations=Locations;
     }
 
+    [JsonConstructor]
     private SchoolDetailReadDto() { }
 
     public Guid Id { get; init; }

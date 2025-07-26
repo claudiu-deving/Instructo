@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
 
 using Domain.Entities;
+using Domain.Shared;
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,7 @@ namespace Infrastructure.Data;
 
 public static class DbInitializer
 {
+
     /// <summary>
     /// Applies pending migrations and seeds initial data
     /// </summary>
@@ -36,6 +39,7 @@ public static class DbInitializer
 
             await CreateSchoolDetailsView(context);
 
+
             logger.LogInformation("Database seeding completed successfully.");
         }
         catch(Exception ex)
@@ -45,9 +49,11 @@ public static class DbInitializer
         }
     }
 
-    private static async Task CreateSchoolDetailsView(AppDbContext context)
+    public static async Task CreateSchoolDetailsView(AppDbContext context)
     {
-        await context.Database.ExecuteSqlRawAsync(@"CREATE VIEW SchoolDetails AS
+        try
+        {
+            await context.Database.ExecuteSqlRawAsync(@"CREATE VIEW SchoolDetails AS
 SELECT         
 s.Id, 
 s.Name, 
@@ -130,8 +136,8 @@ s.BussinessHours,
               JSON_QUERY((
                 SELECT vc.Name
                 FROM dbo.InstructorVehicleCategories ivc
-                JOIN dbo.VehicleCategories vc ON vc.Id = ivc.VehicleCategoriesId
-                WHERE ivc.InstructorsId = i.Id
+                JOIN dbo.VehicleCategories vc ON vc.Id = ivc.VehicleCategoryId
+                WHERE ivc.InstructorId = i.Id
                 FOR JSON PATH
             )) AS Categories
             FROM dbo.Teams AS t
@@ -150,13 +156,19 @@ FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
         FROM dbo.Addresses AS addr
         WHERE addr.SchoolId = s.Id
         FOR JSON PATH
-) AS ExtraLocations,
+) AS Locations,
 s.SchoolStatistics
 
 FROM  dbo.Schools AS s  
 JOIN dbo.Counties AS county ON s.CountyId = county.Id 
 JOIN dbo.Cities AS city ON s.CityId = city.Id 
 ");
+        }
+        catch(Exception ex)
+        {
+            // View might already exist, ignore the error
+            // This is a simple approach - in production you might want to check if view exists first
+        }
     }
 
     /// <summary>
@@ -173,20 +185,25 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
             logger.LogInformation("Applying database migrations...");
             await context.Database.MigrateAsync();
             logger.LogInformation("Database migrations applied successfully.");
+
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            if(roleManager.Roles.Any())
+
+            // Check if roles already exist
+            if(await roleManager.Roles.AnyAsync())
+            {
+                logger.LogInformation("Roles already exist, skipping seeding");
                 return;
+            }
+
             // Seed roles and users if not already done
             await SeedRolesAndAdminUser(serviceProvider);
 
             // Check if we should use legacy SQL seeding or new SchoolSeeder
             var seedingOptions = scope.ServiceProvider.GetService<IOptions<SeedingOptions>>()?.Value??new SeedingOptions();
 
-
             await SeedSchoolsIfConfiguredAsync(serviceProvider, logger);
             await CreateSchoolDetailsView(context);
-
             logger.LogInformation("Database seeding completed successfully.");
         }
         catch(Exception ex)
@@ -223,20 +240,28 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
             }
         }
     }
+
     public static async Task SeedRolesAndAdminUser(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
- 
-        // Create roles
-        string[] roleNames = ["Admin", "Owner", "Instructor", "Student"];
 
-        await roleManager.CreateAsync(new ApplicationRole() { Name="IronMan", Description="I am Ironman" });
-        await roleManager.CreateAsync(new ApplicationRole() { Name="Admin", Description="Can manage a school, cannot delete it" });
-        await roleManager.CreateAsync(new ApplicationRole() { Name="Owner", Description="Can manage a school, can delete it" });
-        await roleManager.CreateAsync(new ApplicationRole() { Name="Instructor", Description="Can manage session" });
-        await roleManager.CreateAsync(new ApplicationRole() { Name="Student", Description="Can view session" });
+        // Create roles if they don't exist
+        foreach(var role in ApplicationRole.AllRoles)
+        {
+            if(!await roleManager.RoleExistsAsync(role.Name!))
+            {
+                await roleManager.CreateAsync(role);
+            }
+        }
+
+        // Check if IronMan user already exists
+        var existingIronMan = await userManager.FindByIdAsync("8fb090d2-ad97-41d0-86ce-08ddc4a5a731");
+        if(existingIronMan!=null)
+        {
+            return; // User already exists
+        }
 
         var ironMan = new ApplicationUser()
         {
@@ -245,10 +270,18 @@ JOIN dbo.Cities AS city ON s.CityId = city.Id
             LastName="Strugar",
             FirstName="Claudiu",
             PhoneNumber="1234567890",
-            UserName="claudiu.c.strugar@gmail.com"
+            UserName="claudiu.c.strugar@gmail.com",
+            NormalizedUserName="CLAUDIU.C.STRUGAR@GMAIL.COM",
+            NormalizedEmail="CLAUDIU.C.STRUGAR@GMAIL.COM",
+            EmailConfirmed=true,
+            IsActive=true
         };
-        await userManager.CreateAsync(ironMan, "Password123!");
-        await userManager.AddToRoleAsync(ironMan, "IronMan");
+
+        var result = await userManager.CreateAsync(ironMan, "Password123!");
+        if(result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(ironMan, ApplicationRole.IronMan.Name!);
+        }
     }
 }
 

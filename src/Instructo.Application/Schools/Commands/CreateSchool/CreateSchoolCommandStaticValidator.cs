@@ -40,12 +40,14 @@ public partial record CreateSchoolCommand
             .OnSuccess(value => createSchoolCommand.Address=value)
             .OnError(errors.AddRange);
 
+        PhoneNumber.Create(createSchoolCommandDto.PhoneNumber)
+                  .OnSuccess(value => createSchoolCommand.PhoneNumber=value)
+                  .OnError(errors.AddRange);
 
         ValidatePhoneNumbers(createSchoolCommandDto)
                   .OnSuccess(phoneNumberData =>
                   {
-                      createSchoolCommand.PhoneNumber=phoneNumberData.phoneNumber;
-                      createSchoolCommand.PhoneNumbersGroups= [.. phoneNumberData.numberGroups];
+                      createSchoolCommand.PhoneNumbersGroups= [.. phoneNumberData];
                   })
                   .OnError(errors.AddRange);
 
@@ -66,40 +68,46 @@ public partial record CreateSchoolCommand
             .OnSuccess(value => createSchoolCommand.BussinessHours=value)
             .OnError(errors.AddRange);
 
-        if(createSchoolCommandDto.VechiclesCategories.Count==0)
+        if(createSchoolCommandDto.VechiclesCategories is null||createSchoolCommandDto.VechiclesCategories.Count==0)
         {
             errors.Add(new Error("VC-Empty", "There must be at least 1 category"));
         }
-        List<VehicleCategoryType> categories = [];
-        createSchoolCommandDto.VechiclesCategories.ForEach(category =>
+        else
         {
-            if(TryParseCategory(category, out VehicleCategoryType vehicleCategory))
-            {
-                categories.Add(vehicleCategory);
-            }
-            else
-            {
-                errors.Add(new Error("VC-Parse", $"{category} is not a valid vehicle category"));
-            }
-        });
-        createSchoolCommand.VehicleCategories=categories;
 
+            List<VehicleCategoryType> categories = [];
+            createSchoolCommandDto.VechiclesCategories.ForEach(category =>
+            {
+                if(TryParseCategory(category, out VehicleCategoryType vehicleCategory))
+                {
+                    categories.Add(vehicleCategory);
+                }
+                else
+                {
+                    errors.Add(new Error("VC-Parse", $"{category} is not a valid vehicle category"));
+                }
+            });
+            createSchoolCommand.VehicleCategories=categories;
+        }
 
-        List<ARRCertificateType> certificates = [];
-        var parsedEnum = Enum.GetValues<ARRCertificateType>().Select(x => x.ToString());
-        createSchoolCommandDto.ArrCertifications.ForEach(certificateInput =>
+        if(createSchoolCommandDto.ArrCertifications is not null)
         {
-            if(!parsedEnum.Contains(certificateInput))
-            {
-                errors.Add(new Error("ARRCertificate-Parse", $"Unable to parse {certificateInput}"));
-            }
-            else
-            {
-                certificates.Add(Enum.Parse<ARRCertificateType>(certificateInput));
-            }
-        });
-        createSchoolCommand.Certificates=certificates;
 
+            List<ARRCertificateType> certificates = [];
+            var parsedEnum = Enum.GetValues<ARRCertificateType>().Select(x => x.ToString());
+            createSchoolCommandDto.ArrCertifications.ForEach(certificateInput =>
+            {
+                if(!parsedEnum.Contains(certificateInput))
+                {
+                    errors.Add(new Error("ARRCertificate-Parse", $"Unable to parse {certificateInput}"));
+                }
+                else
+                {
+                    certificates.Add(Enum.Parse<ARRCertificateType>(certificateInput));
+                }
+            });
+            createSchoolCommand.Certificates=certificates;
+        }
 
         createSchoolCommand.Statistics=new Statistics()
         {
@@ -124,12 +132,12 @@ public partial record CreateSchoolCommand
         }
     }
 
-    private static Result<(IEnumerable<PhoneNumbersGroup> numberGroups, PhoneNumber phoneNumber)> ValidatePhoneNumbers(CreateSchoolCommandDto createSchoolCommandDto)
+    private static Result<IEnumerable<PhoneNumbersGroup>>
+        ValidatePhoneNumbers(CreateSchoolCommandDto createSchoolCommandDto)
     {
         List<Error> errors = [];
         List<PhoneNumbersGroup> phoneNumberGroups = [];
-        PhoneNumber? mainPhoneNumber = null;
-        if(createSchoolCommandDto.PhoneNumberGroups.Count!=0)
+        if(createSchoolCommandDto.PhoneNumberGroups is not null&&createSchoolCommandDto.PhoneNumberGroups.Count!=0)
         {
             foreach(PhoneNumberGroupDto group in createSchoolCommandDto.PhoneNumberGroups)
             {
@@ -152,62 +160,10 @@ public partial record CreateSchoolCommand
                     break;
                 }
             }
-            if(phoneNumberGroups.Count==1&&!MainPhoneNumberExists(createSchoolCommandDto))
-            {
-                if(phoneNumberGroups[0].PhoneNumbers.Count==1)
-                {
-                    mainPhoneNumber=phoneNumberGroups[0].PhoneNumbers[0];
-                    phoneNumberGroups.Clear();
-                }
-            }
-            if(phoneNumberGroups.Count>=1&&phoneNumberGroups[0].PhoneNumbers.Count==1)
-            {
-                mainPhoneNumber=phoneNumberGroups[0].PhoneNumbers[0];
-                phoneNumberGroups[0].PhoneNumbers.RemoveAt(0);
-                phoneNumberGroups.RemoveAt(0);
-            }
-            if(phoneNumberGroups.Count>=1&&phoneNumberGroups[0].PhoneNumbers.Count>1)
-            {
-                mainPhoneNumber=phoneNumberGroups[0].PhoneNumbers[0];
-                phoneNumberGroups[0].PhoneNumbers.RemoveAt(0);
-            }
-
-            if(MainPhoneNumberExists(createSchoolCommandDto))
-            {
-                var phoneNumberCreationRequest = PhoneNumber.Create(createSchoolCommandDto.PhoneNumber!)
-                   .OnError(errors.AddRange)
-                   .OnSuccess(phoneNum => mainPhoneNumber=phoneNum);
-            }
-        }
-        else
-        {
-            if(createSchoolCommandDto.PhoneNumber is null)
-            {
-                errors.Add(new Error("Phone-Number-Missing", "No phone number groups and no phone number"));
-            }
-            else
-            {
-                var phoneNumberCreationRequest = PhoneNumber.Create(createSchoolCommandDto.PhoneNumber)
-                    .OnError(errors.AddRange)
-                    .OnSuccess(phoneNum => mainPhoneNumber=phoneNum);
-            }
-        }
-        if(errors.Count!=0)
-        {
-            return Result<(IEnumerable<PhoneNumbersGroup>, PhoneNumber)>.WithErrors([.. errors]);
-        }
-        if(mainPhoneNumber is null)
-        {
-            mainPhoneNumber=phoneNumberGroups[0].PhoneNumbers[0];
         }
 
 
-        return Result<(IEnumerable<PhoneNumbersGroup>, PhoneNumber)>.Success((phoneNumberGroups, mainPhoneNumber));
-    }
-
-    private static bool MainPhoneNumberExists(CreateSchoolCommandDto createSchoolCommandDto)
-    {
-        return createSchoolCommandDto.PhoneNumber is not null&&!string.IsNullOrEmpty(createSchoolCommandDto.PhoneNumber);
+        return Result<IEnumerable<PhoneNumbersGroup>>.Success(phoneNumberGroups);
     }
 
     /// <summary>

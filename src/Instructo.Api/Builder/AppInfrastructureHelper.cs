@@ -16,7 +16,7 @@ public static class AppInfrastructureHelper
                 if(environmentType==EnvironmentType.Production)
                     // In production, apply migrations
                     await DbInitializer.InitializeDatabaseAsync(scope.ServiceProvider, logger);
-                else if(environmentType==EnvironmentType.Development)
+                else if(environmentType==EnvironmentType.Development || environmentType == EnvironmentType.Staging || environmentType == EnvironmentType.Testing)
                 {
                     // In development or staging, ensure database is created
                     await DbInitializer.EnsureDatabaseCreatedAsync(scope.ServiceProvider, logger);
@@ -46,7 +46,7 @@ public static class AppInfrastructureHelper
                     TimeSpan.FromSeconds(30),
                     null);
             });
-            if(builder.Environment.IsDevelopment()||builder.Environment.IsStaging())
+            if(builder.Environment.IsDevelopment()||builder.Environment.IsStaging()||builder.Environment.IsEnvironment("Testing"))
                 options.EnableSensitiveDataLogging();
             else
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);

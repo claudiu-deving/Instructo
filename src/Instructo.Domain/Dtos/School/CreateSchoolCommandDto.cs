@@ -12,7 +12,7 @@ public readonly record struct CreateSchoolCommandDto(
     string SchoolEmail,
     string City,
     string Address,
-    string? PhoneNumber,
+    string PhoneNumber,
     string ImagePath,
     string ImageContentType,
     string? Slogan,

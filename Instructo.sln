@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Instructo.ServiceDefaults",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager", "src\MediatR\Messager.csproj", "{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHelpers", "TestHelpers\TestHelpers.csproj", "{AD6B8773-3A5C-40B8-A480-12FBCECD1560}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,14 @@ Global
 		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Release|x64.ActiveCfg = Release|x64
 		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D}.Release|x64.Build.0 = Release|x64
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Debug|x64.Build.0 = Debug|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Release|x64.ActiveCfg = Release|Any CPU
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +126,7 @@ Global
 		{98CCA405-1841-D04C-4C40-A0F2727F1249} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
 		{4126D29C-A5BA-4F67-9499-29E0B86AAFA3} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
 		{2C08B22F-36ED-43E2-A1E5-3A67BDF6FF3D} = {2F3EFB35-B59D-4C92-898F-AB49EE290FD4}
+		{AD6B8773-3A5C-40B8-A480-12FBCECD1560} = {F84B6034-04A9-4E0B-B9E4-5F1AD9997C7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {23954A8C-9A62-41AD-BDBB-8AED6C8D5905}

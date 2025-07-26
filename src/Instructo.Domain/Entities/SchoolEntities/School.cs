@@ -18,7 +18,7 @@ namespace Domain.Entities.SchoolEntities;
 public class School : BaseAuditableEntity<Guid>
 {
     private readonly List<WebsiteLink> _websiteLinks = [];
-    private readonly List<Address> _extraLocations = [];
+    private readonly List<Address> _locations = [];
     private readonly List<SchoolCategoryPricing> _schoolCategoryPricings = [];
 
     private School(
@@ -85,7 +85,7 @@ public class School : BaseAuditableEntity<Guid>
     public virtual Image? Icon { get; private set; }
     public virtual IReadOnlyCollection<WebsiteLink> WebsiteLinks => _websiteLinks.AsReadOnly();
     public virtual Team? Team { get; private set; }
-    public virtual IReadOnlyCollection<Address> ExtraLocations => _extraLocations.AsReadOnly();
+    public virtual IReadOnlyCollection<Address> Locations => _locations.AsReadOnly();
     public bool IsApproved { get; set; }
 
     public void Approve()
@@ -161,9 +161,10 @@ public class School : BaseAuditableEntity<Guid>
     {
         try
         {
-            if(_extraLocations.Contains(address))
+            if(_locations.Contains(address))
                 return Result<School>.Success(this);
-            _extraLocations.Add(address);
+            address.SetSchool(this);
+            _locations.Add(address);
             return Result<School>.Success(this);
         }
         catch(Exception ex)
@@ -174,9 +175,9 @@ public class School : BaseAuditableEntity<Guid>
 
     public bool RemoveExtraLocation(Address address)
     {
-        if(!_extraLocations.Contains(address))
+        if(!_locations.Contains(address))
             return false;
-        _extraLocations.Remove(address);
+        _locations.Remove(address);
         return true;
     }
 
@@ -228,7 +229,7 @@ public class School : BaseAuditableEntity<Guid>
         {
             RemoveTeam();
         }
-        foreach(var extraLocation in newData.ExtraLocations.Where(extraLocation => !_extraLocations.Contains(extraLocation)))
+        foreach(var extraLocation in newData.Locations.Where(extraLocation => !_locations.Contains(extraLocation)))
             AddExtraLocation(extraLocation);
     }
 
@@ -287,5 +288,96 @@ public class School : BaseAuditableEntity<Guid>
     public void ChangeSlogan(Slogan slogan)
     {
         Slogan=slogan.Value;
+    }
+
+    public void UpdateName(SchoolName name)
+    {
+        Name=name.Value;
+    }
+
+    public void UpdateEmail(Email email)
+    {
+        if(!Email.Equals(email.Value))
+        {
+            Email=email.Value;
+        }
+    }
+
+    public void UpdateLegalName(LegalName legalName)
+    {
+        if(!CompanyName.Equals(legalName.Value))
+        {
+            CompanyName=legalName.Value;
+        }
+    }
+
+    public void UpdateSlogan(Slogan slogan)
+    {
+        if(!Slogan.Equals(slogan.Value))
+        {
+            Slogan=slogan.Value;
+        }
+    }
+
+    public void UpdateDescription(Description description)
+    {
+        if(!Description.Equals(description.Value))
+        {
+            Description=description.Value;
+        }
+    }
+
+    public void UpdateCity(City city)
+    {
+        if(City==null||!City.Equals(city))
+        {
+            City=city;
+            County=city.County; // Update county based on the new city
+        }
+    }
+
+    public void UpdatePhoneNumber(PhoneNumber phoneNumber)
+    {
+        if(!PhoneNumber.Equals(phoneNumber))
+        {
+            PhoneNumber=phoneNumber;
+        }
+    }
+
+    public void UpdateMainLocation(Address mainLocation)
+    {
+        if(Locations.Count==0||!Locations.First().Equals(mainLocation))
+        {
+            if(Locations.Count>0)
+            {
+                var existingMainLocation = Locations.FirstOrDefault(x => x.AddressType==Enums.AddressType.MainLocation);
+                if(existingMainLocation!=null)
+                {
+                    // Update existing main location
+                    existingMainLocation.Update(mainLocation.Street, mainLocation.Coordinate?.X.ToString(), mainLocation.Coordinate?.Y.ToString(), Enums.AddressType.MainLocation, mainLocation.Comment);
+                }
+                else
+                {
+                    // Add as a new main location if it doesn't exist
+                    _locations.Add(mainLocation);
+                }
+            }
+            else
+            {
+                _locations.Add(mainLocation); // Add if no locations exist
+            }
+        }
+    }
+
+    public void UpdateVehicleCategories(List<VehicleCategory> categories)
+    {
+        VehicleCategories.Clear();
+        foreach(var category in categories)
+        {
+            if(!VehicleCategories.Contains(category))
+            {
+                VehicleCategories.Add(category);
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ public static class AppBuilder
 
         builder.AddAuthentification();
 
-        builder.AddAuthorization(args);
+        builder.AddAuthorization();
 
         builder.AddRepositories();
 

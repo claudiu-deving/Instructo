@@ -23,15 +23,21 @@ public record BussinessHours
     {
         List<BussinessHoursEntry> entries = [];
         List<Error> errors = [];
+        if(bussinessHoursDto is null)
+        {
+            return new Error("School-Create-NoBussinessHours",
+                "The bussiness hours cannot be null");
+        }
         bussinessHoursDto.ForEach(entry =>
         {
             var daysOfTheWeek = new List<DayOfWeek>();
             try
             {
                 entry.DaysOfTheWeek.ForEach(day => daysOfTheWeek.Add(ToDayOfWeekEnum(day)));
-            }catch(ArgumentException ex)
+            }
+            catch(ArgumentException ex)
             {
-               errors.Add(new Error("DayOfTheWeekFormat", ex.Message));
+                errors.Add(new Error("DayOfTheWeekFormat", ex.Message));
             }
             List<TimeOfDayInterval> times = [];
             entry.Intervals.ForEach(interval =>

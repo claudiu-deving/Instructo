@@ -1,4 +1,5 @@
-﻿using Domain.Entities.SchoolEntities;
+﻿using Domain.Entities;
+using Domain.Entities.SchoolEntities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -16,8 +17,20 @@ internal class InstructorProfileConfiguration : IEntityTypeConfiguration<Instruc
                .WithMany()
                .HasForeignKey(i => i.ProfileImageId)
                .OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(i => i.VehicleCategories)
-               .WithMany(c => c.Instructors)
-               .UsingEntity(j => j.ToTable("InstructorVehicleCategories"));
+
+        builder.HasMany(x => x.VehicleCategories)
+         .WithMany(c => c.Instructors)
+         .UsingEntity<InstructorVehicleCategory>(
+             j => j.HasOne(sc => sc.VehicleCategory)
+                   .WithMany()
+                   .HasForeignKey(sc => sc.VehicleCategoryId),
+             j => j.HasOne(sc => sc.Instructor)
+                   .WithMany()
+                   .HasForeignKey(sc => sc.InstructorId),
+             j =>
+             {
+                 j.HasKey(sc => new { sc.InstructorId, sc.VehicleCategoryId });
+                 j.ToTable("InstructorVehicleCategories");
+             });
     }
 }

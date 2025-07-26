@@ -1,5 +1,4 @@
-﻿
-using Domain.Dtos.School;
+﻿using Domain.Dtos.School;
 using Domain.Entities.SchoolEntities;
 using Domain.Shared;
 using Domain.ValueObjects;
@@ -11,4 +10,5 @@ public interface ISchoolQueriesRepository
     Task<Result<bool>> SchoolExists(string companyName);
     Task<Result<SchoolDetailReadDto?>> GetBySlugAsync(string slug);
     Result<IEnumerable<ISchoolReadDto>> GetAll(Func<School, bool>? filter = null, int pageNumber = 1, int pageSize = 20);
+    Task<Result<IEnumerable<SchoolReadDto>>> GetAllAsync();
 }
